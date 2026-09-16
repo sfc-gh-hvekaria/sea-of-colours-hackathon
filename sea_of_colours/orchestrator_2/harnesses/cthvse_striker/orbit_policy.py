@@ -55,6 +55,9 @@ from sea_of_colours.game.weapons import (
     WEAPONISED_BLUE_CAP,
 )
 
+# --- weapon-forge hook (installed by forge_install.py) ---
+from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import weapon_forge
+
 
 @dataclass(frozen=True)
 class OrbitDials:
@@ -118,7 +121,10 @@ class OrbitDials:
 
 
 #: The shipped economy. Fork-local, so retuning it cannot affect a rival.
-DEFAULT_DIALS = OrbitDials()
+# --- weapon-forge hook (installed by forge_install.py) ---
+# ECONOMY from weapon_plays.py: buy the cheapest declared weapon as
+# soon as it is affordable, and never buy ordnance with no play.
+DEFAULT_DIALS = weapon_forge.tune_dials(OrbitDials())
 
 
 # ── View readers ──────────────────────────────────────────────────
@@ -343,11 +349,14 @@ def plan_orbit_actions(
             descriptors.append(
                 f"built EMP (blue {blue_total} > {dials.blue_always_build})"
             )
-        elif _afford_chaff():
+        # --- weapon-forge hook (installed by forge_install.py) ---
+        elif chaff_stock < dials.chaff_stockpile_cap \
+                and _afford_chaff():
             actions.append({"a": "build_chaff", "count": 1})
             remaining -= chaff_credit_cost
             descriptors.append("built CHAFF (blue surplus top-up)")
-        elif _afford_emp():
+        # --- weapon-forge hook (installed by forge_install.py) ---
+        elif emp_stock < dials.emp_stockpile_cap and _afford_emp():
             actions.append({"a": "build_emp", "count": 1})
             remaining -= emp_credit_cost
             descriptors.append("built EMP (blue surplus top-up)")
@@ -374,6 +383,18 @@ def plan_orbit_actions(
             descriptors.append(
                 "skipped EMP build (blue surplus but 50% roll missed)"
             )
+
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    # PLACEMENT IS LOAD-BEARING. This must sit with the stock weapon
+    # branch (priority 3), BEFORE the probe magazine top-up — probes
+    # cost 250c each and a 3-probe batch spends 750c, so a hook placed
+    # after them is handed an empty wallet. That is exactly what
+    # happened: an EMP agent armed 3 times from the stock branch while
+    # a SNAP agent never armed once, reporting 'could not afford it
+    # (credits 0/250)' every night with plenty of blue in the bank.
+    remaining = weapon_forge.add_procurement(
+        actions, descriptors, view, remaining=remaining,
+        weapons_enabled=weapons_enabled)
 
     # Priority 4: top the probe magazine up. A flat "build 2" ran dry and
     # left harvesters unable to hot-drop, so top up toward the target in

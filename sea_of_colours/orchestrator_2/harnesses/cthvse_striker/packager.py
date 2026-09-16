@@ -31,6 +31,9 @@ from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import (
     option_economics as econ,
 )
 
+# --- weapon-forge hook (installed by forge_install.py) ---
+from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import weapon_forge
+
 # Kinds that each COMMIT ONE HARVESTER for a single outing (RULEBOOK §3.9.2 —
 # one outing per harvester per night). ``seam`` is handled separately because a
 # multi-wave campaign consumes one harvester PER non-deny wave.
@@ -973,6 +976,9 @@ def pack_recipe(
         selected_options or [], agent_view,
     )
     pk.log.extend(order_log)
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    ordered, hour_log = weapon_forge.order_for_weapon_hours(ordered)
+    pk.log.extend(hour_log)
     # Fix 2.4, CORRECTED. This block used to hoist every harvester outing ahead
     # of every standalone probe, on the argument that a probe buys tomorrow
     # while an outing banks tonight. True as ADVICE, and not ours to impose:
@@ -1007,3 +1013,8 @@ def pack_recipe(
             supersede_hints=supersede_hints,
         )
     return pk.moves, pk.log
+
+# --- weapon-forge hook (installed by forge_install.py) ---
+# Register a packer per declared weapon. Without a _DISPATCH entry the
+# option is offered, chosen, and silently never compiles.
+_DISPATCH.update(weapon_forge.packers())

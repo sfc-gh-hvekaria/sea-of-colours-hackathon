@@ -47,6 +47,9 @@ from sea_of_colours.orchestrator_2.harnesses.cthvse_striker._v7.probe_hints impo
     _visible_red,
 )
 
+# --- weapon-forge hook (installed by forge_install.py) ---
+from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import weapon_forge
+
 # Comb-shape variants offered per hot drop (the user's "length/area is the
 # agent's choice"). Suffix keeps the ID short + legible; the thinker picks one.
 _SHAPE_META = {
@@ -737,6 +740,16 @@ def build_registry(
     committed to" at compile time, and only the first is useful to the agent.
     """
     reg: "OrderedDict[str, Option]" = OrderedDict()
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    # Declared weapon plays go in first; their PRINTED position comes
+    # from _KIND_HEADERS order below, not from insertion order.
+    # `present=reg` lets a weapon rationale name a competitor that is
+    # REALLY on tonight's menu. V12 ships 18 named seam patterns plus 8
+    # numbered families, so a hardcoded 'COMPARE: BLIND_GRAB' often names
+    # a move that is not there — and the model picks moves by id.
+    reg.update(weapon_forge.build_options(
+        agent_view, seam_patterns, option_cls=Option,
+        present=list(reg)))
 
     for p in seam_patterns or []:
         if isinstance(p, SeamPattern):
@@ -917,7 +930,10 @@ def _apply_hazard(reg: "OrderedDict[str, Option]", hazard_cells: Collection[Any]
 
 
 # ── menu render (for the thinker prompt) ────────────────────────────────
-_KIND_HEADERS = [
+# --- weapon-forge hook (installed by forge_install.py) ---
+# Weapon groups are prepended — this list's order IS the menu's group
+# order, so a weapon buried below the grabs reads as an afterthought.
+_KIND_HEADERS_BASE = [
     ("grab", "PRIORITY RED GRABS — ids GRAB* (mass/pure RED you can SEE or reach — the highest-value take, no probe; grab it FIRST)"),
     ("seam", "REDSIGN PATTERNS (multi-wave campaigns — pick & order by case)"),
     ("hotdrop", "HOT DROPS (probe+drop into fresh fog this night)"),
@@ -931,6 +947,8 @@ _KIND_HEADERS = [
 
 # One-line "what this kind of play brings to the table" — rendered under each
 # group header so the thinker weighs the KIND before the individual options.
+_KIND_HEADERS = weapon_forge.extend_headers(_KIND_HEADERS_BASE)
+
 _KIND_BLURB = {
     "grab": "mass/pure RED you can SEE — the highest-value bank, no probe, lowest risk; take it FIRST.",
     "seam": "redsign campaigns — SMASH your own pure; ATTACK a rival's (blind the finder + blind-walk the fresh, mass-rich seam). CONTEST_DENY is the demoted ahead/certainty play (confirm now, smash tomorrow).",
@@ -1172,7 +1190,12 @@ def _econ_detail_lines(
     if walk:
         n = int(econ.get("length") or len(walk))
         lines.append(f"walk: {_fmt_walk(walk)}  ({n} cell{'s' if n != 1 else ''})")
-    lines.append(_fmt_yield(
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    _dy = (opt.payload or {}).get("denial_yield")
+    if _dy:
+        lines.append(_dy)
+    else:
+        lines.append(_fmt_yield(
         econ.get("yield") or {},
         probed=_option_probe_cost(opt) > 0,
         blind=econ.get("blind"),

@@ -48,6 +48,9 @@ from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import (
     option_economics as econ,
 )
 
+# --- weapon-forge hook (installed by forge_install.py) ---
+from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import weapon_forge
+
 Cell = Tuple[int, int]
 
 # Own-move tags that describe a field/orbital ACTION worth logging (own always).
@@ -992,3 +995,12 @@ def render(
     return format_block(
         collect(store, session_id, player, agent_view, prior_day_entry, day=day)
     )
+
+# --- weapon-forge hook (installed by forge_install.py) ---
+# Without these a weapon fires in the engine and is INVISIBLE in the
+# seat's own execution log — the hour simply goes missing, and the agent
+# then journals that it never executed, corrupting the next night.
+# Note the wire verb and the replay tag are NOT always the same string:
+# snap_launch on the wire arrives as `snap` in the frame.
+_OWN_ACTION_TAGS |= weapon_forge.frame_tags()
+_PUBLIC_ORBITAL_TAGS |= weapon_forge.public_tags()

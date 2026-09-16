@@ -61,6 +61,9 @@ from sea_of_colours.orchestrator_2.harnesses.cthvse_striker._v7.prompt import (
     _THINKER_SCHEMA,
 )
 
+# --- weapon-forge hook (installed by forge_install.py) ---
+from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import weapon_forge
+
 _SECTION_1 = "=== SECTION 1 - THE GAME (how it works) ==="
 _SECTION_2 = "=== SECTION 2 - THE BOARD NOW (what you can see right now) ==="
 _SECTION_3 = "=== SECTION 3 - WHAT HAPPENED LAST NIGHT (learn from it) ==="
@@ -418,7 +421,13 @@ def blue_is_requested(agent_view: Mapping[str, Any]) -> bool:
     outrank anything. It only puts a ``BL*`` on the menu; whether the unit is
     better spent on red is the agent's call, and doctrine says red wins ties.
     """
-    if not blue_vault_is_short(agent_view):
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    # The stock gate asks whether the VAULT is short, which is the
+    # wrong question for an armed seat: a 'medium' vault can hold 150
+    # and still be 150 short of a charge. Also ask whether the rack
+    # can fire at all.
+    if not (blue_vault_is_short(agent_view)
+            or weapon_forge.blue_also_requested(agent_view)):
         return False
     if not (agent_view.get("blue_tiles") or []):
         return False
@@ -1004,6 +1013,13 @@ def _assemble_doctrine(
     # not exist and so fires on 80 blue but not on none).
     if is_setup_night or blue_is_requested(agent_view):
         text += "\n\n" + doctrine.DOCTRINE_BLUE
+        # --- weapon-forge hook (installed by forge_install.py) ---
+        # DOCTRINE_BLUE ranks blue below red, which is right for an
+        # agent that spends blue on nothing. Correct it while the
+        # rack is empty — emitted AFTER, so recency favours it.
+        _blue_ammo = weapon_forge.blue_doctrine_for(agent_view)
+        if _blue_ammo:
+            text += "\n\n" + _blue_ammo
 
     # Weapons — jam that hit us last night forces reaction even if tracker cold.
     jam_events = _my_jam_events(agent_view)
@@ -1063,6 +1079,16 @@ def _assemble_doctrine(
         text += "\n\n" + doctrine.DOCTRINE_BEWARE_CHAFF
     if opp_has_snap or was_snapped:
         text += "\n\n" + doctrine.DOCTRINE_BEWARE_SNAP
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    # Gated on OUR OWN rack, not a rival's estimated arsenal. Every
+    # BEWARE_ block above fires on the THREAT side, which is why the
+    # baseline says nothing about spending ordnance on a quiet board —
+    # precisely the cheapest night to fire. This also emits the
+    # CORRECTIONS that answer those blocks; without them the survivor
+    # framing wins and the weapon stays in the rack.
+    _weapon_doctrine = weapon_forge.doctrine_for(agent_view)
+    if _weapon_doctrine:
+        text += "\n\n" + _weapon_doctrine
 
     # FINAL NIGHT — supersede enemy probes. Gated to the ACTUAL final night
     # (A6): earlier nights must not see this or the agent starts declaring
@@ -1142,6 +1168,8 @@ def build_prompt(
     enemy_probes_block = format_enemy_probes_block(agent_view, day=day)
     weapons_block = format_opponent_weapons_block(opponent_weapon_estimates)
     geometry_block = format_weapon_geometry_block(opponent_weapon_estimates)
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    rack_block = weapon_forge.format_rack_block(agent_view)
     # ORBIT GUIDANCE — a single crisp "act on these tonight" block. v11 drops the
     # separate TACTICAL PRIORITY FROM ORBIT (wishlist entries) block: it was a
     # second rendering of the same orbit turn (conserve/replace), and the
@@ -1196,6 +1224,13 @@ def build_prompt(
         parts += [opponent_block, "\n"]
     if weapons_block:
         parts += [weapons_block]
+    # --- weapon-forge hook (installed by forge_install.py) ---
+    # Our own rack, AFTER the threat blocks: read what can be done to
+    # us, then what we can do back. Kept OUT of the geometry/weapons
+    # if-elif chain below — that chain is a spacing fix between two
+    # THREAT blocks and folding this in suppresses its blank line.
+    if rack_block:
+        parts += [rack_block, "\n"]
     if geometry_block:
         parts += [geometry_block, "\n"]
     elif weapons_block:

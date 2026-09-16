@@ -16,9 +16,15 @@ The decision (thinker) schema is re-exported unchanged.
 from __future__ import annotations
 
 from sea_of_colours.orchestrator_2.harnesses.cthvse_striker._v7.chat_schema import (  # noqa: F401
-    _MOVE_ITEM,
+    _MOVE_ITEM as _V7_MOVE_ITEM,
     _DECISION_SCHEMA as _V7_DECISION_SCHEMA,
 )
+
+# --- weapon-forge hook (installed by forge_install.py) ---
+from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import weapon_forge
+# An enum in a strict structured-output schema is a HARD WALL: without
+# the verb the model physically cannot emit the move, with no error.
+_MOVE_ITEM = weapon_forge.widen_schema(_V7_MOVE_ITEM)
 
 # v11 STRATEGY JOURNAL: two extra agent-authored strings on the plan pass.
 #   * ``intent``     — 1-2 sentences: what the agent is trying to do tonight +

@@ -46,6 +46,9 @@ from sea_of_colours.orchestrator_2.harnesses.cthvse_striker.seam_control import 
     _walkin_from_live,
 )
 
+# --- weapon-forge hook (installed by forge_install.py) ---
+from sea_of_colours.orchestrator_2.harnesses.cthvse_striker import weapon_forge
+
 # Provenance tiers (engine truth from red_tiles[].freshness).
 LIVE = "LIVE"
 ECHO = "ECHO"
@@ -65,7 +68,12 @@ _BLUE_GRAB_MIN = 192
 # least this many red points. Blue is only surfaced when orbital asks for it OR
 # the seat has MORE harvesters than strong red chains (a spare unit that would
 # otherwise idle / gather low-yield red) — see ``force_surface_grabs``.
-_STRONG_CHAIN_RED_MIN = 150
+# --- weapon-forge hook (installed by forge_install.py) ---
+# ECONOMY.strong_chain_red_min: the red a chain must bank before it
+# outranks a blue run for a harvester. Raising it diverts a unit to
+# blue unless the red on offer is genuinely better — which is what an
+# agent whose weapon is BOUGHT with blue actually wants.
+_STRONG_CHAIN_RED_MIN = weapon_forge.strong_chain_red_min(150)
 # Short mass halo to sweep after banking the pure (kept tight — the pure is the
 # prize; a long tail exposes the unit to weapons). The thinker/packager can trim.
 _SMASH_TAIL = 3
