@@ -1,0 +1,123 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Scratch output from the film harness. The shipped films themselves
+# (server/static/films/*.webm) ARE committed — an attendee unzips this
+# repo and plays, with no build step and no ffmpeg — but the generator
+# (backstage/films/) is what you edit. See
+# docs/TUTORIAL_PLAN.md §4.1.
+reports/films/
+reports/filmsheets/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local agent/tooling settings
+.claude/
+
+# Secrets / local config (never commit)
+*.env
+.env*
+connections.toml
+secrets.toml
+*.pem
+*.key
+
+# Local file-backed store output (SOC_BACKEND=file) + sweep artifacts.
+# Generated CSVs are regenerable; the summary .md reports are docs (kept).
+/seasons/
+/seasons_battery/
+/seasons_battery.bak_*/
+/_watch_seasons/
+/_perf_seasons/
+/_tmp_seasons_dbg/
+/reports/*.csv
+/reports/*.log
+/reports/baseline_*.md
+# Screenshots shot by the scratch harnesses (backstage/probes/_fx_*.py). Regenerable by
+# re-running the harness, and several MB a session. The frozen/*.json fixtures
+# under reports/ are deliberately tracked and unaffected by this.
+/reports/**/*.png
+
+# Battle-room bakes (`soc suite --record`). Output, not source: a bake is
+# one person's suite run, they accumulate, and the room itself is copied
+# in from sea_of_colours/evals/battles/room/. Committing these would put
+# every attendee's runs in everyone else's diff.
+/reports/battles/
+/reports/battle-room-probe/
+
+# Headless season records (`soc season`) and the local session stores
+# they write through. Same argument as the bakes: one person's runs,
+# regenerable, and a season's cards are megabytes of prompt text.
+/reports/seasons/
+/.soc_sessions/
+/.soc_probe*/
+
+# Cached single-turn runs from the fast diff loop. Keyed on a hash of
+# the agent's own source, so they are worthless to anyone else and
+# regenerate in one model call.
+/.soc_livecache/
+/reports/cards-probe/
+
+# Turn Lab — its own local store. The clones are scratch; the boards
+# are not, and they ship (v1.42).
+#
+# The boards used to be excluded on the grounds that they regenerate
+# from `python -m turnlab.mint`. Two things were wrong with that. Only
+# the minted half regenerates — a board grabbed out of a played season
+# needs that season, which for the two carrying real agent journals
+# means somebody's Snowflake account, so a fresh clone could never
+# rebuild them at all. And a frozen turn is only worth anything if it
+# is the *same* turn for everyone: the recorded V12 baselines are diffed
+# against, so a locally-regenerated board would quietly compare a fork
+# to a baseline from a different night.
+#
+# They fit because `python -m turnlab.pack` trims each board to the one
+# night it can actually read and gzips it — 107MB of replay frames down
+# to 1.1MB. Pack before committing a new board.
+#
+# Boards only, hence the whitelist. The directory also accumulates the
+# throwaway `LABRUN_` clones and the full source seasons that minting
+# played out to cut the boards from — one of those is 24MB of frames on
+# its own, and nothing reads it once the boards exist.
+turnlab/data/*
+!turnlab/data/LAB_*/
+
+# Forks handed between teammates by `soc share`. Never committed: the
+# published copy of an agent is its directory, and a parcel is a
+# snapshot in flight. Ignored rather than merely discouraged because
+# `soc push` refuses to publish while anything outside your own folder
+# has changed — so a parcel left in the repo root would block the
+# push it has nothing to do with.
+*.socfork
+
+# Film voiceover intermediates (backstage/films/voice/). Same argument as
+# the films themselves: the narration that ships is muxed into the
+# committed .webm, so the per-line .wav clips are build scratch.
+#
+# The voice models are excluded for a different reason — they are ~60MB
+# of ONNX weights fetched from upstream, identical for everyone, and
+# re-downloadable in one command. What IS tracked is the scripts/
+# directory of narration text, because that is written by a human and is
+# the only part nothing can regenerate.
+backstage/films/voice/models/
+backstage/films/voice/clips/
+backstage/films/voice/build/

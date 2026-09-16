@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!--
+  The turn lab — a launcher, and nothing else.
+
+  Pick a frozen night and a seat, press go, and you land in the ORDINARY
+  game interface on a clone of that turn: the same board, the same fog
+  toggles, the same hour transport, the same replay. The lab adds one
+  thing to that interface, gated to lab sessions only — the invoke
+  control that live play lost in v1.1 — so you can hand a seat to V12 and
+  watch it plan.
+
+  This page used to be much bigger. It drew its own board and its own
+  hour strip, and both were wrong in the way a second implementation is
+  always eventually wrong: the hour strip showed the two seats acting in
+  sequence when a night resolves them together. Deleting it was the fix.
+  If you are tempted to render a game here, don't — open the game.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Turn Lab — Sea of Colours</title>
+<link rel="stylesheet" href="/static/styles.css" />
+<style>
+  body.lab { margin: 0; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 40px 20px; }
+  h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: .05em; }
+  .sub { opacity: .6; font-size: 12.5px; margin-bottom: 26px; }
+
+  .panel {
+    border: 1px solid rgba(255,255,255,.14); border-radius: 8px;
+    background: rgba(255,255,255,.03); padding: 16px 18px;
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+  .field label {
+    font-size: 11px; letter-spacing: .1em; opacity: .6; text-transform: uppercase;
+  }
+  select, button {
+    font: inherit; background: rgba(255,255,255,.06); color: inherit;
+    border: 1px solid rgba(255,255,255,.2); border-radius: 5px; padding: 8px 11px;
+  }
+  button { cursor: pointer; }
+  button:hover:not(:disabled) { background: rgba(255,255,255,.13); }
+  button:disabled { opacity: .45; cursor: default; }
+  #go { width: 100%; padding: 11px; margin-top: 4px; }
+
+    /* One row per seat: who they are, and what they are holding. */
+    .rack-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .rack-row .seat {
+      flex: 0 0 42px; font-size: 11px; letter-spacing: .06em; opacity: .75;
+    }
+    .rack-row select { flex: 1 1 auto; min-width: 0; }
+    .hint { font-size: 11.5px; opacity: .5; line-height: 1.5; margin-top: 3px; }
+
+    .note { font-size: 12px; opacity: .58; line-height: 1.55; }
+    /* v1.40 — the load-bearing clause of a note, marked in the note text
+       with [[double brackets]]. A board blurb is four or five sentences of
+       even grey and the one fact that decides how you play it (who can see
+       the pure, who is holding the only weapon, who has two harvesters)
+       reads exactly like the scene-setting around it. The note sits at
+       .58 opacity, so the highlight lifts to full rather than adding a
+       block of colour — brighter text on a faint wash, not a marker pen. */
+    .note mark {
+      background: rgba(240, 200, 70, .16);
+      color: #f2d071;
+      opacity: 1;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+  .bad { color: #ff9a9a; }
+  .ok  { color: #8fe3a0; }
+  .how { margin-top: 22px; font-size: 12.5px; opacity: .7; line-height: 1.7; }
+  .how b { opacity: .95; font-weight: 600; }
+</style>
+</head>
+<body class="lab">
+<div class="wrap">
+
+  <h1>TURN LAB</h1>
+  <div class="sub">a frozen night, opened in the real interface</div>
+
+  <div class="panel">
+    <div class="field">
+      <label for="boardpick">night</label>
+      <select id="boardpick"></select>
+    </div>
+    <!-- v1.42 — no "sit in" picker. It chose the seat the page bound you
+         to, which mattered when a human could compose a turn; now every
+         seat is cast from the AGENT pane and the choice only set which
+         fog you happened to open on, which the view buttons already do
+         better. Every seat is castable regardless of which one you land
+         on, so the control was a decision with no consequence. -->
+    <div class="field">
+      <label>ordnance</label>
+      <div id="racks"></div>
+      <div class="hint" id="rackhint"></div>
+    </div>
+    <button id="go">open this turn</button>
+    <div class="note" id="note" style="margin-top:12px"></div>
+  </div>
+
+  <div class="how">
+    Once you are in: the <b>AGENT</b> tab has an invoke control for each
+    seat — pick who plays it and press go, and you will see it plan.
+    Invoke one seat and the board waits; invoke both and the night
+    resolves and plays out exactly as a live night does. The
+    <b>[ RED ] [ RHL ] [ OBS ]</b> buttons isolate each seat's vision,
+    and the plan overlay draws the shape of what each seat queued.
+    <br /><br />
+    <b>Ordnance</b> is handed out here rather than being part of the
+    board, so the same night can be opened armed and empty and the only
+    difference between the two runs is the rack. Arm one seat and not the
+    other if what you want to know is what a weapon is worth.
+    <br /><br />
+    The turn is a throwaway copy. Whatever happens to it, the frozen
+    board is untouched — open it again and you are back at the same
+    night with nobody's orders in.
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const boardPick = document.getElementById("boardpick");
+  const goBtn = document.getElementById("go");
+  const note = document.getElementById("note");
+  const racksEl = document.getElementById("racks");
+  const rackHint = document.getElementById("rackhint");
+  let boards = [];
+
+  async function getJSON(url, opts) {
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      let detail = res.statusText;
+      try { detail = (await res.json()).detail || detail; } catch (_) {}
+      throw new Error(detail);
+    }
+    return res.json();
+  }
+
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = String(s == null ? "" : s);
+    return d.innerHTML;
+  }
+
+  // Note text, with [[key phrases]] lifted (v1.40). Escaping runs FIRST
+  // and the brackets survive it, so a note can never smuggle markup in —
+  // <mark> is the only tag this can ever produce, whatever the note says.
+  function hl(s) {
+    return esc(s).replace(/\[\[(.+?)\]\]/g, "<mark>$1</mark>");
+  }
+
+  // Which seats this turn is worth playing. A note can narrow it, and
+  // when it does the reason matters enough to print: a seat a human held
+  // has no agent journal, so casting it measures a fork against a blank
+  // history rather than against a real one.
+  function seatsFor(b) {
+    if (!b) return [];
+    // castable is the board's own answer and already falls back to its
+    // full roster. The board-list scan below is the last resort for a
+    // board whose session would not load — it reads the seats off the
+    // ids, which only tells the truth for a minted set (a row per seat).
+    if (b.castable && b.castable.length) return b.castable.slice();
+    if (b.players && b.players.length) return b.players.slice();
+    return [...new Set(
+      boards.filter((x) => x.source === b.source && x.day === b.day)
+            .map((x) => x.seat),
+    )].sort();
+  }
+
+  function describe() {
+    const b = boards.find((x) => x.id === boardPick.value);
+    if (!b) { note.textContent = ""; return; }
+    const bits = [];
+    // The one-liner first, then the facts that make it reproducible.
+    // Seat count and seed are read off the saved session, never typed
+    // into the blurb — a board you cannot re-create is an anecdote.
+    if (b.tests) {
+      bits.push(`<div><b>tests</b> — ${hl(b.tests)}</div>`);
+    }
+    const facts = [];
+    if (b.seats_n) facts.push(`${b.seats_n} seat${b.seats_n === 1 ? "" : "s"}`);
+    if (b.seed != null) facts.push(`seed ${b.seed}`);
+    if (b.day != null) facts.push(`day ${b.day}`);
+    if (facts.length) {
+      bits.push(
+        `<div class="hint" style="margin-top:4px">${esc(facts.join(" · "))}` +
+        `${b.season ? " · " + esc(b.season) : ""}</div>`,
+      );
+    }
+    if (b.state) bits.push(`<div style="margin-top:8px">${hl(b.state)}</div>`);
+    if (b.why) {
+      bits.push(
+        `<div style="margin-top:8px"><b>why this turn</b> — ${hl(b.why)}</div>`,
+      );
+    }
+    // Only worth saying when a note has deliberately narrowed the board.
+    // castable is otherwise the full roster, and "seats p1 and p2 and p3
+    // only" on a three-seat night is noise dressed as a warning.
+    const narrowed = b.castable && b.players
+      && b.castable.length && b.castable.length < b.players.length;
+    if (narrowed) {
+      bits.push(
+        `<div style="margin-top:8px" class="hint">seats ` +
+        `${esc(b.castable.join(" and "))} only — see above for why</div>`,
+      );
+    }
+    if (!bits.length) {
+      bits.push(
+        `<div>${esc(b.id)} — saved state from ${esc(b.source)}, ` +
+        `frozen before anyone moved</div>`,
+      );
+    }
+    note.innerHTML = bits.join("");
+  }
+
+  // Everything that depends on WHICH turn is picked, rebuilt together.
+  async function selectBoard() {
+    const b = boards.find((x) => x.id === boardPick.value);
+    // Racks are re-fetched per board, not once at boot: whether a rack
+    // is offerable depends on the board's own economy. Every board
+    // frozen before v1.36 has no SNAP in its price list, so the SNAP
+    // and arsenal racks are not choices there (turnlab/arms.py).
+    await loadRacks(boardPick.value);
+    buildRacks(seatsFor(b));
+    describe();
+  }
+
+  async function go() {
+    const board = boardPick.value;
+    if (!board) return;
+
+    // Opened NOW, before the await, and not after it. A browser only
+    // allows window.open while it can still see the click that caused
+    // it; open one after the fetch resolves and the popup blocker eats
+    // it, because by then the call looks like it came from nowhere. So
+    // the tab is claimed up front and pointed somewhere once the run
+    // exists.
+    const tab = window.open("", "_blank");
+    if (tab) {
+      tab.document.write(
+        "<!doctype html><meta charset=utf-8>"
+        + "<title>opening a frozen turn…</title>"
+        + "<body style='background:#0e0b16;color:#8fe3a0;font:14px ui-monospace,"
+        + "monospace;padding:28px'>staging the board…</body>",
+      );
+      tab.document.close();
+    }
+
+    goBtn.disabled = true;
+    goBtn.textContent = "opening…";
+    try {
+      const out = await getJSON("/api/lab/open", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // No seat: the server falls back to the seat the board was
+        // frozen on, which is only the fog the page opens on.
+        body: JSON.stringify({ board, arms: chosenRacks() }),
+      });
+      // The launcher stays where it is. Every turn is a fresh clone, so
+      // opening four of them side by side is a normal thing to want —
+      // that is most of the point of a library — and navigating away
+      // meant coming back and re-picking for each one.
+      if (tab) tab.location.replace(out.url);
+      else window.location.href = out.url;
+      note.innerHTML =
+        `<span class="ok">opened <b>${esc(labelOf(board))}</b> in a new tab.` +
+        " Pick another and go again — each one is its own throwaway clone.</span>";
+    } catch (err) {
+      if (tab) tab.close();
+      note.innerHTML = `<span class="bad">${err.message}</span>`;
+    } finally {
+      goBtn.disabled = false;
+      goBtn.textContent = "open this turn";
+    }
+  }
+
+  function labelOf(id) {
+    const b = boards.find((x) => x.id === id);
+    return b ? (b.label || b.id) : id;
+  }
+
+  async function boot() {
+    try {
+      boards = (await getJSON("/api/lab/boards")).boards || [];
+    } catch (err) {
+      note.innerHTML = `<span class="bad">could not load boards: ${err.message}</span>`;
+      goBtn.disabled = true;
+      return;
+    }
+    if (!boards.length) {
+      note.innerHTML =
+        '<span class="bad">no frozen boards in this store — mint some first</span>';
+      goBtn.disabled = true;
+      return;
+    }
+
+    // One entry per frozen turn, named. This used to key on the day
+    // number alone, which was fine when every board came from one
+    // season and wrong the moment a second one arrived: two seasons
+    // both have a day 2, and only one of them survived the dedupe.
+    // The pair a mint leaves behind IS a genuine duplicate, though —
+    // a snapshot is taken before any seat submits, so d2_p1 and d2_p2
+    // are the same position — hence (source, day) rather than id.
+    const seen = new Set();
+    for (const b of boards) {
+      const key = `${b.source}:${b.day}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const o = document.createElement("option");
+      o.value = b.id;
+      o.textContent = b.label;
+      boardPick.appendChild(o);
+    }
+    // Open on a curated turn when there is one — a named board is a
+    // board somebody chose, which is a better default than the lowest
+    // day number lying around.
+    const named = boards.find((b) => b.name);
+    if (named) boardPick.value = named.id;
+
+    await loadRacks();
+    selectBoard();
+  }
+
+  // The boards were frozen out of ordinary seasons, so most carry no
+  // ordnance at all. Handing a seat a rack here — on the copy, never on
+  // the board — is what makes "does it play differently armed?" a
+  // question you can actually ask.
+  let racks = [];
+  let dflt = "";
+
+  async function loadRacks(board) {
+    try {
+      const q = board ? "?board=" + encodeURIComponent(board) : "";
+      const out = await getJSON("/api/lab/racks" + q);
+      racks = out.racks || [];
+      dflt = out.default;
+    } catch (_) {
+      racks = [];
+      rackHint.textContent = "could not load racks — opening unarmed";
+    }
+  }
+
+  // Rebuilt every time the turn changes, because the seats change with
+  // it: a three-seat board needs a third row, and a board that names its
+  // castable seats must not offer a rack to one it excludes.
+  function buildRacks(seats) {
+    racksEl.innerHTML = "";
+    if (!racks.length) return;
+    for (const seat of seats) {
+      const row = document.createElement("div");
+      row.className = "rack-row";
+      const tag = document.createElement("span");
+      tag.className = "seat";
+      tag.textContent = seat;
+      const sel = document.createElement("select");
+      sel.dataset.seat = seat;
+      for (const r of racks) {
+        const o = document.createElement("option");
+        o.value = r.id;
+        // Disabled rather than hidden. "That weapon is younger than
+        // this board" is a fact worth learning; a menu that is quietly
+        // shorter on some boards than others just reads as a bug.
+        const off = r.available === false;
+        o.disabled = off;
+        o.textContent = off ? r.label + " — n/a on this board" : r.label;
+        o.title = off ? r.unavailable_because : r.note;
+        if (r.id === dflt) o.selected = true;
+        sel.appendChild(o);
+      }
+      sel.addEventListener("change", () => describeRacks(racks));
+      row.append(tag, sel);
+      racksEl.appendChild(row);
+    }
+    describeRacks(racks);
+  }
+
+  function describeRacks(racks) {
+    const picked = [...racksEl.querySelectorAll("select")]
+      .map((s) => racks.find((r) => r.id === s.value))
+      .filter((r) => r && r.id !== "empty");
+    rackHint.textContent = picked.length
+      ? picked[0].note
+      : "the board exactly as it was frozen";
+  }
+
+  function chosenRacks() {
+    const out = {};
+    for (const sel of racksEl.querySelectorAll("select")) {
+      out[sel.dataset.seat] = sel.value;
+    }
+    return out;
+  }
+
+  boardPick.addEventListener("change", selectBoard);
+  goBtn.addEventListener("click", go);
+  boot();
+})();
+</script>
+</body>
+</html>

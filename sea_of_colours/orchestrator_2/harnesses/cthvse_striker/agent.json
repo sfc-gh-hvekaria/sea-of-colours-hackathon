@@ -1,0 +1,11 @@
+{
+  "team": "cthvse",
+  "name": "striker",
+  "participants": [
+    "Hitesh Vekaria",
+    "Ceren"
+  ],
+  "menu_label": "CTHVSE_STRIKER \u2014 cthvse's agent (needs a Snowflake PAT \u00b7 slow)",
+  "entry": "harness:run",
+  "needs_llm": true
+}

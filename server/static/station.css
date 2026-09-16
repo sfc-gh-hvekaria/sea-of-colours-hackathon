@@ -1,0 +1,648 @@
+/* station.css — optional inline orbital "space station" panels.
+ *
+ * Everything here is inert unless <body> carries the ``os-active`` class,
+ * which station.js only adds when the station UI is enabled (``?station=1``
+ * or the persisted ``sea_of_colours:stationUI`` flag). With the flag off,
+ * the ``.os-side`` columns collapse to ``display:none`` and ``.os-map-row``
+ * behaves as a transparent single-child flex wrapper, so the production
+ * layout renders identically to before.
+ */
+
+/* ── map row layout (structural — always applied) ─────────────────────
+ * index.html always wraps the map area in ``.os-map-row`` so the grid
+ * placement continues to work with the map nested one level deeper. When
+ * the station UI is off there are no side columns, so this is a no-op
+ * passthrough that fills the same grid cell the map used to occupy. */
+
+.os-map-row {
+  grid-area: map;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.os-map-row > .cc-map-area {
+  grid-area: unset;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Side columns are hidden until the station UI is active. */
+.os-side { display: none; }
+
+body.os-active .os-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #030308;
+  flex: 0 0 122px;
+  overflow: hidden;
+}
+
+/* When active, hand the full board height to the station layout: drop the
+ * 640px cap on the main map host and let the scoreboard HUD give way to the
+ * per-station score readouts. */
+body.os-active .cc-hud-scoreboard { display: none !important; }
+body.os-active .map-host.map-host--main { max-height: none !important; overflow: visible !important; }
+body.os-active .cc-map-viewport { overflow: auto !important; }
+
+/* ── station panel ───────────────────────────────────────────────── */
+
+.os-station {
+  flex: 1 1 0;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  gap: 0;
+  background: #05050e;
+  border: 1px solid #0e0e1c;
+  overflow: visible;
+  cursor: default;
+  transition: background 0.5s;
+}
+
+.os-station--night { background: #040410; }
+.os-station--day   { background: #060610; }
+
+/* 4-player: the two platforms per side hug the top + bottom CORNERS while the
+ * catapult grows to fill the middle of the column (so it never overlaps a
+ * station). 2-player keeps the default flex:1 stack + bottom catapult. */
+.os-side--4p .os-station  { flex: 0 0 auto; }
+.os-side--4p .os-catapult { flex: 1 1 auto; justify-content: center; }
+
+/* ── unicode diamond ─────────────────────────────────────────────── */
+
+.os-diamond-wrap {
+  position: relative;
+  width: fit-content;
+  overflow: visible;
+  /* Gentle idle bob — the whole station (diamond + vault overlay + tag +
+     held blue are all children) drifts up and down a few px. */
+  animation: os-float 4.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes os-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* Desync each platform so they don't bob in lockstep. Keyed by seat (stations
+   live in separate left/right panels, so nth-child would collide). Negative
+   delays start each one mid-cycle. */
+[data-os-station="p1"] .os-diamond-wrap { animation-delay: -0.2s; }
+[data-os-station="p2"] .os-diamond-wrap { animation-delay: -2.3s; }
+[data-os-station="p3"] .os-diamond-wrap { animation-delay: -1.2s; }
+[data-os-station="p4"] .os-diamond-wrap { animation-delay: -3.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .os-diamond-wrap { animation: none; }
+}
+
+.os-diamond {
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 0.6;
+  white-space: pre;
+  letter-spacing: 0;
+  display: block;
+  overflow: visible;
+  /* color set inline per station via --os-color */
+}
+
+/* ── vault overlay pre ───────────────────────────────────────────── */
+
+/* Second <pre> laid exactly over the diamond. The main diamond pre leaves
+   the vault corner as spaces; this overlay renders only the vault chars,
+   so body chars never bleed into the vault region. */
+.os-vault-pre {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 0.6;
+  white-space: pre;
+  letter-spacing: 0;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 2;
+  background: transparent;
+}
+
+/* Each vault char is clipped to exactly one line-height slot (0.6em = 8.4px).
+   The shade glyphs are uniform fills so clipping 40% off looks identical —
+   same density, no bleed into adjacent rows. */
+.os-vault-pre span {
+  display: inline-block;
+  width: 1ch;
+  height: 0.6em;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+/* ── the arsenal bar (v1.34, RULEBOOK §4.9.8) ────────────────────── */
+
+/* Weaponised blue, six pips at 100 blue each, mounted on the hull corner
+   OPPOSITE the vault: cargo one end, ordnance the other. Unlike the
+   vault this is public and exact for every seat, which is why it reads
+   the same on a rival's station as on your own.
+
+   An overlay rather than a hole cut in the hull, deliberately. Carving
+   the diamond would change the station silhouette for every game
+   including the weapons-off teaching ones; an empty <pre> renders
+   nothing and leaves those pixel-identical. */
+.os-arms {
+  position: absolute;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 0.6;
+  white-space: pre;
+  letter-spacing: 0;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+  background: transparent;
+}
+
+.os-arms--left  { left: 0; }
+.os-arms--right { right: 0; }
+
+.os-arms span {
+  display: inline-block;
+  width: 1ch;
+  height: 0.6em;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+/* v1.35 — a pip lighting and a pip going out. The bar is a warning
+   sign, so both ends of it have to be visible as EVENTS: a fired EMP
+   otherwise changes one character in a corner between two frames.
+   ``overflow: hidden`` above clips a transform, so these fade and glow
+   in place rather than moving. */
+.os-arms span.os-arms-pip--in {
+  animation: os-arms-lit 0.42s ease-out both;
+}
+@keyframes os-arms-lit {
+  0%   { opacity: 0; }
+  60%  { opacity: 1; text-shadow: 0 0 8px rgba(57,211,211,0.95); }
+  100% { opacity: 1; text-shadow: none; }
+}
+.os-arms span.os-arms-pip--out {
+  animation: os-arms-spent 0.42s ease-in both;
+}
+@keyframes os-arms-spent {
+  0%   { opacity: 1; text-shadow: 0 0 8px rgba(57,211,211,0.9); }
+  100% { opacity: 0; text-shadow: none; }
+}
+
+.os-diamond-tag {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font: bold 10px/1 "Courier New", monospace;
+  color: #000;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* v1.20 — who is flying this seat: H human / B bot / A agent. Printed on
+   the lower lobe of the hull, in the same knocked-out black as the seat
+   tag and deliberately quiet — it answers a question you only ask once
+   per game, so it must not compete with the vault readout above it. */
+.os-diamond-kind {
+  position: absolute;
+  top: 69%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font: bold 8px/1 "Courier New", monospace;
+  color: #000;
+  letter-spacing: 0.1em;
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+/* ── central catapult panel (bottom of left column) ─────────────── */
+
+.os-catapult {
+  flex: 0 0 auto;
+  padding: 6px 4px 8px;
+  background: #040410;
+  border: 1px solid #0e0e1c;
+  border-top: 1px solid #1a1a2a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.os-catapult-label {
+  font: 8px/1 "Courier New", monospace;
+  color: #3a3a4e;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.os-catapult-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 21px);
+  gap: 2px;
+}
+
+/* Bigger, hover-card-style tiles: owner-coloured density block, no numbers. */
+.os-cat-slot {
+  width: 21px;
+  height: 21px;
+  background: #080814;
+  border: 1px solid #14142a;
+  font: bold 11px/21px "Courier New", monospace;
+  color: var(--os-color, #222);
+  letter-spacing: -1px;
+  text-align: center;
+  overflow: hidden;
+  display: inline-block;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.os-cat-slot[data-active] {
+  background: color-mix(in srgb, var(--os-color, #fff) 18%, #08081a);
+  border-color: var(--os-color, #fff);
+  color: var(--os-color, #fff);
+}
+
+/* Brief bright pulse at the moment of launch */
+.os-cat-slot[data-firing] {
+  background: color-mix(in srgb, var(--os-color, #fff) 50%, #08081a);
+  border-color: var(--os-color, #fff);
+  color: #fff;
+}
+
+/* Post-launch GHOST: the payload has shipped but we leave a faint trace of what
+   was fired so it stays readable through the surface phase (until dawn). */
+.os-cat-slot[data-active][data-ghost] {
+  opacity: 0.34;
+  background: color-mix(in srgb, var(--os-color, #fff) 8%, #08081a);
+  border-color: color-mix(in srgb, var(--os-color, #fff) 30%, #0a0a1a);
+  border-style: dashed;
+}
+
+/* ── green solar-jettison catapult (right column) ────────────────── */
+
+.os-catapult--green {
+  border-top: 1px solid #14301a;
+}
+.os-catapult--green .os-catapult-label { color: #2a4a30; }
+
+/* Flushed green slots: seat-coloured cell tint with a green parcel glyph. */
+.os-cat-slot[data-green] {
+  background: color-mix(in srgb, var(--os-color, #44cc44) 14%, #06120a);
+  border-color: color-mix(in srgb, var(--os-color, #44cc44) 45%, #10201a);
+}
+.os-cat-slot[data-green][data-firing] {
+  background: color-mix(in srgb, #44cc44 45%, #06120a);
+  color: #9dffb0 !important;
+}
+
+/* ── blue (fissile) consumption burn ─────────────────────────────── */
+
+/* Radial blue flash overlaid on the diamond when a station burns fissile.
+   Intensity scales with --os-burn (0..1), set per fire by station.js. */
+.os-blue-flash {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+.os-blue-flash--fire {
+  animation: os-blue-burn 1.1s ease-out;
+}
+@keyframes os-blue-burn {
+  0% {
+    opacity: 0;
+    background: radial-gradient(circle,
+      rgba(74,163,255,calc(var(--os-burn, 0.6) * 0.85)) 0%,
+      rgba(74,163,255,0) 62%);
+    transform: scale(0.6);
+  }
+  22% { opacity: 1; transform: scale(1); }
+  100% {
+    opacity: 0;
+    background: radial-gradient(circle,
+      rgba(74,163,255,0) 0%, rgba(74,163,255,0) 62%);
+    transform: scale(1.35);
+  }
+}
+
+/* "−Xp" blue-burn badge under the score — a line item of what was committed
+   in orbit. Pending (dusk) gently pulses; spent (praxis) flashes then fades. */
+.os-blue-burn {
+  font: bold 10px/1 "Courier New", monospace;
+  color: #4aa3ff;
+  min-height: 11px;
+  white-space: nowrap;
+  opacity: 0;
+}
+.os-side--left  .os-blue-burn { align-self: flex-end;   padding-right: 6px; }
+.os-side--right .os-blue-burn { align-self: flex-start; padding-left:  6px; }
+.os-blue-burn[data-pending] {
+  opacity: 0.95;
+  animation: os-blue-pending 1.1s ease-in-out infinite;
+}
+@keyframes os-blue-pending {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; text-shadow: 0 0 7px rgba(74,163,255,0.8); }
+}
+.os-blue-burn--spent {
+  opacity: 1;
+  color: #cfe6ff;
+  text-shadow: 0 0 9px rgba(74,163,255,0.95);
+  animation: none;
+}
+
+/* v1.35 — the same number in the arsenal's colour when the blue was
+   ARMED rather than merely spent. "−200p" in blue is an expense;
+   "−200p" in cyan is a missile with your name on it. */
+.os-blue-burn--armed { color: #39d3d3; }
+.os-blue-burn--armed[data-pending] {
+  animation: os-blue-pending-armed 1.1s ease-in-out infinite;
+}
+@keyframes os-blue-pending-armed {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; text-shadow: 0 0 7px rgba(57,211,211,0.85); }
+}
+.os-blue-burn--armed.os-blue-burn--spent {
+  color: #d6fbfb;
+  text-shadow: 0 0 9px rgba(57,211,211,0.95);
+}
+
+/* Held blue ◆ row — lifted out of the vault at dusk, hovering above the
+   station until the surface phase consumes it. */
+.os-blue-held {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 3px;
+  display: flex;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 4;
+  white-space: nowrap;
+}
+.os-blue-held span {
+  font: bold 12px/1 "Courier New", monospace;
+  color: #4aa3ff;
+  text-shadow: 0 0 6px rgba(74,163,255,0.85);
+}
+.os-blue-held span.os-blue-held--in {
+  animation: os-blue-lift 0.5s ease-out both;
+}
+@keyframes os-blue-lift {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.7); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.os-blue-held span.os-blue-held--out {
+  animation: os-blue-spend 0.6s ease-in both;
+}
+@keyframes os-blue-spend {
+  0%   { opacity: 1; transform: translateY(0)     scale(1); }
+  100% { opacity: 0; transform: translateY(-14px) scale(1.25); }
+}
+
+/* v1.35 — blue turning into ordnance, in place, before it flies into
+   the arsenal bar. This is the beat the whole animation exists for: the
+   glyph does not move, so the only thing the eye reads is the colour
+   change, and what it means is "that is a weapon now". */
+.os-blue-held span.os-blue-held--arming {
+  animation: os-blue-arm 0.46s ease-out both;
+}
+@keyframes os-blue-arm {
+  0% {
+    color: #4aa3ff;
+    text-shadow: 0 0 6px rgba(74,163,255,0.85);
+    transform: scale(1);
+  }
+  55% {
+    color: #39d3d3;
+    text-shadow: 0 0 11px rgba(57,211,211,1);
+    transform: scale(1.4);
+  }
+  100% {
+    color: #39d3d3;
+    text-shadow: 0 0 8px rgba(57,211,211,0.9);
+    transform: scale(1);
+  }
+}
+
+/* ── score ───────────────────────────────────────────────────────── */
+
+.os-score {
+  margin-top: 5px;
+  font: bold 14px/1 "Courier New", monospace;
+  color: var(--os-color, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 1px 3px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.os-side--left  .os-score { align-self: flex-end;   padding-right: 6px; }
+.os-side--right .os-score { align-self: flex-start;  padding-left:  6px; }
+
+.os-score--lead {
+  background: var(--os-color, #fff);
+  color: #000;
+  padding: 1px 5px;
+}
+
+/* Subtle glow while the readout is counting up to a new night's total. */
+.os-score--ticking {
+  text-shadow: 0 0 6px var(--os-color, #fff);
+}
+
+/* Flash white when the sole leader changes hands. */
+@keyframes os-leadflash {
+  0%   { background:#fff; color:#000; box-shadow:0 0 14px #fff; }
+  100% { background:var(--os-color,#fff); color:#000; box-shadow:none; }
+}
+.os-score--leadflash {
+  animation: os-leadflash 1s ease-out;
+}
+
+/* ── ship-delta "+X" preview badge ───────────────────────────────── */
+
+.os-score-delta {
+  font: bold 10px/1 "Courier New", monospace;
+  color: var(--os-color, #fff);
+  min-height: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  padding: 0 3px;
+}
+.os-side--left  .os-score-delta { align-self: flex-end;  padding-right: 6px; }
+.os-side--right .os-score-delta { align-self: flex-start; padding-left:  6px; }
+
+/* Pending (shown at dusk): gently pulse so it reads as "incoming". */
+.os-score-delta[data-pending] {
+  opacity: 0.95;
+  animation: os-delta-pulse 1.1s ease-in-out infinite;
+}
+@keyframes os-delta-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* Spent (at launch): brief bright pop, then _osConsumeShipDeltas fades it. */
+.os-score-delta--spent {
+  opacity: 1;
+  color: #fff;
+  text-shadow: 0 0 8px var(--os-color, #fff);
+  animation: none;
+}
+
+/* ── final settlement +/- lines (season-close only) ────────────────
+   Stacked under the score at the terminal RESOLVE beat: the green
+   endgame penalty subtracts (red line) and the unshipped vault-RED
+   fire-sale adds back (amber line), each folded into the count-up. */
+.os-settle {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.os-side--left  .os-settle { align-items: flex-end;   padding-right: 6px; }
+.os-side--right .os-settle { align-items: flex-start; padding-left:  6px; }
+.os-settle-line {
+  font: bold 9px/1.15 "Courier New", monospace;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.os-settle-line--in { opacity: 0.96; transform: translateY(0); }
+.os-settle-line--green {
+  color: #ff6b6b;
+  text-shadow: 0 0 7px rgba(255, 90, 90, 0.75);
+}
+.os-settle-line--red {
+  color: #ffb454;
+  text-shadow: 0 0 7px rgba(255, 170, 60, 0.7);
+}
+
+/* ── hover cards ─────────────────────────────────────────────────── */
+
+/* Shared floating hover card container. Uses the game's existing
+   .cc-report-* / .cc-cat-* CSS since we render the real report DOM. */
+.os-hover-card {
+  position: fixed;
+  z-index: 9200;
+  background: #06060f;
+  border: 1px solid #1a1a2e;
+  padding: 10px 12px;
+  width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  pointer-events: auto;
+  /* Inherit the game's base font so .cc-report-* rules render correctly */
+  font-family: "Courier New", monospace;
+}
+
+/* Catapult card is narrower — just the grid + legend */
+.os-hover-card--cat {
+  width: 260px;
+}
+
+.os-hover-card-head {
+  font: 700 9px/1.4 "Courier New", monospace;
+  color: #aaa;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.os-hover-card-dim {
+  font: 9px/1.4 "Courier New", monospace;
+  color: #444;
+  padding: 4px 0;
+}
+
+.os-hover-card-hint {
+  font: 8px/1 "Courier New", monospace;
+  color: #333;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 8px;
+  text-align: right;
+}
+
+/* Give the embedded report panels a bit of breathing room */
+.os-hover-card .cc-report-obs { margin-bottom: 10px; }
+.os-hover-card .cc-report-orbital-panel { margin-bottom: 0; }
+
+/* ── full-vault mouseover grid (catapult-style tiles) ────────────── */
+
+.os-vault-card { margin-bottom: 12px; }
+
+.os-vault-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 26px);
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.os-vault-tile {
+  width: 26px;
+  height: 26px;
+  display: inline-block;
+  text-align: center;
+  font: bold 13px/26px "Courier New", monospace;
+  letter-spacing: -1px;
+  overflow: hidden;
+  background: #08081a;
+  border: 1px solid #16162c;
+}
+.os-vault-tile[data-type] {
+  background: color-mix(in srgb, currentColor 16%, #08081a);
+}
+.os-vault-tile[data-empty] {
+  color: #222;
+  border-style: dashed;
+  border-color: #14142400;
+  background: #05050e;
+}
+
+/* ── launch delay toggle ─────────────────────────────────────────── */
+
+.os-setting-btn {
+  font: 8px/1 "Courier New", monospace;
+  background: #0a0a18;
+  border: 1px solid #222233;
+  color: #444;
+  padding: 3px 6px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.os-setting-btn:hover   { border-color: #444466; color: #888; }
+.os-setting--on         { border-color: #4444aa !important; color: #8888ff !important; }

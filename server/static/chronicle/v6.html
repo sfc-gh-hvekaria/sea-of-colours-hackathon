@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>tabula v6 — Comprehension · Sea of Colours Chronicle</title>
+<link rel="stylesheet" href="chronicle.css" />
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">Agent detail · generation 6</div>
+  <h1>v6 — teaching a fast collator to <i>understand</i></h1>
+  <p class="subtitle">v5 made the plan always finish. v6 kept that win and spent its budget on three comprehension upgrades — grounded reflection, fog-gated hot-drops, and anti-self-crush routing.</p>
+  <div class="meta">haiku-4-5 · Cortex Agents API · "reason in your head" · single-call</div>
+  <a class="backlink" href="../agent_build_chronicle.html">← back to the overview</a>
+</header>
+
+<div class="wrap">
+
+<section id="what">
+  <h2><span class="num">v6</span>What v6 is</h2>
+  <p class="lead">The comprehension release. It inherits v5's <b>moves-first output contract</b> (emit the <code>moves</code> array before any prose, so a truncated turn still ships a plan) and the <b>move sanitizer</b>, then adds three levers aimed at a single weakness: v5 could <i>act</i> but it couldn't reliably <i>read the board or its own past</i>.</p>
+  <p>It still runs on the Cortex <b>Agents API</b> with the "reason in your head" instruction — the only Agents-API setting that skips runaway extended thinking. That makes v6 fast and obedient, but it is fundamentally a <b>collator</b> of the deterministic hints we precompute for it, not a strategist. That ceiling is exactly what v7's containment fix and v8's worldview restructure were built to break.</p>
+</section>
+
+<section id="changes">
+  <h2><span class="num">01</span>The three engineering changes</h2>
+
+  <h3>1 · Grounded reflection</h3>
+  <p>v5 authored its "what happened last night" narrative from memory — and routinely got it wrong, inventing outcomes that never occurred. v6 feeds the <b>engine-resolved truth</b> into the prompt: actual banked points and concrete losses (chaff jam, probe crush, dawn crash), computed by a deterministic <code>recorder</code> that diffs the score ledger night-over-night. The schema then forces the agent to echo the exact number and name the gap cause. It can no longer confabulate a result.</p>
+
+  <h3>2 · Fog-gated hot-drops with a precomputed comb path</h3>
+  <p>A "hot drop" — launch a probe, then drop a harvester into the disk it just revealed, in the <i>same</i> night — only makes sense if the target is genuinely fogged. v6 gates on that (<code>target_in_fog</code>) and precomputes a <b>blind serpentine comb</b> over the probe's radius-4 disk: staying in-disk, avoiding known green, biased toward value. A hot drop becomes a ready-to-copy 6-cell chain instead of a timid 2-step gesture.</p>
+
+  <h3>3 · Absorb-first-step (anti self-crush)</h3>
+  <p>Dropping a harvester onto your own live probe <b>destroys the probe</b>. When a harvest chain follows a drop, v6's sanitizer <b>absorbs the first step into the drop</b> — rerouting the drop to the first step's cell — sparing the probe <i>and</i> keeping the chain intact. A deterministic guardrail for a mistake the model kept making.</p>
+</section>
+
+<section id="carried">
+  <h2><span class="num">02</span>What it carried forward (and became foundational)</h2>
+  <div class="grid2">
+    <div class="card good"><h4>Moves-first contract (v5)</h4><p class="dim">The <code>moves</code> array is emitted first. Started as pure truncation defense; every later version keeps it.</p></div>
+    <div class="card good"><h4>Move sanitizer (v1–v4 lineage)</h4><p class="dim">Deterministic repair of illegal moves (off-grid steps, non-adjacency, orphaned chains, self-crush). v7 and v8 reuse it unchanged.</p></div>
+    <div class="card good"><h4>State-triggered doctrine (v5)</h4><p class="dim">Strategy appendices (redsign, blue, beware-EMP/chaff, final-night supersede) appear only when live state calls for them. v8 forks and extends this.</p></div>
+    <div class="card good"><h4>Precomputed hint menu</h4><p class="dim">Chains, comb paths, probe placements, supersede targets — arithmetic kept out of the token budget. Shared by every version since.</p></div>
+  </div>
+</section>
+
+<section id="ceiling">
+  <h2><span class="num">03</span>The "aha" — a complete plan is not a smart plan</h2>
+  <div class="callout warn">
+    <div class="tag">The v6 ceiling, stated plainly</div>
+    <p style="margin:0">"Reason in your head" buys you a <b>fast, obedient collator</b> of the hints you hand it — not genuine deliberation. v6 reliably harvests visible RED and combs probe disks, but on the Agents API there is no middle setting between <i>runaway think</i> and <i>no think</i>. To make the agent smarter you cannot just ask it to think harder — the API surface won't let you bound it. That realization is what pointed straight at v7.</p>
+  </div>
+  <p class="dim">v6's recurring failures — chaff blindness (scheduling pickups into a jam window night after night), unit-identity confusion, no multi-night planning — are all <i>depth</i> problems. Depth is precisely what a fast collator can't supply, and precisely what v7 (containment) and v8 (worldview + a real, bounded thinker) set out to add.</p>
+</section>
+
+<section id="perf">
+  <h2><span class="num">04</span>How it plays — head-to-head reference</h2>
+  <p class="dim">In the seed-42 three-way arena (v8 vs v7 vs v6), v6 is the slowest of the three cortex versions per turn (~20–29s) and finished last. Its orbit-planning heuristic had a bug that spent RED fuel green-flushing, ending the season negative — a factor that skews the raw margin but doesn't change the ordering.</p>
+  <table>
+    <thead><tr><th>Metric</th><th class="mono">v6 (seed 42, 3-way)</th></tr></thead>
+    <tbody>
+      <tr><td>Final score</td><td class="mono">−100</td></tr>
+      <tr><td>Turn time (planning)</td><td class="mono">~20–29s</td></tr>
+      <tr><td>Redsign outcome</td><td class="mono">never escaped the contested beacon cell</td></tr>
+      <tr><td>Known issue</td><td class="mono">orbit heuristic green-flushed RED fuel → negative</td></tr>
+    </tbody>
+  </table>
+  <p class="dim">Full digest: <code>reports/versus_s42_v8_v7_v6.md</code>. Engineering detail: <code>orchestrator_2/harnesses/CHANGES_TABULA_v6_v7.md</code>.</p>
+</section>
+
+<div class="vpager">
+  <a href="../agent_build_chronicle.html">← overview</a>
+  <a href="v7.html">v7 — Containment →</a>
+</div>
+
+<footer>
+  Sea of Colours · agent build chronicle · v6 detail
+</footer>
+
+</div>
+</body>
+</html>

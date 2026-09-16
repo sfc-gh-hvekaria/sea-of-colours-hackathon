@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<!--
+  The divergence view — a fork against the thing it forked, on one night.
+
+  Opened in its own tab from the AGENT panel. The opener writes the two
+  takes onto window.__LAB_DIFF__ before this page's script runs, so this
+  document never fetches anything: it is the same contract the battle
+  room uses, and for the same reason (a page that might be read off disk
+  cannot assume a server).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Divergence — Turn Lab</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #dfe4e8;
+    --dim: rgba(223, 228, 232, .5);
+    --line: rgba(255, 255, 255, .1);
+    --add: #7ee787;
+    --del: #ff9a9a;
+    --addbg: rgba(63, 185, 80, .13);
+    --delbg: rgba(248, 81, 73, .12);
+    --mine: #f778f7;
+    --base: #82f4fb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #07090b; color: var(--ink);
+    font: 13px/1.6 ui-monospace, "JetBrains Mono", Consolas, monospace;
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 5; background: #07090b;
+    border-bottom: 1px solid var(--line); padding: 18px 26px 0;
+  }
+  h1 { font-size: 15px; letter-spacing: .18em; margin: 0 0 5px; font-weight: 600; }
+  .meta { font-size: 11.5px; color: var(--dim); line-height: 1.55; }
+  .meta b { color: var(--ink); font-weight: 600; }
+  nav { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; padding: 13px 0 0; }
+  nav a {
+    color: var(--dim); text-decoration: none; font-size: 11px;
+    padding: 5px 9px; border: 1px solid transparent; border-radius: 4px 4px 0 0;
+  }
+  nav a:hover { color: var(--ink); background: rgba(255,255,255,.05); }
+  /* The page runs decision → offer → prompt, which is the order the
+     questions get asked. Labelling the runs keeps a nav of fifteen
+     entries from reading as one undifferentiated list. */
+  .navgrp {
+    font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(223, 228, 232, .32); padding: 0 8px 0 14px;
+  }
+  .navgrp:first-child { padding-left: 0; }
+
+  /* STRUCTURED takes the take apart to answer "what differs, and where".
+     RAW puts it back together to answer "show me both, in full". Neither
+     is a subset of the other, so they are a switch and not a fold. */
+  .modes { display: flex; align-items: center; gap: 6px; padding: 11px 0 0; flex-wrap: wrap; }
+  .modes .k {
+    font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(223, 228, 232, .32); padding-right: 4px;
+  }
+  .modes .k + .k, .modes button + .k { padding-left: 14px; }
+  .modes button {
+    font: inherit; font-size: 10.5px; letter-spacing: .08em; cursor: pointer;
+    color: var(--dim); background: none; padding: 3px 9px;
+    border: 1px solid var(--line); border-radius: 4px;
+  }
+  .modes button:hover { color: var(--ink); }
+  .modes button.on { color: var(--ink); border-color: rgba(255,255,255,.4); }
+
+  main { padding: 26px; max-width: 1180px; }
+  section { margin: 0 0 40px; scroll-margin-top: 120px; }
+  h2 {
+    font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
+    margin: 0 0 3px; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sub { color: var(--dim); font-size: 11.5px; margin: 0 0 12px; }
+  .badge {
+    font-size: 10.5px; letter-spacing: 0; text-transform: none;
+    color: var(--dim); border: 1px solid var(--line);
+    border-radius: 3px; padding: 1px 6px; font-weight: 400;
+  }
+  .badge.same { opacity: .55; }
+
+  /* Whose column is whose, everywhere: cyan is the baseline, magenta is
+     yours. Same pairing the board uses for the two seats' plans. */
+  th:nth-child(2), td.base { color: var(--base); }
+  th:nth-child(3), td.mine { color: var(--mine); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  th {
+    text-align: left; font-weight: 600; font-size: 10.5px; letter-spacing: .08em;
+    text-transform: uppercase; padding: 0 12px 6px 0; border-bottom: 1px solid var(--line);
+  }
+  td { padding: 4px 12px 4px 0; vertical-align: top; border-bottom: 1px solid rgba(255,255,255,.05); }
+  td.hour, td.k { color: var(--dim); white-space: nowrap; width: 1%; }
+  tr.agree td { opacity: .42; }
+  tr.differ td.hour, tr.differ td.k { color: var(--ink); }
+  tr.differ { background: rgba(255,255,255,.035); }
+  .none { opacity: .3; }
+  .tally { font-size: 11.5px; color: var(--dim); margin: 0 0 10px; }
+
+  /* The verb, at a glance. A night is mostly stepping; the drops, the
+     probes and above all the weapons are what a reader is scanning for. */
+  .v-drop   { border-left: 2px solid #ffd479; padding-left: 7px; }
+  .v-probe  { border-left: 2px solid #79c0ff; padding-left: 7px; }
+  .v-pickup { border-left: 2px solid #a5d6a7; padding-left: 7px; }
+  .v-weapon { border-left: 2px solid #ff7b72; padding-left: 7px; font-weight: 600; }
+  .v-wait   { opacity: .45; }
+  .v-step   { border-left: 2px solid transparent; padding-left: 7px; }
+
+  .diff {
+    border: 1px solid var(--line); border-radius: 5px; overflow: hidden;
+    font-size: 12px; line-height: 1.5;
+  }
+  .row { display: flex; white-space: pre-wrap; word-break: break-word; }
+  .row .sign { flex: 0 0 18px; text-align: center; opacity: .6; user-select: none; }
+  .row .txt { flex: 1 1 auto; padding-right: 10px; }
+  .row.add { background: var(--addbg); color: var(--add); }
+  .row.del { background: var(--delbg); color: var(--del); }
+  .row.same { opacity: .5; }
+
+  /* What actually changed, inside the line. Without this the view looks
+     like it is lying: a prompt line runs several hundred characters and
+     wraps over eight rows, so a two-digit edit deep inside one is
+     invisible and the red/green pair reads as identical text. */
+  .row mark {
+    color: inherit; border-radius: 2px; padding: 0 1px;
+    background: rgba(255, 255, 255, .2);
+  }
+  .row.add mark { background: rgba(63, 185, 80, .42); color: #d4ffd9; }
+  .row.del mark { background: rgba(248, 81, 73, .38); color: #ffdcdc; }
+  /* Same text, somewhere else. The LCS is entitled to call a moved line
+     a delete plus an add, and it is right — but painted red over green
+     it accuses text that plainly did not change. */
+  .row.moved { background: rgba(255, 255, 255, .045); color: var(--dim); }
+  .rownote {
+    margin-left: 12px; font-size: 10px; letter-spacing: .06em;
+    text-transform: uppercase; opacity: .65;
+  }
+  .row.fold {
+    background: rgba(255,255,255,.03); color: var(--dim);
+    font-size: 11px; padding: 3px 0 3px 18px; justify-content: flex-start;
+  }
+  .identical, .empty, .onesided {
+    color: var(--dim); font-size: 12px; border: 1px dashed var(--line);
+    border-radius: 5px; padding: 9px 12px;
+  }
+  .onesided b { color: var(--ink); font-weight: 600; }
+  .badge.one { color: var(--base); border-color: rgba(130,244,251,.35); }
+
+  /* The pieces that came through untouched. Present in full — this
+     view claims to show the whole prompt — but folded, because a
+     screenful of boxes reading "identical" hides the two that changed
+     just as effectively as showing the prompt three times did. */
+  .quiet { border: 1px solid var(--line); border-radius: 5px; }
+  .quiet details { margin: 0; border-bottom: 1px solid var(--line); }
+  .quiet details:last-child { border-bottom: none; }
+  .quiet summary { padding: 7px 12px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .quiet summary b { color: var(--dim); font-weight: 600; }
+  .quiet details[open] summary b { color: var(--ink); }
+  .qsub { opacity: .6; }
+  .quiet pre { margin: 0 12px 12px; }
+
+  details { margin-top: 8px; }
+  summary {
+    cursor: pointer; color: var(--dim); font-size: 11.5px; padding: 3px 0;
+  }
+  summary:hover { color: var(--ink); }
+  details pre {
+    margin: 6px 0 0; padding: 10px 12px; max-height: 460px; overflow: auto;
+    background: rgba(255,255,255,.03); border: 1px solid var(--line);
+    border-radius: 5px; font-size: 11.5px; line-height: 1.5;
+    white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* A directive field can be multi-line once it is flattened. */
+  td.base, td.mine { white-space: pre-wrap; }
+
+  /* The option menu, back in table form. Each play is one row; the
+     walk/yield/crush boilerplate the renderer repeats under every
+     single option folds away, which is the only way the menu is
+     readable at forty plays. */
+  table.menu td.k { font-size: 11px; letter-spacing: .04em; }
+  tr.grp td {
+    padding: 14px 0 4px; border-bottom: none; color: var(--dim);
+    font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  }
+  tr.grp:first-child td { padding-top: 0; }
+  .opt { white-space: pre-wrap; }
+  .tick {
+    font-size: 9.5px; letter-spacing: .1em; padding: 1px 5px;
+    border: 1px solid currentColor; border-radius: 3px; opacity: .9;
+    vertical-align: 1px;
+  }
+  tr .opt.picked { font-weight: 600; }
+  /* A picked row is the one thing on this page you should never have to
+     hunt for, so it keeps full contrast even when the row agrees. */
+  tr.agree td:has(.opt.picked) { opacity: 1; }
+
+  @media print { body { background: #fff; color: #000; } header { position: static; } }
+</style>
+</head>
+<body>
+  <header>
+    <div id="head"></div>
+    <nav id="nav"></nav>
+  </header>
+  <main id="body"></main>
+</body>
+</html>

@@ -1,0 +1,390 @@
+/* sea_of_colours — eval command center.
+ *
+ * Standalone layout for /evals. Reuses the global palette (--green,
+ * --frame, --panel-bg, etc.) from styles.css so the chrome feels
+ * continuous with the watcher. The replay area is an <iframe> pointed
+ * at /?session=<id> so we inherit every map-painter improvement for
+ * free without duplicating animation code.
+ */
+
+.ev-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.ev-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5ch;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--frame);
+  background: var(--panel-bg);
+  flex-shrink: 0;
+}
+.ev-header .cc-header-mid { margin-left: auto; }
+.ev-header .cc-header-right { margin-left: 1ch; }
+.ev-nav-btn { font-size: 12px; }
+.ev-counter { font-size: 12px; }
+
+/* ── Body grid ───────────────────────────────────────────────────── */
+.ev-body {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 0;
+}
+
+/* ── Sidebar: scenario list ─────────────────────────────────────── */
+.ev-sidebar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--frame);
+  background: var(--panel-bg);
+  min-height: 0;
+}
+.ev-sidebar-head {
+  padding: 8px 12px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--frame);
+}
+.ev-scenario-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+.ev-scenario-list li {
+  padding: 6px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(58, 58, 72, 0.4);
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ev-scenario-list li:hover {
+  background: rgba(63, 185, 80, 0.08);
+}
+.ev-scenario-list li.is-active {
+  background: rgba(63, 185, 80, 0.15);
+  border-left: 2px solid var(--green);
+  padding-left: 10px;
+}
+.ev-scenario-list li.is-active .ev-scen-name {
+  color: var(--green);
+}
+.ev-scen-name {
+  font-size: 13px;
+}
+.ev-scen-meta {
+  font-size: 10px;
+  color: var(--dim);
+  display: flex;
+  gap: 0.6ch;
+  align-items: center;
+}
+.ev-scen-tag {
+  border: 1px solid var(--frame);
+  padding: 0 4px;
+  border-radius: 2px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ev-scenario-loading { padding: 12px; font-size: 12px; }
+.ev-sidebar-foot {
+  padding: 8px 12px;
+  font-size: 10px;
+  border-top: 1px solid var(--frame);
+  line-height: 1.5;
+}
+.ev-sidebar-foot code {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0 3px;
+  border-radius: 2px;
+}
+
+/* ── Main column ─────────────────────────────────────────────────── */
+.ev-main {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Headline */
+.ev-headline {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--frame);
+  background: var(--panel-bg);
+}
+.ev-headline-head {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  margin-bottom: 6px;
+}
+.ev-headline-name {
+  color: var(--green);
+  font-size: 15px;
+  font-weight: 600;
+}
+.ev-headline-tags {
+  display: flex;
+  gap: 0.4ch;
+}
+.ev-headline-tag {
+  border: 1px solid var(--frame);
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dim);
+}
+.ev-headline-summary {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: var(--fg);
+  line-height: 1.5;
+  max-width: 90ch;
+}
+
+.ev-pass-conditions {
+  border-left: 2px solid var(--green);
+  padding-left: 10px;
+  margin-top: 6px;
+}
+.ev-pass-conditions-head {
+  font-size: 10px;
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
+}
+.ev-assertion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ev-assertion-list li {
+  font-size: 12px;
+  display: flex;
+  gap: 0.6ch;
+  align-items: baseline;
+}
+.ev-assertion-marker {
+  color: var(--green);
+  font-weight: 600;
+}
+.ev-assertion-name {
+  color: var(--green);
+  min-width: 22ch;
+}
+.ev-assertion-desc {
+  color: var(--fg);
+}
+
+/* Viewer frame: tabbed wrapper around the replay iframe + transcript */
+.ev-viewer-frame {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-bottom: 1px solid var(--frame);
+  background: var(--bg);
+}
+.ev-viewer-head {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--frame);
+  background: var(--panel-bg);
+}
+.ev-tabs {
+  display: flex;
+  gap: 0;
+}
+.ev-tab {
+  background: transparent;
+  color: var(--dim);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  user-select: none;
+}
+.ev-tab:hover { color: var(--fg); }
+.ev-tab.is-active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+.ev-viewer-caption {
+  margin-left: auto;
+  font-size: 11px;
+}
+
+/* Tab panels share the same frame area; only one is visible at a time */
+.ev-tab-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ev-tab-panel[hidden] { display: none; }
+
+.ev-replay-iframe {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--bg);
+  min-height: 0;
+}
+
+/* Transcript panel */
+.ev-transcript {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 14px;
+  background: var(--bg);
+}
+.ev-transcript-empty { padding: 12px; font-size: 12px; }
+
+.ev-tx-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5ch;
+  margin-bottom: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--frame);
+  border-radius: 2px;
+  font-size: 11px;
+  background: var(--panel-bg);
+}
+.ev-tx-meta strong { color: var(--green); font-weight: 600; }
+.ev-tx-meta .dim { color: var(--dim); }
+
+.ev-tx-section {
+  margin: 12px 0;
+}
+.ev-tx-section > header {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--dim);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+}
+.ev-tx-section > header strong {
+  color: var(--green);
+}
+.ev-tx-pre {
+  margin: 0;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--frame);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 60vh;
+  overflow-y: auto;
+  color: var(--fg);
+}
+.ev-tx-pre.is-missing { color: var(--dim); font-style: italic; }
+.ev-tx-byline {
+  font-size: 10px;
+  color: var(--dim);
+  margin-left: auto;
+}
+
+/* Past-runs strip */
+.ev-runs-strip {
+  display: flex;
+  flex-direction: column;
+  max-height: 30vh;
+  border-top: 1px solid var(--frame);
+  background: var(--panel-bg);
+}
+.ev-runs-head {
+  padding: 6px 12px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--frame);
+}
+.ev-runs-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.ev-runs-empty { padding: 12px; font-size: 11px; }
+
+.ev-run-row {
+  display: grid;
+  /* verdict · config · agent · drop · summary · session-id */
+  grid-template-columns: 5ch 9ch 22ch 11ch 1fr 10ch;
+  align-items: center;
+  gap: 1ch;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(58, 58, 72, 0.3);
+  user-select: none;
+}
+.ev-run-agent {
+  color: var(--fg);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ev-run-agent.is-unknown { color: var(--dim); font-style: italic; }
+.ev-run-row:hover { background: rgba(63, 185, 80, 0.08); }
+.ev-run-row.is-active {
+  background: rgba(63, 185, 80, 0.15);
+  border-left: 2px solid var(--green);
+  padding-left: 10px;
+}
+
+.ev-run-verdict {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.ev-run-verdict.is-pass { color: var(--green); }
+.ev-run-verdict.is-fail { color: var(--red); }
+.ev-run-verdict.is-na   { color: var(--dim); }
+
+.ev-run-config {
+  text-transform: lowercase;
+  color: var(--blue);
+}
+.ev-run-config.is-unknown { color: var(--dim); }
+
+.ev-run-drop { color: var(--dim); font-size: 11px; }
+.ev-run-summary { color: var(--fg); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-run-id { color: var(--dim); font-size: 10px; font-family: var(--mono); text-align: right; }
+
+@media (max-width: 1100px) {
+  .ev-body { grid-template-columns: 180px 1fr; }
+  .ev-run-row { grid-template-columns: 5ch 9ch 18ch 11ch 1fr; }
+  .ev-run-id { display: none; }
+}

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sea_of_colours · evals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/evals.css" />
+  </head>
+  <body>
+    <div class="crt-viewport ev-shell">
+      <!-- ── Header ─────────────────────────────────────────────── -->
+      <header class="cc-header ev-header">
+        <div class="cc-header-left">
+          <span class="prompt-sigil">$</span>
+          <span class="prompt-cmd">sea_of_colours</span>
+          <span class="dim cc-subhead">· evals</span>
+          <span class="prompt-caret">_</span>
+        </div>
+        <div class="cc-header-mid">
+          <a href="/" class="cli-btn ev-nav-btn" title="back to watcher / player view">[ &lt; back ]</a>
+        </div>
+        <div class="cc-header-right">
+          <span class="dim ev-counter" id="ev-counter">— scenarios</span>
+        </div>
+      </header>
+
+      <!-- ── Body grid ──────────────────────────────────────────── -->
+      <main class="ev-body">
+        <!-- Sidebar: scenario list -->
+        <aside class="ev-sidebar">
+          <div class="ev-sidebar-head dim"># SCENARIOS</div>
+          <ul id="ev-scenario-list" class="ev-scenario-list">
+            <li class="ev-scenario-loading dim">loading…</li>
+          </ul>
+          <div class="ev-sidebar-foot dim">
+            <span>tip:</span> use <code>--replay</code> on the CLI to make new runs show up here
+          </div>
+        </aside>
+
+        <!-- Main column: headline + replay + past-runs strip -->
+        <section class="ev-main">
+          <!-- Headline: scenario name + summary + pass conditions -->
+          <div id="ev-headline" class="ev-headline">
+            <div class="ev-headline-head">
+              <span class="dim">eval:</span>
+              <span class="ev-headline-name" id="ev-scenario-name">— select a scenario —</span>
+              <span class="ev-headline-tags" id="ev-scenario-tags"></span>
+            </div>
+            <p class="ev-headline-summary" id="ev-scenario-summary"></p>
+            <div class="ev-pass-conditions">
+              <div class="dim ev-pass-conditions-head"># pass conditions</div>
+              <ul id="ev-assertion-list" class="ev-assertion-list"></ul>
+            </div>
+          </div>
+
+          <!-- Replay + transcript: tabbed view of one run -->
+          <div class="ev-viewer-frame">
+            <div class="ev-viewer-head">
+              <div class="ev-tabs" role="tablist">
+                <button
+                  type="button"
+                  class="ev-tab is-active"
+                  role="tab"
+                  data-tab="replay"
+                  id="ev-tab-replay"
+                >[ REPLAY ]</button>
+                <button
+                  type="button"
+                  class="ev-tab"
+                  role="tab"
+                  data-tab="transcript"
+                  id="ev-tab-transcript"
+                >[ TRANSCRIPT ]</button>
+              </div>
+              <span id="ev-viewer-caption" class="ev-viewer-caption dim">— pick a past run below —</span>
+            </div>
+
+            <!-- Tab panel: replay iframe (default) -->
+            <div
+              class="ev-tab-panel is-active"
+              data-panel="replay"
+              role="tabpanel"
+              aria-labelledby="ev-tab-replay"
+            >
+              <iframe
+                id="ev-replay-iframe"
+                class="ev-replay-iframe"
+                src="about:blank"
+                title="eval replay"
+              ></iframe>
+            </div>
+
+            <!-- Tab panel: agent transcript -->
+            <div
+              class="ev-tab-panel"
+              data-panel="transcript"
+              role="tabpanel"
+              aria-labelledby="ev-tab-transcript"
+              hidden
+            >
+              <div id="ev-transcript" class="ev-transcript">
+                <p class="dim ev-transcript-empty">— pick a past run to see the agent transcript —</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Past runs strip -->
+          <div class="ev-runs-strip">
+            <div class="ev-runs-head dim"># past runs <span id="ev-runs-count"></span></div>
+            <div id="ev-runs-list" class="ev-runs-list">
+              <span class="dim ev-runs-empty">— select a scenario to see its past runs —</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="/static/evals.js"></script>
+  </body>
+</html>

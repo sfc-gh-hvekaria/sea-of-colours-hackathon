@@ -1,0 +1,43 @@
+label,agent,fixture,run_idx,ok,ms,resp_chars,ramble_count,preamble_count,first_cand,final_cand,stable_choice,tool_called,wallclock_capped,plan_chosen
+smoke_twocall,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d1s1_opening.txt,0,True,48139,5065,0,7,P0,P2,False,True,False,
+smoke_twocall_v2,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d1s1_opening.txt,0,True,34285,5066,3,8,P0,P2,False,True,False,
+smoke_twocall_sandwich,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d1s1_opening.txt,0,True,36000,5065,3,2,P0,P2,False,True,False,
+E1_twocall_d3s9,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,64725,5065,10,0,"at (19,13)",EMP0,False,False,False,
+E1_twocall_d3s9,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,97084,5066,9,1,"at (19,13)",,False,True,False,
+E1_twocall_d3s9,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,55912,5066,13,0,,EMP0,False,False,False,
+E1_twocall_d3s9,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,3,True,88129,5066,5,0,"at (10,7)","at (28,7)",False,True,False,
+E1_twocall_d3s9,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,4,True,67861,5065,3,10,"at (19,13)","at (29,8)",False,True,False,
+smoke_output_first,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d1s1_opening.txt,0,True,40515,6066,3,3,P0,P1,False,True,False,
+E2_timer_15_25,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,40046,6066,11,4,"at (29,8)",EMP0,False,False,True,
+E2_timer_15_25,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,40023,6065,8,0,"at (22,16)",H0,False,False,True,harvest_mixed
+E2_timer_15_25,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,37824,6066,1,0,P2,,False,False,True,harvest_pure
+E2_timer_15_25,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,3,True,40744,6066,4,0,"at (21,13)","at (21,13)",False,False,True,
+E2_timer_15_25,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,4,True,40058,6066,3,0,"at (17,12)","at (12,10)",False,False,True,
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,65772,6066,3,4,"at (17,12)","at (13,5)",False,True,True,harvest_mixed
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,56744,6066,4,1,"at (22,16)",C0,False,False,True,harvest_pure
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,61222,6066,6,2,"at (22,16)",EMP0,False,True,True,harvest_pure
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,3,True,47587,6065,2,0,"at (20,14)","at (29,3)",False,True,True,
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,4,True,58098,6066,3,0,"at (22,16)","at (19,13)",False,True,True,
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,0,True,56125,6066,1,3,"at (30,1)",H0,False,False,True,final_day_push
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,1,True,61053,6066,1,2,H0,"at (20,23)",False,True,True,final_day_push
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,2,True,65265,6066,4,0,"at (30,1)","at (20,21)",False,True,True,final_day_push
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,3,True,60723,6066,2,0,"at (30,1)","at (20,21)",False,True,True,
+E3_timer_15_45,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,4,True,56070,4224,3,0,P2,H0,False,True,True,final_day_push
+E4_trimmed_tactician,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,59145,6066,6,0,"at (28,7)",P2,False,True,True,
+E4_trimmed_tactician,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,48929,6066,2,0,"at (22,16)","at (29,3)",False,True,True,harvest_pure
+E4_trimmed_tactician,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,55980,6066,5,0,"at (28,7)","at (28,7)",False,True,True,
+E4_trimmed_tactician,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,3,True,60037,6066,8,0,"at (22,16)",,False,False,True,
+E4_trimmed_tactician,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,4,True,47246,6065,5,5,H0,,False,True,False,
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,61516,3076,0,0,H0,,False,True,True,
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,63653,3076,1,1,"at (22,16)",,False,True,True,
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,60096,3075,0,0,"at (22,16)",,False,True,True,
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,3,True,57123,3075,0,0,"at (29,3)",,False,True,True,
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,4,True,59207,3076,0,0,"at (19,13)",,False,True,True,
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,0,True,63852,3076,0,4,"at (30,1)",,False,True,True,final_day_push
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,1,True,66439,3075,0,0,"at (16,21)",,False,True,True,final_day_push
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,2,True,60543,3076,0,0,"at (30,1)",,False,True,True,final_day_push
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,3,True,62402,3075,0,0,,,False,True,True,
+E5_tool_required,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d7s26_final_night.txt,4,True,54759,1369,0,0,H0,,False,True,True,final_day_push
+E6_full_stack,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,36688,2076,0,0,"at (22,16)",,False,True,True,
+E6_full_stack,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,39963,2076,0,0,P2,,False,True,True,
+E6_full_stack,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,47026,2076,0,0,"at (28,7)",,False,True,True,

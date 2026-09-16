@@ -1,0 +1,1908 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sea_of_colours · command centre</title>
+    <!-- v0.7.4 — VT323 is the classic 8-bit DOS-terminal bitmap face
+         used only by the PRAXIS timeline so the feed reads like a
+         live tty stream. preconnect keeps the first paint snappy. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <!-- Optional inline orbital "space station" panels. Inert unless the
+         station UI is enabled (?station=1); see station.js / station.css. -->
+    <link rel="stylesheet" href="/static/station.css" />
+  </head>
+  <body>
+    <div id="crt-viewport" class="crt-viewport cc-shell">
+      <header class="cc-header">
+        <div class="cc-header-left">
+          <span class="prompt-sigil">$</span>
+          <span class="prompt-cmd">sea_of_colours</span>
+          <span class="dim cc-subhead">· command centre</span>
+          <span class="prompt-caret">_</span>
+          <!-- v1.20 — the season has always had a name and the playing UI
+               never showed it; it lived only in the watcher's picker. -->
+          <span id="cc-season-name" class="cc-season-name" hidden></span>
+        </div>
+        <div class="cc-header-mid">
+          <button id="new-game-btn" type="button" class="cli-btn cli-btn-primary">
+            [ &gt; NEW GAME ]
+          </button>
+          <!-- v1.22 — the NIGHTS spinner used to live here. It only ever
+               seeded the launcher's own copy, so on the idle screen it
+               read as a setting you had to fill in and on a live board it
+               had to be hidden again. Season length belongs to the game
+               you are about to start, so it now lives only in the modal. -->
+          <!-- v0.9.6 — N-seat launcher modal lives at body level
+               (just before </body>) so its `position: fixed` overlay
+               resolves against the document viewport, not against
+               #crt-viewport (which has a CSS `filter` that
+               otherwise becomes the containing block for fixed
+               descendants and squashes the modal into the header). -->
+          <!-- Watcher mode (Phase C): season picker — populated from
+               /api/sessions. Visible only when ?session= / ?season= /
+               ?watch=1 boots the page into watcher mode. -->
+          <div id="watch-picker-wrap" class="cc-watch-picker" hidden>
+            <label class="dim cc-watch-picker-label" for="watch-season-picker">
+              SEASON
+            </label>
+            <select id="watch-season-picker" class="cc-watch-picker-select"
+                    aria-label="Choose a persisted season to watch">
+              <option value="">// loading…</option>
+            </select>
+            <button id="watch-delete-btn" type="button"
+                    class="cc-watch-delete" title="Delete this replay"
+                    aria-label="Delete the selected replay" hidden>&#x1F5D1;</button>
+            <!-- v1.22 — the "fixtures" tickbox and a meta line used to sit
+                 here. The meta line restated the selected option word for
+                 word, and the tickbox is a developer list-filter; both are
+                 gone from the header (the filter moved to SETTINGS). -->
+          </div>
+          <span id="phase-line" class="dim cc-status"># idle — start a session</span>
+          <!-- v1.32 — tutorial.js hangs its [ TUTORIAL ] button here in a
+               teaching game. An empty slot in an ordinary season, because
+               the reels — and the button — are that file's business, not
+               this markup's. -->
+          <span data-tutorial-slot></span>
+        </div>
+        <div class="cc-header-right">
+          <!-- v1.20 — where THIS game is stored. Backend is a per-game
+               choice since v1.14, so this reads the session, not the
+               process default: a memory game and a Snowflake season can
+               be open on the same server. It is the difference between
+               "LLM seats, agent memory and replays" and "fast, offline,
+               gone when the process stops", which was previously
+               invisible once you were past the launcher.
+               Top-RIGHT so it reads as a status light rather than part of
+               the season's identity, and so it never shifts the prompt
+               line as the label changes width. -->
+          <span id="cc-backend-badge" class="cc-backend-badge" hidden
+                tabindex="0" role="note"></span>
+          <!-- v1.20 — replay readout. The seed names the map (a replay
+               could never tell you which one you were looking at), and
+               the extraction figure is the season's headline: what share
+               of the map's RED value came off the ground by this night.
+               Populated by app.js; hidden outside replay/watch. -->
+          <div id="cc-extract-strip" class="cc-extract" hidden>
+            <span class="cc-extract-cell" id="cc-extract-seed-cell">
+              <span class="cc-extract-k dim">SEED</span>
+              <span class="cc-extract-v" id="cc-extract-seed">—</span>
+            </span>
+            <span class="cc-extract-cell">
+              <span class="cc-extract-k dim">RED ON MAP</span>
+              <span class="cc-extract-v" id="cc-extract-total">—</span>
+            </span>
+            <span class="cc-extract-cell cc-extract-cell--pct">
+              <span class="cc-extract-k dim">EXTRACTED</span>
+              <span class="cc-extract-v" id="cc-extract-pct">—</span>
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main class="cc-main">
+        <!-- Optional station UI wrapper. When the station UI is off the side
+             columns are display:none and .os-map-row is a transparent
+             single-child flex passthrough, so layout matches production. -->
+        <div class="os-map-row">
+        <div class="os-side os-side--left" id="os-side-left"></div>
+        <section class="cc-map-area" aria-label="Player percept">
+          <div class="cc-map-frame">
+            <div class="cc-map-frame-head">
+              <span class="cc-frame-title">YOUR MAP</span>
+              <span class="dim cc-map-sub" id="solo-map-heading">fog · trails</span>
+              <div class="cc-map-zoom" role="group" aria-label="Map zoom">
+                <button
+                  type="button"
+                  class="cc-map-zoom-btn"
+                  id="cc-map-zoom-out"
+                  title="Zoom out (Ctrl/Cmd + -)"
+                  aria-label="Zoom out"
+                >−</button>
+                <span class="cc-map-zoom-label">ZOOM</span>
+                <input
+                  type="range"
+                  id="cc-map-zoom-slider"
+                  class="cc-map-zoom-slider"
+                  min="10"
+                  max="28"
+                  step="1"
+                  value="14"
+                  aria-label="Map zoom level"
+                  title="Drag to resize the map (Ctrl/Cmd + scroll over map)"
+                />
+                <button
+                  type="button"
+                  class="cc-map-zoom-btn"
+                  id="cc-map-zoom-in"
+                  title="Zoom in (Ctrl/Cmd + +)"
+                  aria-label="Zoom in"
+                >+</button>
+                <span class="cc-map-zoom-readout" id="cc-map-zoom-readout">100%</span>
+              </div>
+            </div>
+            <!-- v1.24 — the aiming bar sits ABOVE the viewport in normal
+                 flow, not absolutely over it. It carries the [ stop ] button
+                 so it cannot be pointer-events:none, and overlaying the board
+                 meant it swallowed every click on the top rows — while
+                 aiming, which is exactly when you need them. -->
+            <div id="pick-mode-banner" class="pick-mode-banner" hidden>
+              <span>// <strong id="pick-mode-label"></strong></span>
+              <button type="button" id="pick-mode-cancel" class="cli-btn pick-mode-cancel-btn">[ stop ]</button>
+            </div>
+            <div class="cc-map-viewport">
+              <div id="map-player" class="map-host map-host--main">
+                <span class="dim"># start NEW GAME</span>
+              </div>
+              <!-- title card: sibling of map-player, sized dynamically by JS -->
+              <div
+                id="cc-map-titlecard"
+                class="cc-map-titlecard"
+                aria-hidden="true"
+                hidden
+              ></div>
+              <!-- v1.1 — daylight wash. A single cheap yellow film over
+                   the whole play area that marks DAY (orbit phase). The
+                   dawn/dusk sweep wipes it in/out left→right via clip-path
+                   (one element — no per-cell overlays). -->
+              <div id="cc-daylight-wash" class="cc-daylight-wash" aria-hidden="true"></div>
+              <div id="collision-fx-layer" class="collision-fx-layer" aria-hidden="true"></div>
+              <!-- v1.1 — submission framing. While a transmitted turn
+                   resolves on the server we dim the map + composer and
+                   foreground "what the server is doing": a calm banner,
+                   the live progress timeline, and a recap of the policy
+                   the player just locked in. VAULT / INTEL tabs stay
+                   interactive underneath. Cleared when the dawn cinematic
+                   takes over the map. -->
+              <div
+                id="cc-resolving-overlay"
+                class="cc-resolving-overlay"
+                aria-live="polite"
+                hidden
+              >
+                <div class="cc-resolving-card">
+                  <div class="cc-resolving-banner">
+                    <span class="cc-resolving-pip" aria-hidden="true">◆</span>
+                    <span class="cc-resolving-title">LOCKED IN</span>
+                    <span class="cc-resolving-sub">resolving praxis…</span>
+                  </div>
+                  <ol
+                    id="cc-resolving-progress"
+                    class="cc-resolving-progress"
+                    role="status"
+                    aria-live="polite"
+                  ></ol>
+                  <div
+                    id="cc-resolving-recap"
+                    class="cc-resolving-recap"
+                    aria-label="Submitted policy recap"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="os-side os-side--right" id="os-side-right"></div>
+        </div><!-- end .os-map-row -->
+
+        <!-- v0.7.5 universal replay strip — pinned below the map,
+             always visible regardless of which side panel is active.
+             LIVE button pulses while a live game is accepting policies.
+             The single-line "now-playing" row underneath always shows
+             D{n} H{nn} + the most recent action (live caption or
+             scrub-cursor frame caption). -->
+        <section
+          id="replay-strip"
+          class="cc-replay-strip"
+          aria-label="Universal replay controls"
+        >
+          <section
+            id="replay-bar"
+            class="cc-replay-bar dim"
+            aria-label="Replay — full season history"
+          >
+            <div class="cc-replay-toolbar">
+              <button type="button" id="replay-live" class="cli-btn">
+                [ LIVE ]
+              </button>
+              <button
+                type="button"
+                id="replay-day-prev"
+                class="cli-btn"
+                title="Jump to previous Nox"
+              >
+                [&laquo;&nbsp;DAY]
+              </button>
+              <button type="button" id="replay-prev" class="cli-btn">[&lt;-]</button>
+              <button type="button" id="replay-play" class="cli-btn">[ play ]</button>
+              <button type="button" id="replay-next" class="cli-btn">[-&gt;]</button>
+              <button
+                type="button"
+                id="replay-day-next"
+                class="cli-btn"
+                title="Jump to next Nox"
+              >
+                [DAY&nbsp;&raquo;]
+              </button>
+              <!-- v1.20 — the clock. NOX nn over the hour it is inside,
+                   pinned to the right of the toolbar so it anchors the
+                   bar. Hours carry their in-world names where they have
+                   one (AURORA / VESPERA) and are bare H01..Hnn inside
+                   the night. Replaces the two small inline spans that
+                   used to trail the transport buttons. -->
+              <div class="cc-clock" id="cc-clock" aria-live="polite">
+                <span id="replay-day-badge" class="cc-clock-day"></span>
+                <span id="replay-slot" class="cc-clock-hour"></span>
+              </div>
+            </div>
+            <div class="cc-replay-scrub-wrap">
+              <input
+                type="range"
+                id="replay-scrub"
+                class="replay-scrub-slider"
+                min="0"
+                max="0"
+                value="0"
+                step="1"
+                disabled
+                aria-label="Replay timeline"
+              />
+              <div
+                id="replay-day-ticks"
+                class="cc-replay-day-ticks"
+                aria-hidden="true"
+              ></div>
+            </div>
+            <div class="cc-replay-view-row" id="cc-replay-view-row" role="group" aria-label="View perspective">
+              <!-- v0.9.9 — populated dynamically by renderReplayViewButtons():
+                   one button per active seat (with the seat's stroke colour),
+                   plus a single OBS button that shows everything everyone sees.
+                   The pre-v0.9.9 hard-coded P1 / P2 / P1+P2 / OBS markup is
+                   gone — those buttons never adapted to 3- or 4-seat games. -->
+              <button type="button" id="replay-view-obs" class="cli-btn cc-replay-view-btn" title="Observer view — every active seat's vision combined">[ OBS ]</button>
+              <!-- v0.9.11 — open the two full-screen orbit reports for
+                   the current context day (replay cursor day, or live
+                   session day). Always present; auto-pop is governed by
+                   the "show orbital summaries as pop-ups" setting. -->
+              <button type="button" id="replay-recap-btn" class="cli-btn cc-replay-view-btn" title="Open the Pre-Orbital Recap for this day">[ RECAP ]</button>
+              <button type="button" id="replay-briefing-btn" class="cli-btn cc-replay-view-btn" title="Open the Post-Orbital Briefing for this day">[ BRIEFING ]</button>
+              <!-- v1.0 — only shown once the loaded season is complete; opens
+                   the end-of-season results screen (also auto-pops at the end
+                   of the scrub and has a pip on the timeline). -->
+              <button type="button" id="replay-results-btn" class="cli-btn cc-replay-view-btn cc-replay-results-btn" title="Open the end-of-season results" hidden>[ RESULTS ]</button>
+            </div>
+          </section>
+          <!-- The one latest-action ticker. v1.20 — there used to be two
+               of these saying the same thing: this row and a plainer
+               #replay-caption above it. This one survives because it is
+               the richer of the pair (owner tag, seat colour, failure
+               state) and it works in both live and replay mode. Its
+               D{n} H{nn} clock went with the duplicate: the clock block
+               in the toolbar now owns the time. -->
+          <div id="replay-now-playing" class="cc-now-playing" aria-live="polite">
+            <span class="cc-now-caption" id="replay-now-caption"># idle &mdash; start NEW GAME</span>
+          </div>
+        </section>
+
+        <nav class="cc-tabbar" aria-label="Command centre panels">
+          <!-- v0.8.0 — ORBIT is the daytime phase that opens before
+               every PRAXIS night. The tab auto-activates when the
+               session phase is "orbit"; it's hidden by ``app.js`` when
+               we're in PLANNING or SEASON_COMPLETE. The numeric keys
+               renumber: ORBIT=[1], ORDERS=[2], ..., GRAPHICS=[8]. -->
+          <button type="button" class="cc-tab" data-cc-tab="orbit">
+            <span class="cc-tab-key">[1]</span>
+            <span class="cc-tab-label">ORBIT</span>
+            <span id="cc-tab-orbit-meta" class="cc-tab-meta dim">0</span>
+          </button>
+          <button type="button" class="cc-tab cc-tab--active" data-cc-tab="orders">
+            <span class="cc-tab-key">[2]</span>
+            <span class="cc-tab-label">ORDERS</span>
+            <span id="cc-tab-orders-meta" class="cc-tab-meta dim">0/21</span>
+          </button>
+          <button type="button" class="cc-tab" data-cc-tab="intel">
+            <span class="cc-tab-key">[3]</span>
+            <span class="cc-tab-label">INTEL</span>
+            <span id="cc-tab-intel-meta" class="cc-tab-meta dim">—</span>
+          </button>
+          <button type="button" class="cc-tab" data-cc-tab="vault">
+            <span class="cc-tab-key">[4]</span>
+            <span class="cc-tab-label">VAULT</span>
+            <span id="cc-tab-vault-meta" class="cc-tab-meta dim">0</span>
+          </button>
+          <button type="button" class="cc-tab" data-cc-tab="shipped">
+            <span class="cc-tab-key">[5]</span>
+            <span class="cc-tab-label">SHIPPED</span>
+            <span id="cc-tab-shipped-meta" class="cc-tab-meta dim">0</span>
+          </button>
+          <button type="button" class="cc-tab" data-cc-tab="replay">
+            <span class="cc-tab-key">[6]</span>
+            <span class="cc-tab-label">LOG</span>
+            <span id="cc-tab-replay-meta" class="cc-tab-meta dim">·</span>
+          </button>
+          <button type="button" class="cc-tab" data-cc-tab="log">
+            <span class="cc-tab-key">[7]</span>
+            <span class="cc-tab-label">AGENT</span>
+          </button>
+          <button type="button" class="cc-tab" data-cc-tab="graphics">
+            <span class="cc-tab-key">[8]</span>
+            <span class="cc-tab-label">SETTINGS</span>
+          </button>
+        </nav>
+
+        <aside id="cc-drawer" class="cc-drawer cc-drawer--open" aria-label="Active panel">
+          <!-- ORBIT panel (v0.8.0) ----------------------------------------- -->
+          <section
+            id="cc-panel-orbit"
+            class="cc-panel"
+            data-cc-panel="orbit"
+            role="tabpanel"
+            aria-label="Compose orbit phase actions"
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">ORBIT &middot; daytime planner</span>
+              <span class="dim cc-panel-sub">
+                Build &middot; repair &middot; arm &mdash; credits are the only limit
+              </span>
+            </header>
+
+            <form
+              id="solo-orbit-form"
+              class="cc-orders-form cc-orbit-form"
+              autocomplete="off"
+              onsubmit="return false;"
+            >
+              <!-- v1.27 — ORBIT is THREE STACKED THIRDS, each scrolling on
+                   its own: what is TRUE (wallet, fleet, what the vault does
+                   on resolve), what you can DO about it, and what you have
+                   DECIDED plus the button that sends it.
+
+                   The panel used to run as one column in that same order but
+                   with no divisions, so the ~200px of readouts and asset list
+                   at the top pushed the first button off the bottom of a
+                   short rail — on a screen whose entire purpose is pressing
+                   buttons. Nothing has been removed; the facts simply can no
+                   longer displace the actions, or vice versa. -->
+
+              <!-- FIRST THIRD — the facts. Read-only, every one of them. -->
+              <div class="cc-orbit-facts">
+                <!-- v1.25 — this block used to be seven equal tiles, four of
+                     which were vault bookkeeping: RED as trace/vein/mass/pure
+                     and BLUE as shallow/mid/sink/deep. Those are the VAULT
+                     tab's job, and the settlement block below already says
+                     what the vault will DO tonight. Meanwhile CREDITS and
+                     BLUE — the only two numbers you can actually spend here —
+                     were rendered at the same weight as everything else, so
+                     the panel shouted "what is in my hold" and murmured "what
+                     can I buy", which is backwards for a buying screen.
+
+                     Now: the wallet leads at double size with its projected
+                     remainder underneath, and everything you OWN collapses to
+                     two one-line readouts. The old #cc-orbit-harvesters and
+                     #cc-orbit-probe-stock ids survive inside the FLEET line so
+                     the existing writes keep working and the line reads as a
+                     sentence rather than as two tiles. -->
+                <div class="cc-orbit-readouts">
+                  <div class="cc-orbit-readout cc-orbit-readout--wallet" data-readout="credits">
+                    <span class="cc-orbit-readout-label dim">CREDITS</span>
+                    <span id="cc-orbit-credits" class="cc-orbit-readout-value">0c</span>
+                    <span id="cc-orbit-credits-proj" class="cc-orbit-readout-proj dim" hidden></span>
+                  </div>
+                  <div class="cc-orbit-readout cc-orbit-readout--wallet" data-readout="blue">
+                    <span class="cc-orbit-readout-label dim">BLUE</span>
+                    <span id="cc-orbit-blue-total" class="cc-orbit-readout-value">0b</span>
+                    <span id="cc-orbit-blue-proj" class="cc-orbit-readout-proj dim" hidden></span>
+                  </div>
+                  <div class="cc-orbit-readout" data-readout="fleet">
+                    <span class="cc-orbit-readout-label dim">FLEET</span>
+                    <span class="cc-orbit-readout-value">
+                      <span id="cc-orbit-harvesters">0/3</span> harvesters
+                      &middot; <span id="cc-orbit-probe-stock">0</span> probes
+                    </span>
+                  </div>
+                  <div class="cc-orbit-readout" data-readout="weapon-stock">
+                    <span class="cc-orbit-readout-label dim">ARMS</span>
+                    <span id="cc-orbit-weapon-stock" class="cc-orbit-readout-value cc-weapon-stock-readout">
+                      <span class="cc-weapon-stock-chip" data-weapon="emp">
+                        <span class="cc-weapon-icon cc-weapon-icon-emp" aria-hidden="true"></span>
+                        <span data-weapon-stock-count="emp">0</span>
+                      </span>
+                      <span class="cc-weapon-stock-chip" data-weapon="chaff">
+                        <span class="cc-weapon-icon cc-weapon-icon-chaff" aria-hidden="true"></span>
+                        <span data-weapon-stock-count="chaff">0</span>
+                      </span>
+                      <span class="cc-weapon-stock-chip" data-weapon="snap">
+                        <span class="cc-weapon-icon cc-weapon-icon-snap" aria-hidden="true"></span>
+                        <span data-weapon-stock-count="snap">0</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- v0.9.5 — full asset roster so the seat can see every
+                     owned harvester / probe / orblift, including damaged
+                     status and live coords. The orbit panel was previously
+                     reduced to "0/3 harvesters" with no way to tell which
+                     unit was damaged or which surface tile a harvester
+                     was sitting on. -->
+                <div class="cc-orbit-assets" id="cc-orbit-assets-pane">
+                  <header class="cc-orbit-assets-head">
+                    <span class="dim">ASSETS</span>
+                    <span class="dim cc-orbit-assets-sub" id="cc-orbit-assets-sub">none owned</span>
+                  </header>
+                  <ul class="cc-orbit-assets-list" id="cc-orbit-assets-list"></ul>
+                </div>
+
+                <!-- v1.13 — not a control, a readout. Settlement is
+                     automatic now, so the thing a player most needs
+                     to know here is what their vault is about to do
+                     without being asked. app.js fills the counts.
+                     v1.27 — moved out of the action toolbar, where being
+                     the third `.cc-orbit-block` in a row of buttons read
+                     as a thing you could press. It is a fact, so it lives
+                     with the facts. -->
+                <div class="cc-orbit-block" data-orbit-block="settlement">
+                  <div class="cc-orbit-block-head dim">// on resolve &middot; automatic</div>
+                  <div class="cc-orbit-block-body cc-orbit-settlement">
+                    <div class="cc-settle-line" data-settle="red">
+                      <span class="cc-settle-arrow" aria-hidden="true">&#8648;</span>
+                      <span id="cc-settle-red">no RED to ship</span>
+                    </div>
+                    <div class="cc-settle-line" data-settle="green">
+                      <span class="cc-settle-arrow" aria-hidden="true">&#9760;</span>
+                      <span id="cc-settle-green">no GREEN to dump</span>
+                    </div>
+                    <!-- v1.27 — was "Your vault empties every orbit — no
+                         bid, no slot, no action." Two lines in a pane that
+                         is one third of the rail, spent restating what the
+                         "automatic" in the heading already says. -->
+                    <div
+                      class="cc-settle-note dim"
+                      title="Settlement needs no bid, no slot and no action from you. It happens the moment the orbit resolves."
+                    >
+                      no bid, no slot, no action
+                    </div>
+                  </div>
+                </div>
+              </div><!-- /.cc-orbit-facts -->
+
+              <!-- SECOND THIRD — the options. -->
+              <div class="cc-orbit-actions">
+                <!-- v1.13 — final settlement orbit banner. Nothing is
+                     blocked any more (settlement is automatic, so there
+                     is no last-turn move to protect); the banner now
+                     just warns that anything bought here never flies.
+                     app.js toggles it via updateFinalOrbitUi.
+                     v1.27 — sits with the OPTIONS, because what it changes
+                     is the value of buying anything at all. -->
+                <div id="final-orbit-banner" class="final-orbit-banner" hidden>
+                  <div class="final-orbit-banner-copy">
+                    FINAL SETTLEMENT ORBIT &mdash; your vault settles automatically when
+                    this orbit resolves: every RED parcel ships for score, every GREEN
+                    one is dumped at &minus;100. There is no night after this, so
+                    anything you build now will never leave the pad. The season ends
+                    here.
+                  </div>
+                </div>
+                <!-- v1.13 — orbit action toolbar. Was four blocks; the
+                     REFINE and SHIPPING/JETTISON lanes went with the
+                     mechanics they drove, leaving:
+                       1. CONSTRUCT / REPAIR — fleet build + workshop
+                       2. WEAPONS — EMP / CHAFF stockpile -->
+                <div class="cc-queue-toolbar cc-orbit-toolbar">
+                  <div class="cc-orbit-block" data-orbit-block="construct">
+                    <!-- v1.25 — the verb lives on the HEADING, so the six
+                         buttons below are bare nouns. `[ BUILD HARVESTER ]`
+                         plus its cost did not fit the rail at 1024 and the
+                         price wrapped under the button; "build" was on
+                         every row of a block already titled build. -->
+                    <div class="cc-orbit-block-head dim">// build &middot; repair</div>
+                    <!-- v1.25 — every action is wrapped in a
+                         `.cc-orbit-act` carrying a `.cc-orbit-why` line
+                         that app.js fills when the action is dimmed. A
+                         button you cannot use has to say what would make
+                         it usable; the old panel dimmed REPAIR with a
+                         class that had no CSS at all, so it rendered at
+                         full brightness and explained nothing.
+
+                         Costs are `data-orbit-cost` placeholders filled
+                         from `ship_prices` / `weapon_prices` on the view,
+                         NOT literals. They were hardcoded in three places
+                         (here, the button title, and orbitActionCost) —
+                         exactly the drift AGENTS.md warns about. -->
+                    <div class="cc-orbit-block-body">
+                      <div class="cc-orbit-act">
+                        <span class="cc-orbit-act-line">
+                          <button
+                            type="button"
+                            class="cli-btn solo-add-orbit cc-add-btn"
+                            data-orbit-action="build_harvester"
+                          >
+                            [ HARVESTER ]
+                          </button>
+                          <span class="cc-orbit-cost" data-orbit-cost="build_harvester"></span>
+                        </span>
+                        <span class="cc-orbit-why" data-orbit-why="build_harvester" hidden></span>
+                      </div>
+                      <div class="cc-orbit-act">
+                        <span class="cc-orbit-act-line">
+                          <button
+                            type="button"
+                            class="cli-btn solo-add-orbit cc-add-btn"
+                            data-orbit-action="build_probe"
+                          >
+                            [ PROBE &times;<span class="cc-probe-count" data-orbit-probe-count>1</span> ]
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            step="1"
+                            value="1"
+                            id="solo-orbit-probe-count"
+                            class="cc-probe-count-input"
+                            title="How many probes to mint this slot"
+                            aria-label="Probe count"
+                          />
+                          <span class="cc-orbit-cost" data-orbit-cost="build_probe"></span>
+                        </span>
+                        <span class="cc-orbit-why" data-orbit-why="build_probe" hidden></span>
+                      </div>
+                      <div class="cc-orbit-act">
+                        <span class="cc-orbit-act-line">
+                          <button
+                            type="button"
+                            class="cli-btn solo-add-orbit cc-add-btn"
+                            data-orbit-action="repair"
+                          >
+                            [ REPAIR ]
+                          </button>
+                          <span class="cc-orbit-cost" data-orbit-cost="repair"></span>
+                          <span class="cc-orbit-stock dim">&middot; <span data-orbit-damaged-count>0</span> damaged</span>
+                        </span>
+                        <span class="cc-orbit-why" data-orbit-why="repair" hidden></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cc-orbit-block" data-orbit-block="weapons">
+                    <div class="cc-orbit-block-head dim">// build weapons</div>
+                    <div class="cc-orbit-block-body">
+                      <div class="cc-orbit-act">
+                        <span class="cc-orbit-act-line">
+                          <button
+                            type="button"
+                            class="cli-btn solo-add-orbit cc-add-btn cc-add-btn-weapon"
+                            data-orbit-action="build_emp"
+                          >
+                            [
+                              <span class="cc-weapon-icon cc-weapon-icon-emp" aria-hidden="true"></span>
+                              EMP &times;<span class="cc-weapon-count" data-orbit-weapon-count="emp">1</span> ]
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            step="1"
+                            value="1"
+                            id="solo-orbit-emp-count"
+                            class="cc-probe-count-input"
+                            title="How many EMP warheads to build this slot"
+                            aria-label="EMP count"
+                          />
+                          <span class="cc-orbit-cost" data-orbit-cost="build_emp"></span>
+                        </span>
+                        <span class="cc-orbit-why" data-orbit-why="build_emp" hidden></span>
+                      </div>
+                      <!-- v1.36 — SNAP takes the slot the retired MINE
+                           row left vacant. Cheapest of the three and the
+                           only one that asks for a single square. -->
+                      <div class="cc-orbit-act">
+                        <span class="cc-orbit-act-line">
+                          <button
+                            type="button"
+                            class="cli-btn solo-add-orbit cc-add-btn cc-add-btn-weapon"
+                            data-orbit-action="build_snap"
+                          >
+                            [
+                              <span class="cc-weapon-icon cc-weapon-icon-snap" aria-hidden="true"></span>
+                              SNAP &times;<span class="cc-weapon-count" data-orbit-weapon-count="snap">1</span> ]
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            step="1"
+                            value="1"
+                            id="solo-orbit-snap-count"
+                            class="cc-probe-count-input"
+                            title="How many SNAP rounds to build this slot"
+                            aria-label="SNAP count"
+                          />
+                          <span class="cc-orbit-cost" data-orbit-cost="build_snap"></span>
+                        </span>
+                        <span class="cc-orbit-why" data-orbit-why="build_snap" hidden></span>
+                      </div>
+                      <div class="cc-orbit-act">
+                        <span class="cc-orbit-act-line">
+                          <button
+                            type="button"
+                            class="cli-btn solo-add-orbit cc-add-btn cc-add-btn-weapon"
+                            data-orbit-action="build_chaff"
+                          >
+                            [
+                              <span class="cc-weapon-icon cc-weapon-icon-chaff" aria-hidden="true"></span>
+                              CHAFF &times;<span class="cc-weapon-count" data-orbit-weapon-count="chaff">1</span> ]
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            step="1"
+                            value="1"
+                            id="solo-orbit-chaff-count"
+                            class="cc-probe-count-input"
+                            title="How many chaff flares to build this slot"
+                            aria-label="Chaff count"
+                          />
+                          <span class="cc-orbit-cost" data-orbit-cost="build_chaff"></span>
+                        </span>
+                        <span class="cc-orbit-why" data-orbit-why="build_chaff" hidden></span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div><!-- /.cc-orbit-toolbar -->
+              </div><!-- /.cc-orbit-actions -->
+
+              <!-- THIRD THIRD — what you have decided, and the button that
+                   sends it. The button is OUTSIDE the scroller (same rule as
+                   ORDERS): it is the one control pressed every single orbit,
+                   so it holds one position regardless of how long the queue
+                   runs. [ clear ] rides WITH the rows rather than above the
+                   scrollport, because unlike ORDERS this pane is nothing but
+                   the queue — there is no other content it could be mistaken
+                   for acting on. -->
+              <div class="cc-orbit-policy">
+                <div class="cc-orbit-commit">
+                  <button
+                    type="button"
+                    class="cli-btn cli-btn-primary cc-transmit-btn"
+                    id="solo-commit-orbit"
+                  >
+                    [ &raquo; COMMIT ORBIT PHASE ]
+                  </button>
+                  <ol
+                    id="solo-commit-orbit-progress"
+                    class="cc-transmit-progress"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                  ></ol>
+                  <p id="err-solo-orbit" class="policy-err dim" hidden></p>
+                </div>
+
+                <div class="cc-orbit-policy-scroll">
+                  <fieldset class="cc-queue-fieldset">
+                    <legend class="cc-queue-legend">
+                      <span class="dim">orbit action queue</span>
+                      <span id="solo-orbit-queue-count" class="solo-queue-count">0</span>
+                    </legend>
+                    <div
+                      class="cc-queue-toolbar cc-queue-toolbar--mini"
+                      id="solo-orbit-queue-toolbar"
+                    >
+                      <button
+                        type="button"
+                        id="solo-orbit-queue-clear"
+                        class="cli-btn cc-add-btn cc-clear-btn"
+                      >
+                        [ clear queue ]
+                      </button>
+                    </div>
+                    <div
+                      id="solo-orbit-queue"
+                      class="cc-move-queue"
+                      aria-label="Ordered orbit action queue"
+                    ></div>
+                  </fieldset>
+                </div>
+              </div><!-- /.cc-orbit-policy -->
+            </form>
+          </section>
+
+          <!-- ORDERS panel ------------------------------------------------- -->
+          <section
+            id="cc-panel-orders"
+            class="cc-panel cc-panel--active"
+            data-cc-panel="orders"
+            role="tabpanel"
+            aria-label="Compose policy"
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">ORDERS · policy composer</span>
+              <span class="dim cc-panel-sub">
+                Build a directive · <span class="move-budget">21</span> slots / Nox
+              </span>
+            </header>
+
+            <form
+              id="solo-night-form"
+              class="cc-orders-form"
+              autocomplete="off"
+              onsubmit="return false;"
+            >
+              <!-- v1.27 — the panel is TWO STACKED HALVES and the split is
+                   the whole point. The top half is what you CAN order; the
+                   bottom half is what you HAVE ordered, headed by the button
+                   that sends it. Each scrolls on its own, so a long queue can
+                   no longer push the roster off the end of the rail and a
+                   long roster can no longer bury the queue.
+
+                   v1.25 pinned the commit bar to the very top of the panel,
+                   above everything. It now heads the BOTTOM half instead,
+                   directly above the directives it transmits — same job, but
+                   adjacent to the thing it acts on. -->
+              <div class="cc-orders-compose">
+                <!-- v0.8.0 asset-first roster (replaces the legacy
+                     [+probe][+drop][+step][+pickup] toolbar). Each
+                     chip IS the action selector:
+                       click a harvester (on surface)  → step mode
+                       click a harvester (in orbit)    → hint to use DROP
+                       click the probe-stock chip      → probe mode
+                       click ORBLIFT > DROP / PICKUP   → 2-step flow
+                     Wired by ``renderOrdersAssetRoster`` in app.js. -->
+                <div
+                  id="orders-asset-roster"
+                  class="cc-orders-roster"
+                  aria-label="Asset roster — click a unit to compose an order"
+                ></div>
+              <!-- v1.19 — ASK V12. A read-only second opinion on the
+                   position from the shipped LLM harness: it runs the full
+                   THINK/PLAN pipeline against your board, submits nothing
+                   and writes no memory, and you decide whether to take it.
+                   Hidden unless the game is Snowflake-backed AND Cortex
+                   credentials resolve (see /api/game/{id}/advisor), and
+                   only ever shown on a night you have not yet sent. -->
+              <section id="cc-advisor" class="cc-advisor" hidden>
+                <div class="cc-advisor-bar">
+                  <button
+                    type="button"
+                    id="advisor-ask"
+                    class="cli-btn cc-advisor-ask"
+                    title="Ask V12 what it would do on this board. It does not play your turn."
+                  >
+                    <span class="cc-advisor-mark" aria-hidden="true">◇</span>
+                    <span>ask V12</span>
+                  </button>
+                  <span id="advisor-timer" class="cc-advisor-timer" hidden>
+                    <span class="cc-advisor-spin" aria-hidden="true">·</span>
+                    <span id="advisor-elapsed">0.0s</span>
+                  </span>
+                  <button
+                    type="button"
+                    id="advisor-cancel"
+                    class="cli-btn cc-advisor-cancel"
+                    hidden
+                  >[ cancel ]</button>
+                </div>
+                <p id="advisor-error" class="cc-advisor-error" hidden></p>
+
+                <div id="advisor-result" class="cc-advisor-result" hidden>
+                  <div class="cc-advisor-tabs" role="tablist">
+                    <button
+                      type="button"
+                      id="advisor-tab-plan"
+                      class="cli-btn cc-advisor-tab"
+                      role="tab"
+                      aria-selected="true"
+                    >[ plan ]</button>
+                    <button
+                      type="button"
+                      id="advisor-tab-think"
+                      class="cli-btn cc-advisor-tab"
+                      role="tab"
+                      aria-selected="false"
+                    >[ thinking ]</button>
+                    <span class="cc-advisor-meta dim" id="advisor-meta"></span>
+                  </div>
+                  <div
+                    id="advisor-pane-plan"
+                    class="cc-advisor-pane"
+                    role="tabpanel"
+                  ></div>
+                  <div
+                    id="advisor-pane-think"
+                    class="cc-advisor-pane"
+                    role="tabpanel"
+                    hidden
+                  ></div>
+                  <div class="cc-advisor-foot">
+                    <button
+                      type="button"
+                      id="advisor-show"
+                      class="cli-btn cc-advisor-show"
+                      title="Hold to preview the proposed orders on the map, numbered by hour"
+                    >[ show on map ]</button>
+                    <button
+                      type="button"
+                      id="advisor-expand"
+                      class="cli-btn cc-advisor-expand"
+                      title="Open the full card: prompt, reasoning and proposed orders"
+                    >[ full card ]</button>
+                    <button
+                      type="button"
+                      id="advisor-adopt"
+                      class="cli-btn cc-advisor-adopt"
+                    >[ adopt plan ]</button>
+                    <span class="cc-advisor-note dim">
+                      // advice is per-position: V12 keeps no memory of a seat it isn't playing
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+              <p class="dim cc-orders-agent-link">// autoplay / versus &rarr; AGENT tab [7]</p>
+              </div><!-- /.cc-orders-compose -->
+
+              <!-- BOTTOM HALF — the policy you are about to send. Fixed
+                   order, and each piece is where it is for a reason:
+                   TRANSMIT first because it is the one control you always
+                   want in reach; the slot count under it because that is
+                   the number that decides whether you may add another row;
+                   [ clear queue ] / [ show all ] small, because they are
+                   occasional; then the directives, the only part that
+                   scrolls, because it is the only part that can run long. -->
+              <div class="cc-orders-policy">
+                <div class="cc-orders-commit">
+                  <button
+                    type="button"
+                    class="cli-btn cli-btn-primary cc-transmit-btn"
+                    id="solo-commit-night"
+                  >
+                    [ &raquo; TRANSMIT / PRAXIS ]
+                  </button>
+                  <div class="cc-orders-commit-meta">
+                    <span id="solo-queue-count" class="solo-queue-count">0/21 slots</span>
+                    <span class="dim cc-orders-commit-hint">one row = one hour</span>
+                  </div>
+                  <ol
+                    id="solo-commit-progress"
+                    class="cc-transmit-progress"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                  ></ol>
+                  <p id="err-solo" class="policy-err dim" hidden></p>
+                </div>
+
+                <fieldset id="solo-standard-fieldset" class="cc-queue-fieldset">
+                  <legend class="cc-queue-legend">
+                    <span class="dim">directive queue</span>
+                  </legend>
+                  <div
+                    class="cc-queue-toolbar cc-queue-toolbar--mini"
+                    id="solo-queue-toolbar"
+                  >
+                    <button
+                      type="button"
+                      id="solo-queue-clear"
+                      class="cli-btn cc-add-btn cc-clear-btn"
+                    >
+                      [ clear queue ]
+                    </button>
+                    <!-- v0.9.5 — toggle that expands the queue to show
+                         all 21 hour slots at once; empty slots render
+                         as (wait) placeholders and remain valid drop
+                         targets for the drag-reorder API. -->
+                    <button
+                      type="button"
+                      id="solo-queue-show-all"
+                      class="cli-btn cc-add-btn cc-queue-show-all-btn"
+                      aria-pressed="false"
+                      title="Show all 21 hour slots; empty slots render as (wait) placeholders"
+                    >
+                      [ show all 21 slots ]
+                    </button>
+                  </div>
+                  <div class="cc-orders-queue-scroll">
+                    <div
+                      id="solo-move-queue"
+                      class="cc-move-queue"
+                      aria-label="Ordered move queue"
+                    ></div>
+                  </div>
+                </fieldset>
+              </div><!-- /.cc-orders-policy -->
+
+              <!-- v1.19 — ASK V12 full card. The inline pane is a glance;
+                   this is the read-everything view, plus a download of the
+                   whole exchange (untruncated prompt + reasoning + orders)
+                   so a fork author can diff what the model actually saw. -->
+              <div
+                id="advisor-modal"
+                class="cc-advisor-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="advisor-modal-title"
+                hidden
+              >
+                <div class="cc-advisor-modal-box">
+                  <header class="cc-advisor-modal-head">
+                    <h2 id="advisor-modal-title">V12 &mdash; full card</h2>
+                    <span class="cc-advisor-modal-meta dim" id="advisor-modal-meta"></span>
+                    <button
+                      type="button"
+                      id="advisor-modal-close"
+                      class="cli-btn cc-advisor-modal-close"
+                      aria-label="Close"
+                    >[ close ]</button>
+                  </header>
+                  <nav class="cc-advisor-modal-tabs" role="tablist">
+                    <button type="button" role="tab" data-card="orders"
+                            class="cli-btn cc-advisor-modal-tab" aria-selected="true"
+                    >[ orders ]</button>
+                    <button type="button" role="tab" data-card="think"
+                            class="cli-btn cc-advisor-modal-tab" aria-selected="false"
+                    >[ reasoning ]</button>
+                    <button type="button" role="tab" data-card="options"
+                            class="cli-btn cc-advisor-modal-tab" aria-selected="false"
+                    >[ option menu ]</button>
+                    <button type="button" role="tab" data-card="prompt"
+                            class="cli-btn cc-advisor-modal-tab" aria-selected="false"
+                    >[ prompt ]</button>
+                  </nav>
+                  <div class="cc-advisor-modal-body" id="advisor-modal-body"></div>
+                  <footer class="cc-advisor-modal-foot">
+                    <button
+                      type="button"
+                      id="advisor-download"
+                      class="cli-btn cc-advisor-download"
+                      title="Download prompt + reasoning + proposed orders as a text file"
+                    >[ download card ]</button>
+                    <button
+                      type="button"
+                      id="advisor-modal-adopt"
+                      class="cli-btn cc-advisor-adopt"
+                    >[ adopt plan ]</button>
+                    <span class="cc-advisor-note dim" id="advisor-download-note"></span>
+                  </footer>
+                </div>
+              </div>
+
+            </form>
+          </section>
+
+          <!-- INTEL panel -------------------------------------------------- -->
+          <section
+            id="cc-panel-intel"
+            class="cc-panel"
+            data-cc-panel="intel"
+            role="tabpanel"
+            aria-label="Intel"
+            hidden
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">INTEL · roster &amp; hoard</span>
+              <span class="dim cc-panel-sub">live inventory &amp; surface journal</span>
+            </header>
+            <pre
+              id="inventory-player"
+              class="cc-intel-pre dim"
+              aria-label="Inventory"
+            ></pre>
+          </section>
+
+          <!-- VAULT panel -------------------------------------------------- -->
+          <section
+            id="cc-panel-vault"
+            class="cc-panel"
+            data-cc-panel="vault"
+            role="tabpanel"
+            aria-label="Vault"
+            hidden
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">VAULT · certified harvest</span>
+              <span class="dim cc-panel-sub">
+                Banked squares · hash = certificate of origin
+              </span>
+            </header>
+            <!-- v0.7.5 seat sub-tabs. In live play the opponent button
+                 is hidden (your own vault only). In replay / watch
+                 both buttons are visible and the vault contents
+                 (hoard + assets) gradually fill as the scrub cursor
+                 walks the night. -->
+            <div
+              id="vault-seat-tabs"
+              class="cc-seat-tabs"
+              role="group"
+              aria-label="Choose vault seat"
+            >
+              <button
+                type="button"
+                id="vault-seat-p1"
+                class="cli-btn cc-replay-view-btn cc-replay-view-btn--active"
+                data-seat="p1"
+              >[ P1 ]</button>
+              <button
+                type="button"
+                id="vault-seat-p2"
+                class="cli-btn cc-replay-view-btn"
+                data-seat="p2"
+                hidden
+              >[ P2 ]</button>
+            </div>
+            <p class="cc-vault-blurb">
+              // 15-slot orbital cargo bay · hover any slot for the full
+              hash + coordinate + harvest Nox (RULEBOOK §3.12).
+            </p>
+            <!-- v0.8.0 live readouts. ``cc-vault-meta-row`` mirrors
+                 the orbit panel: a horizontal strip of compact
+                 [label · value] cells refreshed by ``renderVault``
+                 (credits, shipped RED sum, shipped count). Live play
+                 reads the agent view; replay reads the per-tick
+                 reconstruction (v1.1 per-frame credits snapshot) so
+                 the readout tracks the scrubber. All cells stay
+                 rendered even when zero so the layout doesn't jump. -->
+            <div
+              id="vault-meta-row"
+              class="cc-vault-meta-row"
+              aria-label="Live vault readouts"
+            >
+              <div class="cc-vault-meta" data-meta="credits">
+                <span class="cc-vault-meta-label">CREDITS</span>
+                <span class="cc-vault-meta-value" id="vault-meta-credits">0c</span>
+              </div>
+              <div class="cc-vault-meta" data-meta="shipped-red">
+                <span class="cc-vault-meta-label">RED SHIPPED (&Sigma;p)</span>
+                <span class="cc-vault-meta-value" id="vault-meta-shipped-red">0</span>
+              </div>
+              <div class="cc-vault-meta" data-meta="shipped-count">
+                <span class="cc-vault-meta-label">PARCELS SHIPPED</span>
+                <span class="cc-vault-meta-value" id="vault-meta-shipped-count">0</span>
+              </div>
+              <!-- v0.9 — Blue-purity readout. The weapons economy
+                   (RULEBOOK §4.9) burns blue-purity-summed parcels,
+                   lowest-first, so this number is the budget a seat
+                   has to fire EMP / chaff this turn. -->
+              <div class="cc-vault-meta" data-meta="blue-purity">
+                <span class="cc-vault-meta-label">BLUE PURITY (&Sigma;p)</span>
+                <span class="cc-vault-meta-value" id="vault-meta-blue-purity">0</span>
+              </div>
+            </div>
+            <div
+              id="vault-grid"
+              class="cc-vault-grid"
+              aria-label="15-slot vault inventory"
+            ></div>
+
+            <div class="cc-assets-divider" role="separator">
+              <span>— — — in orbit — — —</span>
+            </div>
+            <div
+              id="vault-assets-in-orbit"
+              class="cc-assets-row"
+              aria-label="In-orbit assets"
+            ></div>
+
+            <div class="cc-assets-divider" role="separator">
+              <span>— — — on surface — — —</span>
+            </div>
+            <div
+              id="vault-assets-on-surface"
+              class="cc-assets-row"
+              aria-label="On-surface assets"
+            ></div>
+
+            <div class="cc-assets-divider" role="separator">
+              <span>— — — destroyed — — —</span>
+            </div>
+            <div
+              id="vault-assets-destroyed"
+              class="cc-assets-row cc-assets-row--destroyed"
+              aria-label="Destroyed assets"
+            ></div>
+
+            <!-- v0.9.5 — weapons economy lives in the VAULT as two
+                 bays: AVAILABLE (current stockpile, drained as the
+                 night phase fires) and USED (lifetime counter,
+                 monotonically grows across the season). The ORDERS
+                 panel only shows AVAILABLE; this bay is read-only. -->
+            <div class="cc-assets-divider" role="separator">
+              <span>— — — weapons bay · available — — —</span>
+            </div>
+            <div
+              id="vault-weapons-available"
+              class="cc-assets-row cc-assets-row--weapons"
+              aria-label="Weapons available"
+            ></div>
+
+            <div class="cc-assets-divider" role="separator">
+              <span>— — — weapons bay · used (lifetime) — — —</span>
+            </div>
+            <div
+              id="vault-weapons-used"
+              class="cc-assets-row cc-assets-row--weapons cc-assets-row--weapons-used"
+              aria-label="Weapons used lifetime"
+            ></div>
+          </section>
+
+          <!-- SHIPPED panel ------------------------------------------------ -->
+          <section
+            id="cc-panel-shipped"
+            class="cc-panel"
+            data-cc-panel="shipped"
+            role="tabpanel"
+            aria-label="Shipped"
+            hidden
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">SHIPPED &middot; sent to Earth</span>
+              <span class="dim cc-panel-sub">
+                Tier-multiplier score &middot; RULEBOOK &sect;3.1 / &sect;4.4
+              </span>
+            </header>
+            <p class="cc-vault-blurb">
+              // settlement manifest &middot; these parcels are the
+              only ones that score. Uncapped.
+            </p>
+            <!-- v0.9.9 — per-seat shipped stats row reads
+                 ``cumulative_shipped_score`` (the same source the HUD
+                 scoreboard uses) so the tab is informative even when
+                 the grid is empty. ``#cc-shipped-stats`` is populated
+                 by ``renderShippedStats`` in app.js. -->
+            <div
+              id="cc-shipped-stats"
+              class="cc-shipped-stats"
+              aria-label="Shipped score by seat"
+            ></div>
+            <div
+              id="shipped-grid"
+              class="cc-vault-grid"
+              aria-label="shipped manifest (uncapped)"
+            ></div>
+          </section>
+
+          <!-- LOG panel (renamed from REPLAY in v0.7.5).
+               Holds the scoreboard + the VT323 PRAXIS timeline. The
+               replay controls now live in #replay-strip below the
+               map; this panel only owns the per-night feed. -->
+          <section
+            id="cc-panel-replay"
+            class="cc-panel"
+            data-cc-panel="replay"
+            role="tabpanel"
+            aria-label="Log · season feed"
+            hidden
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">LOG · season feed</span>
+              <span class="dim cc-panel-sub">
+                scoreboard + PRAXIS timeline (synced to scrub)
+              </span>
+            </header>
+            <!-- v0.7.5 scoreboard — two seat rows (P1 / P2). In live
+                 play only the active player's row shows real numbers;
+                 in replay/watch both rows fill gradually as the scrub
+                 cursor walks the night. -->
+            <section
+              id="replay-scoreboard"
+              class="cc-scoreboard"
+              aria-label="Scoreboard — synced to scrub"
+            >
+              <div class="cc-scoreboard-row" data-seat="p1">
+                <span class="cc-scoreboard-tag">P1</span>
+                <span class="cc-scoreboard-cell" data-stat="score">score 0</span>
+                <span class="cc-scoreboard-cell" data-stat="vault">vault 0/15</span>
+                <span class="cc-scoreboard-cell" data-stat="surface">surface 0</span>
+                <span class="cc-scoreboard-cell" data-stat="damaged">damaged 0</span>
+                <span class="cc-scoreboard-cell" data-stat="destroyed">destroyed 0</span>
+              </div>
+              <div class="cc-scoreboard-row" data-seat="p2">
+                <span class="cc-scoreboard-tag">P2</span>
+                <span class="cc-scoreboard-cell" data-stat="score">score 0</span>
+                <span class="cc-scoreboard-cell" data-stat="vault">vault 0/15</span>
+                <span class="cc-scoreboard-cell" data-stat="surface">surface 0</span>
+                <span class="cc-scoreboard-cell" data-stat="damaged">damaged 0</span>
+                <span class="cc-scoreboard-cell" data-stat="destroyed">destroyed 0</span>
+              </div>
+              <!-- v0.9.6 — extra seats are hidden by default and
+                   un-hidden by app.js when the active session has 3+
+                   seats. The DOM order matches NGM_SEAT_IDS so the
+                   renderScoreboard loop can address them positionally. -->
+              <div class="cc-scoreboard-row" data-seat="p3" hidden>
+                <span class="cc-scoreboard-tag">P3</span>
+                <span class="cc-scoreboard-cell" data-stat="score">score 0</span>
+                <span class="cc-scoreboard-cell" data-stat="vault">vault 0/15</span>
+                <span class="cc-scoreboard-cell" data-stat="surface">surface 0</span>
+                <span class="cc-scoreboard-cell" data-stat="damaged">damaged 0</span>
+                <span class="cc-scoreboard-cell" data-stat="destroyed">destroyed 0</span>
+              </div>
+              <div class="cc-scoreboard-row" data-seat="p4" hidden>
+                <span class="cc-scoreboard-tag">P4</span>
+                <span class="cc-scoreboard-cell" data-stat="score">score 0</span>
+                <span class="cc-scoreboard-cell" data-stat="vault">vault 0/15</span>
+                <span class="cc-scoreboard-cell" data-stat="surface">surface 0</span>
+                <span class="cc-scoreboard-cell" data-stat="damaged">damaged 0</span>
+                <span class="cc-scoreboard-cell" data-stat="destroyed">destroyed 0</span>
+              </div>
+            </section>
+            <!-- v0.7.4 — unified TIMELINE feed. One row per frame in
+                 the current night: pre-cursor rows render in the
+                 owner's seat colour at low opacity (still upcoming),
+                 cursor-and-earlier rows render full-opacity (already
+                 executed), failures render red with the engine's
+                 reason inline. Boundary events (opening / dawn /
+                 swap collisions) render dim/neutral. Filters by the
+                 P1 / P2 / Both view buttons; auto-scrolls to the
+                 cursor as the scrubber walks the night. -->
+            <section
+              id="replay-feed"
+              class="cc-replay-feed"
+              aria-label="PRAXIS timeline — orders &amp; log unified"
+              hidden
+            >
+              <div class="cc-replay-feed-head">
+                <span class="cc-replay-feed-title">
+                  PRAXIS &middot; TIMELINE <span class="cc-replay-feed-day" id="replay-feed-day"></span>
+                </span>
+                <span
+                  class="cc-replay-feed-filter"
+                  role="tablist"
+                  aria-label="Filter log by phase"
+                >
+                  <button
+                    type="button"
+                    class="cc-log-filter-chip cc-log-filter-chip--active"
+                    data-log-filter="all"
+                    title="Show every line"
+                  >ALL</button>
+                  <button
+                    type="button"
+                    class="cc-log-filter-chip"
+                    data-log-filter="night"
+                    title="Show only Nox-phase frames"
+                  >NOX</button>
+                  <button
+                    type="button"
+                    class="cc-log-filter-chip"
+                    data-log-filter="orbit"
+                    title="Show only orbit-phase actions for this day"
+                  >ORBIT</button>
+                </span>
+              </div>
+              <div
+                id="replay-feed-timeline"
+                class="cc-replay-feed-timeline"
+                aria-live="polite"
+                aria-label="PRAXIS timeline — every order, success and failure for this Nox"
+              ></div>
+            </section>
+          </section>
+
+          <!-- AGENT panel (renamed from LOG in v0.7.5).
+               Direct agent rationale only — filtered to the active
+               turn (live: current day; replay: the day under the
+               scrub cursor). Seat sub-tabs mirror the replay-view
+               buttons: in live play the opponent seat is hidden; in
+               replay/watch both are visible.
+
+               #orch-log stays in the DOM as a hidden buffer so the
+               legacy status-poll path (renderOrchLog) keeps working
+               unchanged — we layer the structured AGENT feed on top
+               via the agentLogByDay bucket. -->
+          <section
+            id="cc-panel-log"
+            class="cc-panel"
+            data-cc-panel="log"
+            role="tabpanel"
+            aria-label="Agent thinking"
+            hidden
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">AGENT · thinking</span>
+              <span class="dim cc-panel-sub">
+                per-turn reasoning, timing &amp; submitted moves
+              </span>
+              <!-- v1.40 — reading a whole season's thinking in this panel
+                   is miserable and copying it out is worse, so hand the
+                   same rows over as a file. Enabled by app.js only when
+                   a session is loaded.
+                   v1.41 — two formats off the same cards, because the
+                   readers differ: HTML opens in a tab with a day rail
+                   and section tabs, Markdown is what you paste into a
+                   coding agent when you want help fixing your fork. -->
+              <button
+                type="button"
+                id="agent-cards-read"
+                class="cli-btn cc-agent-dl"
+                title="Open every recorded turn in this season, in a new tab"
+                disabled
+              >[ READ ]</button>
+              <button
+                type="button"
+                id="agent-cards-download"
+                class="cli-btn cc-agent-dl"
+                title="Download every recorded turn in this season as Markdown"
+                disabled
+              >[ .MD ]</button>
+            </header>
+            <!-- v1.1 — the live-play controls (autoplay / versus) that used
+                 to live here were removed; games are driven via the CLI /
+                 season runner now. This tab is purely the agent's reasoning
+                 trace, the LOG tab ([6]) carries the pure PRAXIS command
+                 feed. The seat sub-tabs + feed keep their original ids so
+                 the app.js bindings are unchanged. -->
+            <header class="cc-panel-subhead dim">
+              # per-turn thinking
+            </header>
+            <div
+              id="agent-seat-tabs"
+              class="cc-seat-tabs"
+              role="group"
+              aria-label="Choose agent seat"
+            >
+              <button
+                type="button"
+                id="agent-seat-p1"
+                class="cli-btn cc-replay-view-btn cc-replay-view-btn--active"
+                data-seat="p1"
+              >[ P1 ]</button>
+              <button
+                type="button"
+                id="agent-seat-p2"
+                class="cli-btn cc-replay-view-btn"
+                data-seat="p2"
+              >[ P2 ]</button>
+            </div>
+            <div
+              id="agent-feed"
+              class="cc-agent-feed"
+              aria-live="polite"
+              aria-label="Agent thinking for the current turn"
+            ># quiet &mdash; no agent thinking yet</div>
+            <pre id="orch-log" class="cc-log-pre dim" hidden></pre>
+          </section>
+
+          <!-- GRAPHICS panel ---------------------------------------------- -->
+          <section
+            id="cc-panel-graphics"
+            class="cc-panel"
+            data-cc-panel="graphics"
+            role="tabpanel"
+            aria-label="Graphics"
+            hidden
+          >
+            <header class="cc-panel-head">
+              <span class="cc-panel-title">SETTINGS · CRT &amp; observer</span>
+              <span class="dim cc-panel-sub">debug overlay (no fog)</span>
+            </header>
+            <div class="cc-gfx-block">
+              <p class="cc-block-head dim"># ANIMATION</p>
+              <label class="cli-check" for="toggle-emp-lulls">
+                <input type="checkbox" id="toggle-emp-lulls" class="cli-check-input" checked />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">show empty EMP turns</span>
+              </label>
+              <!-- v0.9.11 — gate the auto-play of the just-resolved
+                   night animation. When OFF, a fresh night drops the
+                   map straight to its resolved state (no last-turn
+                   playback). Persisted as ``soc.replay.lastTurnFx``. -->
+              <label class="cli-check" for="toggle-last-turn-fx">
+                <input type="checkbox" id="toggle-last-turn-fx" class="cli-check-input" checked />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">replay last turn animation</span>
+              </label>
+              <!-- v1.1 — gate the cinematic title cards flashed over the
+                   map (NIGHT n BEGINS / PRAXIS BEGINS). When OFF the
+                   dawn/dusk sweep + day/night tint still play, just
+                   without the text. Persisted as ``soc.cinematic.titleCards``. -->
+              <label class="cli-check" for="toggle-title-cards">
+                <input type="checkbox" id="toggle-title-cards" class="cli-check-input" checked />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">show title cards (NOX / PRAXIS)</span>
+              </label>
+              <!-- Orbit→surface sequencing: when ON a station launch anim
+                   plays first and the matching on-board landing is held back
+                   a beat, so the orbital action reads as "launched from
+                   orbit, then executes on the surface". OFF = simultaneous.
+                   Persisted as ``soc.orbit.launchSequencing``. -->
+              <label class="cli-check" for="toggle-orbit-seq">
+                <input type="checkbox" id="toggle-orbit-seq" class="cli-check-input" checked />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">sequence orbit launch &rarr; surface</span>
+              </label>
+              <!-- Replay tail: when ON, replay autoplay/next wraps back to
+                   day 1 at the end of the timeline. Default OFF (stops on the
+                   last available window). Persisted as ``soc.replay.loop``. -->
+              <label class="cli-check" for="toggle-replay-loop">
+                <input type="checkbox" id="toggle-replay-loop" class="cli-check-input" />
+                <span class="cli-check-box" aria-hidden="true">[ ]</span>
+                <span class="cli-check-caption dim">loop replay (cycle to day 1 at end)</span>
+              </label>
+              <!-- Replay tail: when ON (and loop is OFF), reaching the end of
+                   the timeline plays the closing settlement + victory
+                   celebration + score card. Default ON. Persisted as
+                   ``soc.replay.endAnimation``. -->
+              <label class="cli-check" for="toggle-replay-end-anim">
+                <input type="checkbox" id="toggle-replay-end-anim" class="cli-check-input" checked />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">play ending on replay (settlement &rarr; victory)</span>
+              </label>
+              <!-- v0.9.11 — gate whether the Pre-Orbital Recap /
+                   Post-Orbital Briefing reports auto-pop. When OFF the
+                   reports are only reachable via the replay-strip
+                   [ RECAP ] / [ BRIEFING ] buttons. Persisted as
+                   ``soc.orbit.autoPopReports``. -->
+              <label class="cli-check" for="toggle-autopop-reports">
+                <input type="checkbox" id="toggle-autopop-reports" class="cli-check-input" checked />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">show orbital summaries as pop-ups</span>
+              </label>
+              <!-- v0.9.9 — orbit summary flash duration. Replay
+                   auto-play pauses on each synthetic orbit_summary
+                   tick for this many seconds. Persisted in
+                   localStorage as ``soc.replay.orbitFlashSeconds``. -->
+              <div class="cc-range-row">
+                <label class="dim" for="replay-orbit-flash-secs"># orbit flash</label>
+                <input
+                  type="range"
+                  id="replay-orbit-flash-secs"
+                  class="crt-intensity-slider"
+                  min="0.5"
+                  max="5"
+                  step="0.5"
+                  value="2"
+                  aria-label="Orbit summary flash duration in seconds"
+                />
+                <span id="replay-orbit-flash-secs-val" class="cc-range-row-val">2.0s</span>
+              </div>
+            </div>
+            <div class="cc-gfx-block">
+              <p class="cc-block-head dim"># DISPLAY</p>
+              <!-- v1.20 — moved out of the header. It is a set-once
+                   preference, and it was the only control in
+                   .cc-header-right, which the replay readout now uses. -->
+              <label class="cli-check" for="toggle-gridlines">
+                <input
+                  type="checkbox"
+                  id="toggle-gridlines"
+                  class="cli-check-input"
+                  checked
+                />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">grid lines on the map</span>
+              </label>
+              <!-- v1.22 — RULEBOOK §3.11. Outlines the limit of each
+                   House's live line-of-sight. Off-switch because four
+                   seats on a busy replay board is a lot of line. -->
+              <label class="cli-check" for="cc-vision-borders">
+                <input
+                  type="checkbox"
+                  id="cc-vision-borders"
+                  class="cli-check-input"
+                  checked
+                />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">vision borders</span>
+              </label>
+              <!-- v1.22 — moved out of the season picker, where it sat
+                   unlabelled next to a live game's identity. It filters the
+                   replay list, so it belongs with the other preferences. -->
+              <label class="cli-check" for="watch-show-fixtures">
+                <input
+                  type="checkbox"
+                  id="watch-show-fixtures"
+                  class="cli-check-input"
+                />
+                <span class="cli-check-box" aria-hidden="true">[ ]</span>
+                <span class="cli-check-caption dim"
+                      title="Frozen test nights captured by the eval harness, plus their replay clones. They never advance and they outnumber real seasons, so the picker hides them.">
+                  list frozen test nights in the season picker
+                </span>
+              </label>
+            </div>
+            <div class="cc-gfx-block">
+              <p class="cc-block-head dim"># CRT</p>
+              <label class="cli-check" for="toggle-crt">
+                <input type="checkbox" id="toggle-crt" class="cli-check-input" />
+                <span class="cli-check-box" aria-hidden="true">[ ]</span>
+                <span class="cli-check-caption dim">CRT mode</span>
+              </label>
+              <div class="cc-range-row">
+                <label class="dim" for="crt-intensity"># intensity</label>
+                <input
+                  type="range"
+                  id="crt-intensity"
+                  class="crt-intensity-slider"
+                  min="0"
+                  max="100"
+                  value="45"
+                />
+              </div>
+              <div class="cc-range-row">
+                <label class="dim" for="crt-curve"># curve</label>
+                <input
+                  type="range"
+                  id="crt-curve"
+                  class="crt-intensity-slider"
+                  min="0"
+                  max="100"
+                  value="60"
+                />
+              </div>
+              <label class="cli-check" for="toggle-glitch">
+                <input type="checkbox" id="toggle-glitch" class="cli-check-input" checked />
+                <span class="cli-check-box" aria-hidden="true">[x]</span>
+                <span class="cli-check-caption dim">glitch</span>
+              </label>
+            </div>
+
+            <!-- v0.9.x — FULL MAP is an omniscient (no-fog) board view.
+                 It is a CHEAT during live play, so it is hidden unless
+                 the session context is allowed to be omniscient (the
+                 dedicated watcher page or a finished season). Toggled by
+                 ``syncFullMapCheatVisibility`` keyed on
+                 ``opponentSeatVisible()``. -->
+            <div class="cc-gfx-block" id="cc-fullmap-block" hidden>
+              <p class="cc-block-head dim"># FULL MAP (cheat)</p>
+              <div class="cc-observer-frame">
+                <div id="map-observer" class="map-host map-host--debug">
+                  <span class="dim"># observer — NEW GAME paints here</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <!-- v0.9.13 — sticky mobile orders bar. Only rendered on the
+           stacked (<=900px) layout and once a session is live (JS toggles
+           the hidden attribute). Keeps the queue count + TRANSMIT in
+           thumb reach without scrolling the drawer. -->
+      <div id="cc-mobile-orders" class="cc-mobile-orders" hidden>
+        <button
+          type="button"
+          id="cc-mobile-orders-open"
+          class="cli-btn cc-mobile-orders-open"
+          aria-label="Open ORDERS panel"
+        >▤ ORDERS · <span id="cc-mobile-orders-count" class="cc-mobile-orders-count">0</span></button>
+        <button
+          type="button"
+          id="cc-mobile-orders-tx"
+          class="cli-btn cc-mobile-orders-tx"
+          aria-label="Transmit orders"
+        >» TRANSMIT</button>
+      </div>
+
+      <div class="crt-rgb-mask" aria-hidden="true"></div>
+      <div class="crt-glitch-band crt-glitch-band--top" aria-hidden="true"></div>
+      <div class="crt-glitch-band crt-glitch-band--bot" aria-hidden="true"></div>
+      <div
+        id="crt-cursor-follower"
+        class="crt-cursor-follower"
+        aria-hidden="true"
+      ></div>
+    </div>
+
+    <!-- v0.9.9 — HUD scoreboard. Permanent top-right fixture
+         showing each seat's cumulative tier-multiplier shipped score.
+         Reads ``cumulative_shipped_score`` from /status (live) and
+         /replay (scrubber). Lives at body level so the position:fixed
+         is unaffected by #crt-viewport's CSS filter. -->
+    <div id="cc-hud-scoreboard" class="cc-hud-scoreboard" hidden aria-label="Shipped score per seat">
+      <div class="cc-hud-scoreboard-head dim">// shipped score</div>
+      <div id="cc-hud-scoreboard-rows" class="cc-hud-scoreboard-rows"></div>
+    </div>
+
+    <!-- v0.9.11 — unified full-screen ORBIT REPORT shell. Hosts the
+         two minimalist reports that map 1:1 to the night/orbit phase
+         transitions: the PRE-ORBITAL RECAP (night chronicle + station
+         observations) and the POST-ORBITAL BRIEFING (what settled +
+         post-settlement observations + per-player orbit log). The
+         segmented header toggle flips between them for the current
+         context day. Replaces the legacy ``#cc-orbit-flash`` modal +
+         the transient on-map orbit banner. Lives at body level so its
+         ``position: fixed`` is unaffected by #crt-viewport's filter. -->
+    <div id="cc-report" class="cc-report" hidden aria-hidden="true">
+      <div class="cc-report-backdrop" id="cc-report-backdrop"></div>
+      <div
+        class="cc-report-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cc-report-title"
+      >
+        <header class="cc-report-head">
+          <span id="cc-report-title" class="cc-report-title">ORBIT REPORT</span>
+          <div class="cc-report-seg" role="group" aria-label="Report kind">
+            <button type="button" id="cc-report-tab-recap" class="cli-btn cc-report-seg-btn" data-report-kind="recap">[ RECAP ]</button>
+            <button type="button" id="cc-report-tab-briefing" class="cli-btn cc-report-seg-btn" data-report-kind="briefing">[ BRIEFING ]</button>
+          </div>
+          <span id="cc-report-day" class="cc-report-day dim">day &mdash;</span>
+          <button
+            type="button"
+            id="cc-report-close"
+            class="cli-btn cc-report-close"
+            aria-label="Close orbit report"
+          >[ &times; ]</button>
+        </header>
+        <div id="cc-report-body" class="cc-report-body"></div>
+      </div>
+    </div>
+
+    <!-- v1.0 — END OF SEASON results screen. Fades in over the board
+         once the final settlement orbit resolves (live) or when a
+         replay scrubs to season-complete. Shows the winner, runner-ups
+         with full tallies, a cumulative-RED step chart, and a sortable
+         shipping manifest. Reopenable from the #cc-endgame-reopen pill
+         (wired in app.js). Lives at body level like #cc-report so its
+         fixed positioning escapes the CRT viewport filter. -->
+    <div id="cc-endgame" class="cc-endgame" hidden aria-hidden="true">
+      <div class="cc-endgame-backdrop" id="cc-endgame-backdrop"></div>
+      <div
+        class="cc-endgame-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cc-endgame-title"
+      >
+        <header class="cc-endgame-head">
+          <span id="cc-endgame-title" class="cc-endgame-title">SEASON COMPLETE</span>
+          <span id="cc-endgame-season" class="cc-endgame-season dim"></span>
+          <button
+            type="button"
+            id="cc-endgame-close"
+            class="cli-btn cc-endgame-close"
+            aria-label="Close end of season screen"
+          >[ &times; ]</button>
+        </header>
+        <div id="cc-endgame-body" class="cc-endgame-body"></div>
+      </div>
+    </div>
+
+    <!-- Reopen pill for the end-of-season screen (shown once a season
+         is complete / a replay has reached its end). -->
+    <button type="button" id="cc-endgame-reopen" class="cc-endgame-reopen cli-btn" hidden>
+      [ SEASON RESULTS ]
+    </button>
+
+    <!-- REPAIR HARVESTER dialog — one damaged harvester per action.
+         v1.13 — the last survivor of four sibling dialogs (ship / green
+         flush / refine went with their mechanics), so the shared
+         .cc-cat-submit frame CSS now exists solely for this one. -->
+    <div id="cc-repair-submit" class="cc-cat-submit cc-cat-submit--repair" hidden aria-hidden="true">
+      <div class="cc-cat-submit-backdrop" id="cc-repair-submit-backdrop"></div>
+      <div
+        class="cc-cat-submit-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cc-repair-submit-title"
+      >
+        <header class="cc-cat-submit-head">
+          <span id="cc-repair-submit-title" class="cc-cat-submit-title">
+            REPAIR HARVESTER &middot; select unit
+          </span>
+          <span class="cc-cat-submit-sub dim">
+            click a damaged harvester &middot; one repair per action &middot; cost deducted from credits
+          </span>
+          <button
+            type="button"
+            id="cc-repair-submit-close"
+            class="cli-btn cc-cat-submit-close"
+            aria-label="Close repair harvester dialog"
+          >[ &times; ]</button>
+        </header>
+        <div class="cc-cat-submit-body">
+          <div class="cc-cat-submit-col cc-cat-submit-col--hoard">
+            <div class="cc-cat-submit-col-head dim">// harvesters</div>
+            <div id="cc-repair-submit-list" class="cc-repair-submit-list"></div>
+            <div id="cc-repair-submit-list-empty" class="cc-cat-submit-hoard-empty dim" hidden>
+              // no harvesters deployed
+            </div>
+          </div>
+          <div class="cc-cat-submit-col cc-cat-submit-col--ctrl">
+            <div class="cc-cat-submit-col-head dim">// repair summary</div>
+            <div class="cc-cat-submit-meta">
+              <div>
+                <span class="dim">unit</span>
+                <span id="cc-repair-submit-meta-unit">&mdash;</span>
+              </div>
+              <div>
+                <span class="dim">status</span>
+                <span id="cc-repair-submit-meta-status">&mdash;</span>
+              </div>
+              <div>
+                <span class="dim">repair cost</span>
+                <span id="cc-repair-submit-meta-cost">&mdash;</span> cr
+              </div>
+              <div>
+                <span class="dim">available</span>
+                <span id="cc-repair-submit-meta-wallet">&mdash;</span> cr
+              </div>
+              <div class="cc-cat-submit-meta-total cc-repair-submit-balance">
+                <span>BALANCE AFTER</span>
+                <span id="cc-repair-submit-meta-balance">&mdash;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="cc-cat-submit-foot">
+          <button
+            type="button"
+            id="cc-repair-submit-cancel"
+            class="cli-btn cc-cat-submit-cancel"
+          >[ cancel ]</button>
+          <button
+            type="button"
+            id="cc-repair-submit-ok"
+            class="cli-btn cli-btn-primary cc-cat-submit-ok"
+            disabled
+          >[ + queue repair ]</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- v0.9.6 — N-seat new-game launcher modal. MUST sit at body
+         level, outside #crt-viewport, because #crt-viewport applies
+         a CSS `filter` and any ancestor with `filter` / `transform`
+         / `perspective` becomes the containing block for
+         `position: fixed` descendants. Nested inside the header,
+         the modal collapsed into a header flex slot instead of
+         overlaying the whole document. Keep this block here. -->
+    <div id="new-game-modal" class="cc-newgame-modal" hidden role="dialog"
+         aria-modal="true" aria-labelledby="new-game-modal-title">
+      <!-- v1.22 — laid out as labelled blocks rather than a flat stack of
+           label+control rows. The old version left every section heading a
+           different width, so nothing lined up, and used raw OS radios and
+           rounded swatches in a UI that is otherwise all monospace and
+           brackets. Markup contract is unchanged: app.js still binds
+           ngm-width / ngm-height / ngm-cap, #ngm-seat-count buttons,
+           #ngm-seats, input[name=ngm-visibility], #ngm-backend, and the
+           three modal buttons. -->
+      <div class="cc-newgame-modal-panel">
+        <header class="cc-newgame-modal-head">
+          <div class="cc-newgame-modal-titlewrap">
+            <h2 id="new-game-modal-title">new game</h2>
+            <p class="cc-newgame-modal-sub dim">
+              configure the season, then spawn it
+            </p>
+          </div>
+          <button id="new-game-modal-close" type="button"
+                  class="cc-newgame-x" aria-label="Close launcher">
+            [ X ]
+          </button>
+        </header>
+        <div class="cc-newgame-modal-body">
+
+          <section class="cc-newgame-block">
+            <h3 class="cc-newgame-block-head"># board</h3>
+            <div class="cc-newgame-fields">
+              <div class="cc-newgame-field">
+                <label class="cc-newgame-field-label" for="ngm-width">width</label>
+                <div class="cc-newgame-field-input">
+                  <input id="ngm-width" type="number" min="20" max="60" step="2"
+                         value="40" class="cc-newgame-input"
+                         aria-label="Map width in cells (20-60)" />
+                  <span class="cc-newgame-unit dim">cells</span>
+                </div>
+              </div>
+              <div class="cc-newgame-field">
+                <label class="cc-newgame-field-label" for="ngm-height">height</label>
+                <div class="cc-newgame-field-input">
+                  <input id="ngm-height" type="number" min="14" max="48" step="2"
+                         value="28" class="cc-newgame-input"
+                         aria-label="Map height in cells (14-48)" />
+                  <span class="cc-newgame-unit dim">cells</span>
+                </div>
+              </div>
+              <div class="cc-newgame-field">
+                <label class="cc-newgame-field-label" for="ngm-cap">length</label>
+                <div class="cc-newgame-field-input">
+                  <input id="ngm-cap" type="number" min="1" max="60" step="1"
+                         value="7" class="cc-newgame-input"
+                         aria-label="Season length in nights (1-60)" />
+                  <span class="cc-newgame-unit dim">nights</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="cc-newgame-block">
+            <h3 class="cc-newgame-block-head">
+              # seats
+              <span id="ngm-seat-count" class="cc-newgame-seatcount"
+                    role="radiogroup" aria-label="Number of seats">
+                <button type="button" data-count="1"
+                        class="cc-newgame-seatbtn">1</button>
+                <button type="button" data-count="2"
+                        class="cc-newgame-seatbtn cc-newgame-seatbtn--on">2</button>
+                <button type="button" data-count="3"
+                        class="cc-newgame-seatbtn">3</button>
+                <button type="button" data-count="4"
+                        class="cc-newgame-seatbtn">4</button>
+              </span>
+            </h3>
+            <ul id="ngm-seats" class="cc-newgame-seats">
+              <!-- Populated by app.js based on the active seat count. -->
+            </ul>
+          </section>
+
+          <section class="cc-newgame-block">
+            <h3 class="cc-newgame-block-head"># visibility</h3>
+            <div class="cc-newgame-visgroup" role="radiogroup"
+                 aria-label="Visibility mode">
+              <label class="cc-newgame-visopt">
+                <input type="radio" name="ngm-visibility" value="hidden" checked />
+                <span><b>HIDDEN</b> — fog-of-war. You only see what your units see.</span>
+              </label>
+              <label class="cc-newgame-visopt">
+                <input type="radio" name="ngm-visibility" value="open" />
+                <span><b>OPEN</b> — omniscient. Every seat sees the whole board,
+                  agents included, so never use it to compare agents.</span>
+              </label>
+            </div>
+          </section>
+
+          <!-- v1.14 — the backend is a per-game choice. Options are
+               rendered by app.js from /api/meta/backend so an unavailable
+               Snowflake store can be shown greyed-out with its reason,
+               rather than silently missing. -->
+          <section class="cc-newgame-block">
+            <h3 class="cc-newgame-block-head"># storage</h3>
+            <div id="ngm-backend" class="cc-newgame-visgroup" role="radiogroup"
+                 aria-label="Storage backend">
+              <!-- Populated by app.js. -->
+            </div>
+          </section>
+
+        </div>
+        <footer class="cc-newgame-modal-foot">
+          <button id="new-game-modal-spawn" type="button"
+                  class="cli-btn cli-btn-primary">[ &gt; SPAWN SESSION ]</button>
+          <span id="ngm-summary" class="cc-newgame-summary dim"></span>
+          <span id="new-game-modal-status" class="dim"></span>
+        </footer>
+      </div>
+    </div>
+
+    <!-- QR Code Generator (Kazuhiko Arase, MIT) — offline, no network.
+         Exposes a global `qrcode()` used by the invite modal to render a
+         scannable LAN link for phone players. -->
+    <script src="/static/vendor/qrcode.js"></script>
+    <script src="/static/app.js"></script>
+    <!-- Optional inline orbital station panels. Self-gates on ?station=1;
+         must load AFTER app.js so the window.osOnX hooks are wired before
+         the first replay payload fires osOnOrbitalDataLoaded. -->
+    <script src="/static/station.js"></script>
+    <!-- v1.32 — teaching-mode film modal. Self-gates on the session's
+         `tutorial` preset, so it costs an ordinary season one no-op event
+         listener. Must load AFTER app.js, which fires the state event. -->
+    <script src="/static/tutorial.js"></script>
+  </body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Harvester FX Tester</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e16;--frame:#1a2535;
+  --p1:#f4eedb;--p2:#f3c64a;--p3:#ff5fd7;--p4:#5fd7ff;
+  --mono:ui-monospace,'Cascadia Code','Fira Code',monospace;
+  --cell:44px;
+}
+body{background:var(--bg);color:#8899aa;font-family:var(--mono);padding:24px 32px;min-height:100vh;}
+h1{font-size:11px;letter-spacing:3px;color:#2a3f55;text-transform:uppercase;margin-bottom:20px;}
+h2{font-size:10px;letter-spacing:2px;color:#2a3f55;text-transform:uppercase;margin:20px 0 10px;}
+.sep{height:1px;background:var(--frame);margin:20px 0;}
+/* cell */
+.cell{
+  position:relative;width:var(--cell);height:var(--cell);
+  background:#0d1420;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:#1e3040;user-select:none;overflow:visible;flex-shrink:0;
+}
+.cell--b{background:#111828;}.cell--c{background:#0a1018;}
+.cell--hl{outline:1px dashed rgba(255,255,255,0.18);outline-offset:-1px;}
+/* entity overlay (matches game) */
+.eo{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:18px;line-height:1;font-weight:600;pointer-events:none;
+  text-shadow:0 0 2px rgba(0,0,0,0.85);
+}
+.eo-sub{
+  position:absolute;right:1px;bottom:0;
+  min-width:10px;height:10px;padding:0 2px;
+  background:rgba(8,12,18,0.78);border:1px solid currentColor;color:currentColor;
+  font-size:7px;line-height:1;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-family:var(--mono);pointer-events:none;
+}
+.eo-sub--tl{right:auto;bottom:auto;left:1px;top:0;}
+.eo-sub--tr{right:1px;bottom:auto;top:0;}
+.eo-sub--bl{right:auto;bottom:0;left:1px;}
+/* grid */
+.grid{display:inline-flex;flex-direction:column;gap:1px;background:var(--frame);border:1px solid var(--frame);position:relative;}
+.grid-row{display:flex;gap:1px;}
+/* collision flash (exact game keyframe) */
+@keyframes cell-collision-flash{0%{filter:brightness(1)}20%{filter:brightness(4)}100%{filter:brightness(1)}}
+.cell--flash{animation:cell-collision-flash 500ms ease-out;}
+/* probe splash (exact game) */
+.probe-splash{position:absolute;width:0;height:0;transform:translate(-50%,-50%);pointer-events:none;--sc:#f5f0e2;}
+.probe-splash__shard{
+  position:absolute;left:0;top:0;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;
+  background:var(--sc);box-shadow:0 0 2px 0 var(--sc);
+  transform:rotate(var(--ang)) translateX(0);
+  animation:probe-fly 580ms steps(7,end) forwards;
+}
+@keyframes probe-fly{0%{transform:rotate(var(--ang)) translateX(0);opacity:1}60%{transform:rotate(var(--ang)) translateX(12px);opacity:.9}100%{transform:rotate(var(--ang)) translateX(18px);opacity:0}}
+/* fx layer */
+.fx-layer{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:5;}
+canvas.xfx{position:absolute;top:0;left:0;pointer-events:none;z-index:10;}
+/* unit labels */
+.ulabel{font-size:9px;color:#2a3f55;letter-spacing:1px;margin-top:5px;text-align:center;}
+.unit-row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;}
+/* buttons */
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.btn{
+  padding:8px 16px;background:#0d1a28;border:1px solid #1e4060;
+  font-family:var(--mono);font-size:11px;cursor:pointer;letter-spacing:1.5px;
+  text-transform:uppercase;transition:all .1s;
+}
+.btn:hover{background:#162030;border-color:#3a7090;}
+.btn.p1{color:var(--p1);border-color:#38332a;}.btn.p1:hover{border-color:var(--p1);}
+.btn.p2{color:var(--p2);border-color:#38320e;}.btn.p2:hover{border-color:var(--p2);}
+.btn.p3{color:var(--p3);border-color:#3a1a30;}.btn.p3:hover{border-color:var(--p3);}
+</style>
+</head>
+<body>
+<h1>Harvester FX Tester</h1>
+
+<h2>Unit States</h2>
+<div class="unit-row" id="unit-states"></div>
+
+<div class="sep"></div>
+
+<h2>Animations — click to trigger on centre cell</h2>
+<p style="font-size:9px;color:#2a3f55;margin-bottom:14px">centre cell outlined · each scenario resets after ~2s</p>
+
+<div id="stage-wrap" style="position:relative;display:inline-block;">
+  <div class="grid" id="stage"></div>
+</div>
+
+<div class="btns">
+  <button class="btn p1" onclick="s_collision()">COLLISION P1×P2</button>
+  <button class="btn p1" onclick="s_death()">DEATH CHAIN + X</button>
+  <button class="btn p2" onclick="s_mine()">MINE DETONATE P2</button>
+  <button class="btn p1" onclick="s_damage()">HARVESTER DAMAGE P1</button>
+  <button class="btn p2" onclick="s_dropon()">DROP-ON P1+P2</button>
+  <button class="btn p3" onclick="s_probe()">PROBE CRUSH P3</button>
+</div>
+
+<script>
+'use strict';
+const P={p1:'#f4eedb',p2:'#f3c64a',p3:'#ff5fd7',p4:'#5fd7ff'};
+const DMGCSS='color:#d6d6de;text-shadow:0 0 3px rgba(0,0,0,0.95)';
+const CELL=44, COLS=7, ROWS=7, CX=3, CY=3;
+
+// ── Unit state showcase ──────────────────────────────────────────
+const UNITS=[
+  {label:'P1 live',     owner:'p1',idx:1,dmg:false},
+  {label:'P1 damaged',  owner:'p1',idx:1,dmg:true},
+  {label:'P2 live',     owner:'p2',idx:1,dmg:false},
+  {label:'P2 damaged',  owner:'p2',idx:1,dmg:true},
+  {label:'drop-on P1+P2',stack:[{o:'p1',i:1},{o:'p2',i:1}]},
+  {label:'P1+P1 stack', stack:[{o:'p1',i:1},{o:'p1',i:2}]},
+  {label:'gravestone',  grave:true},
+];
+const unitRow=document.getElementById('unit-states');
+UNITS.forEach(u=>{
+  const wrap=document.createElement('div');
+  const g=document.createElement('div');
+  g.className='grid';
+  const cell=document.createElement('div');
+  cell.className='cell cell--hl';
+  if(u.grave){
+    cell.innerHTML=`<span class="eo" style="${DMGCSS}">X</span>`;
+  } else if(u.stack){
+    const CORNERS=['','--tl','--tr','--bl'];
+    const badges=u.stack.map((h,i)=>`<span class="eo-sub${CORNERS[i]}" style="color:${P[h.o]}">${h.i}</span>`).join('');
+    cell.innerHTML=`<span class="eo" style="${DMGCSS}"><span style="${DMGCSS}">X</span>${badges}</span>`;
+  } else {
+    const ch=u.dmg?`<span style="${DMGCSS}">X</span>`:'X';
+    cell.innerHTML=`<span class="eo" style="color:${P[u.owner]}">${ch}<span class="eo-sub" style="color:${P[u.owner]}">${u.idx}</span></span>`;
+  }
+  g.appendChild(cell);
+  const lbl=document.createElement('div');
+  lbl.className='ulabel';lbl.textContent=u.label;
+  wrap.appendChild(g);wrap.appendChild(lbl);
+  unitRow.appendChild(wrap);
+});
+
+// ── Build animation stage (7×7 grid) ────────────────────────────
+const stage=document.getElementById('stage');
+const fxl=document.createElement('div');fxl.className='fx-layer';fxl.id='fxl';
+const xfxEl=document.createElement('canvas');xfxEl.className='xfx';xfxEl.id='xfx';
+const cells=[];
+for(let y=0;y<ROWS;y++){
+  const row=document.createElement('div');row.className='grid-row';
+  const cr=[];
+  for(let x=0;x<COLS;x++){
+    const c=document.createElement('div');
+    c.className='cell '+(['','cell--b','cell--c','cell--b','','cell--c',''][x]);
+    if(x===CX&&y===CY)c.classList.add('cell--hl');
+    c.dataset.x=x;c.dataset.y=y;
+    row.appendChild(c);cr.push(c);
+  }
+  stage.appendChild(row);cells.push(cr);
+}
+stage.appendChild(fxl);stage.appendChild(xfxEl);
+const CC=cells[CY][CX];
+function resizeXfx(){
+  const r=stage.getBoundingClientRect();
+  xfxEl.width=r.width;xfxEl.height=r.height;
+  xfxEl.style.width=r.width+'px';xfxEl.style.height=r.height+'px';
+}
+window.addEventListener('load',resizeXfx);window.addEventListener('resize',resizeXfx);
+setTimeout(resizeXfx,0);
+
+// ── Cell helpers ─────────────────────────────────────────────────
+function clearEnt(cell){cell.querySelectorAll('.eo').forEach(e=>e.remove());}
+function setHarv(cell,owner,idx,dmg){
+  clearEnt(cell);
+  const o=document.createElement('span');o.className='eo';o.style.color=P[owner];
+  const ch=dmg?`<span style="${DMGCSS}">X</span>`:'X';
+  const b=`<span class="eo-sub" style="color:${P[owner]}">${idx}</span>`;
+  o.innerHTML=ch+b;cell.appendChild(o);
+}
+function setStack(cell,units){
+  clearEnt(cell);
+  const CORNERS=['','--tl','--tr','--bl'];
+  const o=document.createElement('span');o.className='eo';
+  o.style.cssText=DMGCSS;
+  const badges=units.map((u,i)=>`<span class="eo-sub${CORNERS[i]}" style="color:${P[u.o]}">${u.i}</span>`).join('');
+  o.innerHTML=`<span style="${DMGCSS}">X</span>`+badges;
+  cell.appendChild(o);
+}
+function setGrave(cell){clearEnt(cell);const o=document.createElement('span');o.className='eo';o.style.cssText=DMGCSS;o.textContent='X';cell.appendChild(o);}
+// initial state
+setHarv(CC,'p1',1,false);
+setHarv(cells[CY][CX+1],'p2',1,false);
+
+// ── spawnPixelExplosion (exact game logic) ───────────────────────
+function spawnPixelExplosion(targetCell,colors,delayMs){
+  delayMs=delayMs||0;
+  const HR=fxl.getBoundingClientRect(),CR=targetCell.getBoundingClientRect();
+  const cx=CR.left-HR.left+CR.width/2,cy=CR.top-HR.top+CR.height/2;
+  const P_=Math.max(2,Math.round(CR.width/6)),R=3,LIFE=2;
+  const pal=colors.length?colors:['#fff'];
+  function rd(d){return[1,1,.95,.85,.70,.55,.40,.25][Math.min(d,7)];}
+  const pix=[],sparks=[];
+  for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){
+    const d=Math.abs(dx)+Math.abs(dy);if(d>R)continue;
+    if(d===0||Math.random()<rd(d))pix.push({dx,dy,d,color:pal[Math.floor(Math.random()*pal.length)]});
+  }
+  for(let dy=-(R+1);dy<=R+1;dy++)for(let dx=-(R+1);dx<=R+1;dx++){
+    if(Math.abs(dx)+Math.abs(dy)!==R+1)continue;
+    if(Math.random()<.6)sparks.push({dx,dy,color:pal[Math.floor(Math.random()*pal.length)]});
+  }
+  const sz=(2*(R+2))*P_+P_,half=Math.floor(P_/2),ox=sz/2,oy=sz/2;
+  const cv=document.createElement('canvas');
+  cv.width=sz;cv.height=sz;
+  cv.style.cssText=`position:absolute;left:${cx-sz/2}px;top:${cy-sz/2}px;pointer-events:none;image-rendering:pixelated;z-index:6;`;
+  setTimeout(()=>{
+    fxl.appendChild(cv);
+    const x2=cv.getContext('2d');let f=0;
+    const t=setInterval(()=>{
+      x2.clearRect(0,0,sz,sz);
+      pix.forEach(({dx,dy,d,color})=>{const age=f-d;if(age<0||age>=LIFE)return;x2.fillStyle=age===0?'#fff':color;x2.fillRect(ox+dx*P_-half,oy+dy*P_-half,P_,P_);});
+      const si=f-(R-1);
+      if(si>=0&&si<LIFE)sparks.forEach(({dx,dy,color})=>{x2.fillStyle=si===0?'#fff':color;x2.fillRect(ox+dx*P_-half,oy+dy*P_-half,P_,P_);});
+      f++;if(f>R+LIFE+1){clearInterval(t);cv.remove();}
+    },75);
+  },delayMs);
+}
+
+// ── Cell collision flash (exact game) ────────────────────────────
+function flashCell(cell,delay){
+  setTimeout(()=>{
+    cell.classList.add('cell--flash');
+    cell.addEventListener('animationend',()=>cell.classList.remove('cell--flash'),{once:true});
+  },delay||0);
+}
+
+// ── Probe splash (exact game) ────────────────────────────────────
+function probeSplash(targetCell,color){
+  const HR=fxl.getBoundingClientRect(),CR=targetCell.getBoundingClientRect();
+  const cx=CR.left-HR.left+CR.width/2,cy=CR.top-HR.top+CR.height/2;
+  const sp=document.createElement('div');sp.className='probe-splash';
+  sp.style.left=cx+'px';sp.style.top=cy+'px';sp.style.setProperty('--sc',color);
+  for(let i=0;i<8;i++){const sh=document.createElement('span');sh.className='probe-splash__shard';sh.style.setProperty('--ang',i*45+'deg');sp.appendChild(sh);}
+  fxl.appendChild(sp);setTimeout(()=>sp.remove(),700);
+}
+
+let xRaf=null;
+
+function spawnRedX(targetCell,delayMs){
+  const HR=fxl.getBoundingClientRect(),CR=targetCell.getBoundingClientRect();
+  const cx=CR.left-HR.left+CR.width/2,cy=CR.top-HR.top+CR.height/2;
+  const eoEl=targetCell.querySelector('.eo');
+  const fs=eoEl?parseFloat(getComputedStyle(eoEl).fontSize):18;
+  const ff=eoEl?getComputedStyle(eoEl).fontFamily:'ui-monospace,monospace';
+  const tmp=document.createElement('canvas'),tctx=tmp.getContext('2d');
+  tctx.font=`600 ${fs}px ${ff}`;
+  const m=tctx.measureText('X');
+  const rx_f=m.width/2;
+  const ry_f=(m.actualBoundingBoxAscent+Math.max(0,m.actualBoundingBoxDescent))/2;
+  const SPREAD=1.4;
+  const rx_s=CR.width/2*SPREAD, ry_s=CR.height/2*SPREAD;
+  const lw=Math.max(3,fs*0.26);
+  const GROW=180, SHRINK=140, HOLD=120, FADE=220;
+  const xctx=xfxEl.getContext('2d');
+  const W=xfxEl.width,H=xfxEl.height;
+  let t0=null;
+  setTimeout(()=>{
+    if(xRaf){cancelAnimationFrame(xRaf);xRaf=null;}
+    xctx.clearRect(0,0,W,H);
+    function tick(ts){
+      if(t0===null)t0=ts;
+      const el=ts-t0;
+      if(el>=GROW+SHRINK+HOLD+FADE){xctx.clearRect(0,0,W,H);xRaf=null;return;}
+      xctx.clearRect(0,0,W,H);
+      xctx.save();
+      xctx.strokeStyle='#ff0000';xctx.lineWidth=lw;xctx.lineCap='butt';
+      if(el<GROW){
+        // Phase 1: 4 arms grow from corner points toward centre
+        const e=1-Math.pow(1-el/GROW,3);
+        const frac=1-e;
+        [[-1,-1],[+1,-1],[+1,+1],[-1,+1]].forEach(([sx,sy])=>{
+          xctx.beginPath();
+          xctx.moveTo(cx+sx*rx_s,cy+sy*ry_s);
+          xctx.lineTo(cx+sx*rx_s*frac,cy+sy*ry_s*frac);
+          xctx.stroke();
+        });
+      } else {
+        // Phase 2: contracts to glyph size, holds, then fades out
+        const p2=Math.min(1,(el-GROW)/SHRINK);
+        const e2=1-Math.pow(1-p2,3);
+        const ex=rx_s+(rx_f-rx_s)*e2, ey=ry_s+(ry_f-ry_s)*e2;
+        const fadeStart=GROW+SHRINK+HOLD;
+        xctx.globalAlpha=el>fadeStart?Math.max(0,1-(el-fadeStart)/FADE):1;
+        xctx.beginPath();xctx.moveTo(cx-ex,cy-ey);xctx.lineTo(cx+ex,cy+ey);xctx.stroke();
+        xctx.beginPath();xctx.moveTo(cx+ex,cy-ey);xctx.lineTo(cx-ex,cy+ey);xctx.stroke();
+      }
+      xctx.restore();
+      xRaf=requestAnimationFrame(tick);
+    }
+    xRaf=requestAnimationFrame(tick);
+  },delayMs||0);
+}
+
+// ── Chain helper (proxy-div based, matches game scatter) ──────────
+function chainBlasts(colors1,colors2){
+  const HR=fxl.getBoundingClientRect(),CR=CC.getBoundingClientRect();
+  const cx=CR.left-HR.left+CR.width/2,cy=CR.top-HR.top+CR.height/2;
+  const C=CELL;
+  function mini(ox,oy,cols,delay){
+    const p=document.createElement('div');
+    p.style.cssText=`position:absolute;width:${C}px;height:${C}px;left:${cx+ox-C/2}px;top:${cy+oy-C/2}px;pointer-events:none;`;
+    fxl.appendChild(p);spawnPixelExplosion(p,cols,delay);
+    setTimeout(()=>p.remove(),delay+700);
+  }
+  mini(0,0,[...colors1,...colors2],0);
+  for(let i=0;i<2;i++){
+    const ang=Math.random()*Math.PI*2;
+    const d=C*(0.3+Math.random()*0.4);
+    mini(Math.cos(ang)*d,Math.sin(ang)*d,i===0?colors1:colors2,90+i*130);
+  }
+}
+
+// ── Reset helper ──────────────────────────────────────────────────
+let resetT=null;
+function schedReset(){
+  clearTimeout(resetT);resetT=setTimeout(()=>{
+    setHarv(CC,'p1',1,false);
+    clearEnt(cells[CY][CX-1]);clearEnt(cells[CY][CX+1]);
+    setHarv(cells[CY][CX+1],'p2',1,false);
+  },1800);
+}
+
+// ── Scenarios ────────────────────────────────────────────────────
+function s_collision(){
+  setStack(CC,[{o:'p1',i:1},{o:'p2',i:1}]);
+  spawnPixelExplosion(CC,[P.p1,P.p2],0);flashCell(CC,0);
+  setTimeout(()=>setGrave(CC),600);schedReset();
+}
+function s_death(){
+  setHarv(CC,'p1',1,false);
+  chainBlasts([P.p1],[P.p2]);flashCell(CC,0);
+  spawnRedX(CC,90);setTimeout(()=>setGrave(CC),700);schedReset();
+}
+function s_mine(){
+  setHarv(CC,'p2',1,false);
+  spawnPixelExplosion(CC,[P.p2],200);flashCell(CC,200);
+  setTimeout(()=>setGrave(CC),800);schedReset();
+}
+function s_damage(){
+  setHarv(CC,'p1',1,false);flashCell(CC,0);
+  setTimeout(()=>setHarv(CC,'p1',1,true),250);schedReset();
+}
+function s_dropon(){
+  setHarv(cells[CY][CX-1],'p1',2,false);
+  setHarv(cells[CY][CX+1],'p2',1,false);
+  setTimeout(()=>{
+    clearEnt(cells[CY][CX-1]);clearEnt(cells[CY][CX+1]);
+    setStack(CC,[{o:'p1',i:2},{o:'p2',i:1}]);
+    spawnPixelExplosion(CC,[P.p1,P.p2],0);flashCell(CC,0);
+    setTimeout(()=>setGrave(CC),600);
+  },400);
+  schedReset();
+}
+function s_probe(){
+  setHarv(CC,'p1',1,false);probeSplash(CC,P.p3);flashCell(CC,0);schedReset();
+}
+</script>
+</body>
+</html>

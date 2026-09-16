@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sea_of_colours · manual</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./manual.css" />
+  </head>
+  <body>
+    <div class="mn-viewport">
+      <header class="mn-header">
+        <span class="prompt-sigil">$</span>
+        <span class="prompt-cmd">sea_of_colours</span>
+        <span class="dim mn-subhead">· manual · v0.1</span>
+        <span class="prompt-caret">_</span>
+        <span class="mn-spacer"></span>
+        <span class="dim mn-hint" id="mn-hint"># ← / → switch tabs · hover glyphs for details · ? for keys</span>
+        <a class="mn-btn" href="./agent.html" style="text-decoration:none"
+           title="How the AI agent and its harness work — one real turn taken apart">[ AGENT &amp; HARNESS → ]</a>
+        <span class="mn-edit-tools" id="mn-edit-tools" hidden>
+          <button class="mn-btn mn-edit-toggle" id="mn-edit-toggle" title="Toggle edit mode (author only)">[ EDIT ]</button>
+          <button class="mn-btn mn-edit-save" id="mn-edit-save" title="Write edits directly to index.html on disk (Chrome/Edge)">[ SAVE FILE ]</button>
+          <button class="mn-btn mn-edit-history" id="mn-edit-history" title="View / export / import edit history">[ HISTORY ]</button>
+          <button class="mn-btn mn-edit-export" id="mn-edit-export" title="Copy the canonical &lt;script&gt; block to clipboard (fallback for Firefox/Safari)">[ EXPORT ]</button>
+          <button class="mn-btn mn-edit-clear" id="mn-edit-clear" title="Wipe your localStorage overrides — leaves only the baked MN_EDITS">[ CLEAR LOCAL ]</button>
+          <button class="mn-btn mn-edit-lock" id="mn-edit-lock" title="Strip ?editor from URL and reload (hides EDIT for readers)">[ LOCK ]</button>
+        </span>
+      </header>
+
+      <main class="mn-main">
+        <!-- centre pane: tab strip + tab body -->
+        <section class="mn-centre" aria-label="Manual content">
+          <div class="mn-tabstrip" id="mn-tabstrip" role="tablist">
+            <button class="mn-tab-arrow" id="mn-tab-prev" aria-label="Previous tab">&lt;</button>
+            <div class="mn-tabs" id="mn-tabs">
+              <button class="mn-tab is-active" data-tab="tiles" role="tab" aria-selected="true">[ 1. TILES ]</button>
+              <button class="mn-tab" data-tab="loop" role="tab" aria-selected="false">[ 3. GAME LOOP ]</button>
+              <button class="mn-tab" data-tab="orders" role="tab" aria-selected="false">[ 4. ORDERS ]</button>
+              <button class="mn-tab" data-tab="vision" role="tab" aria-selected="false">[ 5. VISION ]</button>
+              <button class="mn-tab" data-tab="signs" role="tab" aria-selected="false">[ 5.1 SIGNS ]</button>
+              <button class="mn-tab" data-tab="opponents" role="tab" aria-selected="false">[ 6. OPPONENTS ]</button>
+              <button class="mn-tab" data-tab="maps" role="tab" aria-selected="false">[ 7. MAPS ]</button>
+              <button class="mn-tab" data-tab="season" role="tab" aria-selected="false">[ 8. SEASON ]</button>
+              <button class="mn-tab" data-tab="probes" role="tab" aria-selected="false">[ 9. PROBES ]</button>
+              <button class="mn-tab" data-tab="harvesters" role="tab" aria-selected="false">[ 10. HARVESTERS ]</button>
+              <button class="mn-tab" data-tab="emp" role="tab" aria-selected="false">[ 11. EMP ]</button>
+              <button class="mn-tab" data-tab="chaff" role="tab" aria-selected="false">[ 12. CHAFF ]</button>
+              <button class="mn-tab" data-tab="orbital" role="tab" aria-selected="false">[ 13. ORBITAL STATION ]</button>
+            </div>
+            <button class="mn-tab-arrow" id="mn-tab-next" aria-label="Next tab">&gt;</button>
+          </div>
+
+          <!-- ── Tab 1: Tiles ─────────────────────────────────────── -->
+          <div class="mn-tabpane is-active" data-tabpane="tiles" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">THE SURFACE</span>
+                <span class="dim mn-frame-sub" id="mn-tiles-phase"># seed · —</span>
+              </div>
+              <div class="mn-tiles-layout">
+                <div class="mn-tiles-stage">
+                  <div class="mn-board-host" id="mn-board-tiles"></div>
+                </div>
+                <aside class="mn-stage-caption mn-tiles-caption" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-tiles-label">0 · UNDER THE FOG</div>
+                  <div class="mn-stage-body" id="mn-tiles-body">Sea of Colours takes place on a board. Initially the entire surface is hidden by fog. But underneath the fog, three substances lie waiting.</div>
+                  <div class="mn-stage-cite dim" id="mn-tiles-cite">§2.1 · §3.2</div>
+                  <div class="mn-tiles-panel" id="mn-tiles-panel" hidden></div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-tiles-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-tiles-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-tiles-toggle" title="Auto-play through stages">[ PLAY ]</button>
+                <button class="mn-btn" id="mn-tiles-replay" title="Replay this stage">[ REPLAY ]</button>
+                <button class="mn-btn" id="mn-tiles-restart" title="Reroll seed and start over">[ RESTART ]</button>
+                <span class="dim mn-status" id="mn-tiles-status"># stage 0 · fog</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Tab 3: Game loop ────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="loop" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">ONE NOX</span>
+                <span class="dim mn-frame-sub" id="mn-loop-phase"># 21:00 — Nox</span>
+              </div>
+              <div class="mn-loop-layout">
+                <div class="mn-loop-stage">
+                  <div class="mn-board-host" id="mn-board-loop"></div>
+                  <div class="mn-aurora-wash" id="mn-aurora-wash" aria-hidden="true"></div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-stage-label">0 · NOX BEGINS</div>
+                  <div class="mn-stage-body" id="mn-stage-body">The planet is only harvestable during the night.</div>
+                  <div class="mn-stage-cite dim" id="mn-stage-cite">§3.2</div>
+                </aside>
+                <aside class="mn-vault" aria-label="Vault">
+                  <div class="mn-vault-head">
+                    <div class="mn-vault-title">VAULT</div>
+                    <div class="mn-vault-score" id="mn-vault-score">score · <b>0</b> pts</div>
+                    <div class="dim mn-vault-cap">6 / 6 hold cap · §3.9</div>
+                  </div>
+                  <div class="mn-vault-grid" id="mn-vault-grid"></div>
+                  <div class="mn-vault-foot dim">
+                    score = purity × MULT<br>
+                    trace 0.75 · vein 1.0<br>
+                    mass 1.5 · pure 3.0<br>
+                    <span style="opacity:0.6">§3.1</span>
+                  </div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-stage-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-stage-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-loop-toggle" title="Auto-play through stages">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-loop-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-loop-step" title="Reset to stage 0 with a fresh seam">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-loop-status"># stage 0 · Nox begins</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 4: Orders ────────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="orders" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">POLICY &amp; PRAXIS</span>
+                <span class="dim mn-frame-sub" id="mn-orders-phase"># 21:00 — orbit</span>
+              </div>
+              <div class="mn-loop-layout mn-orders-layout">
+                <div class="mn-loop-stage">
+                  <div class="mn-board-wrap" id="mn-board-wrap-orders">
+                    <div class="mn-board-corner"></div>
+                    <div class="mn-coord-row mn-coord-top" id="mn-coord-top"></div>
+                    <div class="mn-coord-col mn-coord-left" id="mn-coord-left"></div>
+                    <div class="mn-board-host" id="mn-board-orders"></div>
+                  </div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-2" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-stage-label-2">0 · NOX &amp; POLICY</div>
+                  <div class="mn-stage-body" id="mn-stage-body-2">Every Nox runs exactly 21 hours. Orders are queued during Orbit and execute in slot order.</div>
+                  <div class="mn-stage-cite dim" id="mn-stage-cite-2">§3.10</div>
+                </aside>
+                <aside class="mn-roster" aria-label="Policy roster">
+                  <div class="mn-roster-head">
+                    <div class="mn-roster-title">POLICY</div>
+                    <div class="mn-roster-nox" id="mn-roster-nox">Nox 1 · 21 hours</div>
+                    <div class="dim mn-roster-cap">MAX_MOVES = 21 · §3.10</div>
+                  </div>
+                  <div class="mn-roster-list" id="mn-roster-list"></div>
+                  <div class="mn-roster-foot dim" id="mn-roster-foot">
+                    slots execute in order.<br>
+                    empty slots are WAITs.
+                  </div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-stage-prev-2" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-stage-next-2" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-orders-toggle" title="Auto-play through stages">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-orders-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-orders-restart" title="Restart from stage 0">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-orders-status"># stage 0 · policy</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-2" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 5: Vision ─────────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="vision" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">VISION · FOG · LIVE · ECHO</span>
+                <span class="dim mn-frame-sub" id="mn-vision-phase"># three states of sight</span>
+              </div>
+              <div class="mn-loop-layout mn-vision-layout">
+                <div class="mn-loop-stage">
+                  <div class="mn-board-host" id="mn-board-vision"></div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-3" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-stage-label-3">0 · VISION</div>
+                  <div class="mn-stage-body" id="mn-stage-body-3">Three vision states: fog, live, echo.</div>
+                  <div class="mn-stage-cite dim" id="mn-stage-cite-3">§3.8</div>
+                </aside>
+                <aside class="mn-vision-legend" aria-label="Vision legend">
+                  <div class="mn-vision-legend-head">STATES</div>
+                  <div class="mn-vision-legend-row" data-state="fog">
+                    <span class="mn-vision-swatch" data-swatch="fog"></span>
+                    <div>
+                      <div class="mn-vision-name">FOG</div>
+                      <div class="dim mn-vision-body">no intel · never seen (or forgotten)</div>
+                    </div>
+                  </div>
+                  <div class="mn-vision-legend-row" data-state="live">
+                    <span class="mn-vision-swatch" data-swatch="live"></span>
+                    <div>
+                      <div class="mn-vision-name">LIVE</div>
+                      <div class="dim mn-vision-body">probe disk right now · current world state</div>
+                    </div>
+                  </div>
+                  <div class="mn-vision-legend-row" data-state="echo">
+                    <span class="mn-vision-swatch" data-swatch="echo"></span>
+                    <div>
+                      <div class="mn-vision-name">ECHO</div>
+                      <div class="dim mn-vision-body">last-known snapshot · may be stale</div>
+                    </div>
+                  </div>
+                  <div class="mn-vision-legend-foot dim">
+                    fog → probe drops → live<br>
+                    probe expires after 3 Nox → echo<br>
+                    re-probe → live again<br><br>
+                    harvesters only land on LIVE cells
+                  </div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-vision-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-vision-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-vision-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-vision-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-vision-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-vision-status"># stage 0 · vision states</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-3" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 5.1: Signs ──────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="signs" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">SIGNS · PUBLIC BEACONS · BLUE + RED</span>
+                <span class="dim mn-frame-sub" id="mn-signs-phase"># fog-independent · never fade · rough on purpose</span>
+              </div>
+              <div class="mn-loop-layout mn-harv-layout">
+                <div class="mn-loop-stage mn-harv-stage" id="mn-signs-stage-host">
+                  <div class="mn-board-host" id="mn-board-signs"></div>
+                  <div class="mn-harv-sticker" id="mn-signs-sticker" hidden></div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-signs" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-signs-label">0 · WHAT ARE SIGNS</div>
+                  <div class="mn-stage-body" id="mn-signs-body">Signs are public beacons. Every house sees them, through fog, from H1. They point roughly. They never fade.</div>
+                  <div class="mn-stage-cite dim" id="mn-signs-cite">§4.10 · blue-sign · §4.11 · redsign</div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-signs-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-signs-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-signs-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-signs-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-signs-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-signs-status"># stage 0 · what are signs</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-signs" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 6: Opponents ─────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="opponents" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">OPPONENTS · SIMULTANEOUS PRAXIS</span>
+                <span class="dim mn-frame-sub" id="mn-opp-phase"># every hour fires for every seat at once</span>
+              </div>
+              <div class="mn-loop-layout mn-opp-layout">
+                <div class="mn-loop-stage">
+                  <div class="mn-board-host" id="mn-board-opp"></div>
+                  <div class="mn-nox-sticker" id="mn-opp-nox-sticker" hidden></div>
+                  <div class="mn-nox-sweep" id="mn-opp-nox-sweep" hidden>
+                    <div class="mn-nox-sweep-band"></div>
+                    <div class="mn-nox-sweep-label" id="mn-opp-nox-sweep-label"></div>
+                  </div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-6" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-stage-label-6">0 · PRAXIS</div>
+                  <div class="mn-stage-body" id="mn-stage-body-6">Two seats. Each Nox, both submit a policy.</div>
+                  <div class="mn-stage-cite dim" id="mn-stage-cite-6">§3.10</div>
+                </aside>
+                <aside class="mn-opp-policies" data-panels="2" aria-label="Both seats' policies">
+                  <div class="mn-opp-policy" data-seat="p1">
+                    <div class="mn-opp-policy-head">
+                      <div class="mn-opp-policy-title" id="mn-opp-policy-title-1">YOUR POLICY · P1</div>
+                      <div class="dim mn-opp-policy-nox" id="mn-opp-policy-nox-1">Nox 1</div>
+                    </div>
+                    <div class="mn-opp-policy-list mn-roster-list" id="mn-opp-policy-list-1"></div>
+                  </div>
+                  <div class="mn-opp-policy" data-seat="p2">
+                    <div class="mn-opp-policy-head">
+                      <div class="mn-opp-policy-title" id="mn-opp-policy-title-2">OPPONENT · P2</div>
+                      <div class="dim mn-opp-policy-nox" id="mn-opp-policy-nox-2">Nox 1</div>
+                    </div>
+                    <div class="mn-opp-policy-list mn-roster-list" id="mn-opp-policy-list-2"></div>
+                  </div>
+                  <div class="mn-opp-policy" data-seat="p3" hidden>
+                    <div class="mn-opp-policy-head">
+                      <div class="mn-opp-policy-title" id="mn-opp-policy-title-3">P3</div>
+                      <div class="dim mn-opp-policy-nox" id="mn-opp-policy-nox-3">Nox 1</div>
+                    </div>
+                    <div class="mn-opp-policy-list mn-roster-list" id="mn-opp-policy-list-3"></div>
+                  </div>
+                  <div class="mn-opp-policy" data-seat="p4" hidden>
+                    <div class="mn-opp-policy-head">
+                      <div class="mn-opp-policy-title" id="mn-opp-policy-title-4">P4</div>
+                      <div class="dim mn-opp-policy-nox" id="mn-opp-policy-nox-4">Nox 1</div>
+                    </div>
+                    <div class="mn-opp-policy-list mn-roster-list" id="mn-opp-policy-list-4"></div>
+                  </div>
+                  <div class="mn-opp-policy-note dim">
+                    you never see opponent's policy in-game.<br>
+                    shown here for teaching.
+                  </div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-opp-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-opp-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-opp-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-opp-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-opp-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-opp-status"># stage 0 · fog · policies drafted</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-6" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 7: Maps ──────────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="maps" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">MAP GENERATION</span>
+                <span class="dim mn-frame-sub" id="mn-maps-phase"># seeded value-noise + fBm + ridge</span>
+              </div>
+              <div class="mn-maps-row" id="mn-maps-row">
+                <div class="mn-map-card">
+                  <div class="mn-map-seed">seed · <b id="mn-map-seed-0">—</b></div>
+                  <div class="mn-board-host" id="mn-board-map-0"></div>
+                  <div class="mn-map-cap dim" id="mn-map-cap-0">— · — · —</div>
+                </div>
+                <div class="mn-map-card">
+                  <div class="mn-map-seed">seed · <b id="mn-map-seed-1">—</b></div>
+                  <div class="mn-board-host" id="mn-board-map-1"></div>
+                  <div class="mn-map-cap dim" id="mn-map-cap-1">— · — · —</div>
+                </div>
+                <div class="mn-map-card">
+                  <div class="mn-map-seed">seed · <b id="mn-map-seed-2">—</b></div>
+                  <div class="mn-board-host" id="mn-board-map-2"></div>
+                  <div class="mn-map-cap dim" id="mn-map-cap-2">— · — · —</div>
+                </div>
+              </div>
+              <div class="mn-prose mn-maps-prose">
+                <p>
+                  A map is <span class="fg-red">not drawn</span> — it's <b>generated</b> from a single
+                  integer <b>seed</b>. Same seed → same map, every time.
+                </p>
+                <p>
+                  Three noise fields are compositied in priority order: 4-octave fBm value-noise
+                  (red seam mask) → smoothstep×noise diagonal bands (green rot lines) →
+                  sparse fBm with cellular smoothing + a Chebyshev distance transform (blue pockets).
+                </p>
+                <p>
+                  Every seed reliably produces the same three signatures — <span class="fg-red">pure red seams</span> along
+                  ridge lines, <span class="fg-green">green rot bands</span> running one snap-to-8 angle across the map,
+                  and <span class="fg-blue">blue pockets</span> in tight round blobs. Reroll and see.
+                </p>
+                <p class="dim">
+                  <span class="cite">§2.1</span> · README<span class="cite">§ Terrain</span> · <span class="mono">sea_of_colours/generator.py</span>
+                </p>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-maps-reveal" title="Fog reveal the three maps">[ ▶ REVEAL ]</button>
+                <button class="mn-btn" id="mn-maps-reroll" title="Reroll seeds and re-reveal">[ ⏮ NEW SEEDS ]</button>
+                <span class="dim mn-status" id="mn-maps-status"># three seeds · fully fogged</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Tab 8: Season · full loop ────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="season" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">SEASON · THE FULL LOOP</span>
+                <span class="dim mn-frame-sub" id="mn-season-phase"># Nox 1 · pre-play</span>
+              </div>
+              <div class="mn-loop-layout mn-season-layout">
+                <!-- Left rail: player's orbital station (diamond + vault + score) -->
+                <aside class="mn-season-station-wrap" aria-label="Your orbital station">
+                  <div class="mn-season-station" data-seat="p1">
+                    <div class="os-diamond-wrap">
+                      <pre class="os-diamond" id="mn-season-diamond"></pre>
+                      <pre class="os-vault-pre" id="mn-season-vault"></pre>
+                      <span class="os-diamond-tag">AVI</span>
+                    </div>
+                    <div class="os-score" id="mn-season-score">0</div>
+                    <div class="os-score-delta" id="mn-season-score-delta"></div>
+                    <div class="mn-season-station-cap dim">
+                      YOUR ORBITAL<br>PLATFORM
+                    </div>
+                  </div>
+                </aside>
+                <!-- Center: real board with sticker, hour strip, season strip overlay -->
+                <div class="mn-loop-stage mn-season-stage">
+                  <div class="mn-board-host" id="mn-board-season"></div>
+                  <div class="mn-season-sticker" id="mn-season-sticker" hidden></div>
+                  <div class="mn-season-hour-strip" id="mn-season-hour-strip" aria-label="21-hour strip"></div>
+                  <div class="mn-season-strip-overlay" id="mn-season-strip-overlay" hidden>
+                    <div class="mn-season-strip-title">SEASON · 7 NIGHTS + 7 DAYS</div>
+                    <div class="mn-season-strip-blocks" id="mn-season-strip-blocks"></div>
+                    <div class="mn-season-strip-sub dim">between each Nox: AURORA · orbital day · VESPERA</div>
+                  </div>
+                </div>
+                <!-- Right rail: stage caption -->
+                <aside class="mn-stage-caption" id="mn-stage-caption-8" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-stage-label-8">0 · NOX · 21 HOURS</div>
+                  <div class="mn-stage-body" id="mn-stage-body-8">Every Nox is 21 hours of PRAXIS.</div>
+                  <div class="mn-stage-cite dim" id="mn-stage-cite-8">§3.2 · §3.10</div>
+                </aside>
+                <!-- Far right: EARTH · shipping score -->
+                <aside class="mn-season-earth" aria-label="Shipped to Earth">
+                  <div class="mn-season-earth-head">SHIPPED · EARTH</div>
+                  <div class="mn-season-earth-score" id="mn-season-earth-score">0</div>
+                  <div class="mn-season-earth-delta" id="mn-season-earth-delta"></div>
+                  <div class="mn-season-earth-cap dim">
+                    only what<br>reaches EARTH<br>wins the season
+                  </div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-season-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-season-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-season-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-season-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-season-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-season-status"># stage 0 · Nox · 21 hours</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-8" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 9: Probes · deep dive ────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="probes" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">PROBES · VISION · FRAGILITY · EMP</span>
+                <span class="dim mn-frame-sub" id="mn-probes-phase"># the eye of the platform</span>
+              </div>
+              <div class="mn-loop-layout mn-probes-layout">
+                <div class="mn-loop-stage mn-probes-stage">
+                  <div class="mn-board-host" id="mn-board-probes"></div>
+                  <div class="mn-probes-sticker" id="mn-probes-sticker" hidden></div>
+                  <div class="mn-probes-life-badge" id="mn-probes-life-badge" hidden>
+                    <span class="mn-probes-life-lbl">PROBE LIFE</span>
+                    <span class="mn-probes-life-rings" id="mn-probes-life-rings">◉ ◉ ◉</span>
+                    <span class="mn-probes-life-nights" id="mn-probes-life-nights">3 nights</span>
+                  </div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-9" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-stage-label-9">0 · PROBE = VISION</div>
+                  <div class="mn-stage-body" id="mn-stage-body-9">A probe's job is to gain vision. Vision reveals RED. Only revealed RED lets you drop a harvester.</div>
+                  <div class="mn-stage-cite dim" id="mn-stage-cite-9">§3.11 · probes</div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-probes-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-probes-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-probes-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-probes-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-probes-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-probes-status"># stage 0 · probe grants vision</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-9" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 10: Harvesters · deep dive ──────────────────── -->
+          <div class="mn-tabpane" data-tabpane="harvesters" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">HARVESTERS · LAND · MOVE · CRASH</span>
+                <span class="dim mn-frame-sub" id="mn-harv-phase"># the workhorse of the surface</span>
+              </div>
+              <div class="mn-loop-layout mn-harv-layout">
+                <div class="mn-loop-stage mn-harv-stage">
+                  <div class="mn-board-host" id="mn-board-harv"></div>
+                  <div class="mn-harv-sticker" id="mn-harv-sticker" hidden></div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-10" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-stage-label-10">0 · LAND · MOVE · PICKUP</div>
+                  <div class="mn-stage-body" id="mn-stage-body-10">Harvester lands on live vision, walks into fog on its own sensors, banks 6 parcels max, picks up anywhere.</div>
+                  <div class="mn-stage-cite dim" id="mn-stage-cite-10">§3.9 · §3.10</div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-harv-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-harv-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-harv-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-harv-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-harv-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-harv-status"># stage 0 · land · move · pickup</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-10" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 11: EMP ─────────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="emp" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">EMP · SALVO · CLOUD · DENIAL</span>
+                <span class="dim mn-frame-sub" id="mn-emp-phase"># 3 missiles per salvo · r=2 diamond · 8-hour cloud</span>
+              </div>
+              <div class="mn-loop-layout mn-harv-layout">
+                <div class="mn-loop-stage mn-harv-stage" id="mn-emp-stage-host">
+                  <div class="mn-board-host" id="mn-board-emp"></div>
+                  <div class="mn-harv-sticker" id="mn-emp-sticker" hidden></div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-11" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-emp-label">0 · EMP · SALVO PATTERNS</div>
+                  <div class="mn-stage-body" id="mn-emp-body">EMP costs 200 BLUE purity + 250 credits per warhead. One warhead = one salvo = 3 missiles fired simultaneously. Each missile spawns a Manhattan-radius-2 cloud (13 cells) that lives 8 hours. The rack is public and capped at 600 BLUE (§4.9.8). Its small cousin SNAP (§4.9.4, v1.36) is 100 BLUE + 250 credits for one missile on one square lasting one hour — the difference that matters is not the size but the timing: SNAP lands ABOVE the hour's vision snapshot, so a probe it kills cannot light a drop that same night. An EMP on the same beacon in the same hour cannot do that.</div>
+                  <div class="mn-stage-cite dim" id="mn-emp-cite">§4.9.3 · emp</div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-emp-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-emp-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-emp-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-emp-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-emp-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-emp-status"># stage 0 · salvo patterns</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-11" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 12: CHAFF ───────────────────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="chaff" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">CHAFF · WHOLE-MAP JAM · CANCELS PICKUPS</span>
+                <span class="dim mn-frame-sub" id="mn-chaff-phase"># 300 BLUE per flare · duration 3 hours · every seat jammed</span>
+              </div>
+              <div class="mn-loop-layout mn-harv-layout">
+                <div class="mn-loop-stage mn-harv-stage" id="mn-chaff-stage-host">
+                  <div class="mn-board-host" id="mn-board-chaff"></div>
+                  <div class="mn-harv-sticker" id="mn-chaff-sticker" hidden></div>
+                </div>
+                <aside class="mn-stage-caption" id="mn-stage-caption-12" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-chaff-label">0 · CHAFF · BASICS</div>
+                  <div class="mn-stage-body" id="mn-chaff-body">CHAFF costs 300 BLUE purity per flare. At hour N it cancels every seat's action for hours N, N+1, N+2. Launcher is immune only at hour N and self-jams for the carry-over. Two things chaff can do that nothing else can: deny an H1 drop and strand an opponent's harvester. A launch is an action too: a flare or EMP queued into a jammed hour is cancelled with its munition intact, so chaff cannot be chained and beats a same-hour EMP. The rack is public and capped at 600 BLUE (§4.9.8) — two flares is the most you can carry, and at 300 apiece a chaff buyer reads the same on the public bar as three SNAPs would.</div>
+                  <div class="mn-stage-cite dim" id="mn-chaff-cite">§4.9.5 · chaff</div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-chaff-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-chaff-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-chaff-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-chaff-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-chaff-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-chaff-status"># stage 0 · chaff basics</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-12" aria-label="Event log"></div>
+            </div>
+          </div>
+
+          <!-- ── Tab 13: ORBITAL STATION ──────────────────────── -->
+          <div class="mn-tabpane" data-tabpane="orbital" role="tabpanel">
+            <div class="mn-frame">
+              <div class="mn-frame-head">
+                <span class="mn-frame-title">ORBITAL STATION · LAUNCH · HARVEST · RECOVER</span>
+                <span class="dim mn-frame-sub" id="mn-orbital-phase"># the round-trip · station → surface → station</span>
+              </div>
+              <div class="mn-loop-layout mn-orbital-layout">
+                <!-- Left rail: player's orbital station (diamond + vault + score) -->
+                <aside class="mn-orbital-station-wrap" aria-label="Your orbital station">
+                  <div class="mn-orbital-station mn-season-station" data-seat="p1">
+                    <div class="os-diamond-wrap">
+                      <pre class="os-diamond" id="mn-orbital-diamond"></pre>
+                      <pre class="os-vault-pre" id="mn-orbital-vault"></pre>
+                      <span class="os-diamond-tag">AVI</span>
+                    </div>
+                    <div class="os-score" id="mn-orbital-score">0</div>
+                    <div class="os-score-delta" id="mn-orbital-score-delta"></div>
+                    <div class="mn-season-station-cap dim">
+                      YOUR ORBITAL<br>PLATFORM
+                    </div>
+                  </div>
+                </aside>
+                <!-- Centre: fogged board + canvas overlay for arc anims -->
+                <div class="mn-loop-stage mn-orbital-stage" id="mn-orbital-stage-host">
+                  <div class="mn-board-host" id="mn-board-orbital"></div>
+                  <canvas class="mn-orbital-arc-canvas" id="mn-orbital-arc-canvas"></canvas>
+                  <div class="mn-harv-sticker" id="mn-orbital-sticker" hidden></div>
+                </div>
+                <!-- Right rail: stage caption -->
+                <aside class="mn-stage-caption" id="mn-stage-caption-13" aria-label="Current stage">
+                  <div class="mn-stage-label" id="mn-orbital-label">0 · PROBE LAUNCH</div>
+                  <div class="mn-stage-body" id="mn-orbital-body">Every craft on the surface came from a station in orbit. The platform fires the probe, the probe lands, the disk unfogs — vision is live. Same pattern for every launch: station edge → curved arc → target cell.</div>
+                  <div class="mn-stage-cite dim" id="mn-orbital-cite">§3.11 · probes · §4 · orbital physics</div>
+                </aside>
+              </div>
+              <div class="mn-controls">
+                <button class="mn-btn" id="mn-orbital-prev" title="Previous stage (←)">[ ◄ PREV ]</button>
+                <button class="mn-btn" id="mn-orbital-next" title="Next stage (→)">[ NEXT ► ]</button>
+                <button class="mn-btn" id="mn-orbital-toggle" title="Auto-play">[ ⏵ PLAY ]</button>
+                <button class="mn-btn" id="mn-orbital-replay" title="Replay this section">[ ↻ REPLAY ]</button>
+                <button class="mn-btn" id="mn-orbital-restart" title="Restart">[ ⏮ RESTART ]</button>
+                <span class="dim mn-status" id="mn-orbital-status"># stage 0 · probe launch</span>
+              </div>
+              <div class="mn-eventlog" id="mn-eventlog-13" aria-label="Event log"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- right pane: section nav (stubbed) -->
+        <aside class="mn-nav" aria-label="Rulebook sections">
+          <div class="mn-nav-head">RULEBOOK</div>
+          <ul class="mn-nav-list">
+            <li class="is-active" data-section="basics">
+              <a href="#basics">§ Basics</a>
+              <span class="dim mn-nav-sub">tiles · loop · orders · vision · opponents · maps · season</span>
+            </li>
+            <li data-section="units">
+              <a href="#units">§ Units</a>
+              <span class="dim mn-nav-sub">probes · harvesters</span>
+            </li>
+            <li data-section="weapons">
+              <a href="#weapons">§ Weapons</a>
+              <span class="dim mn-nav-sub">emp · chaff</span>
+            </li>
+            <li class="is-stub"><a href="#stub">§0 Setting</a><span class="dim mn-nav-sub">// stub</span></li>
+            <li class="is-stub"><a href="#stub">§1 World</a><span class="dim mn-nav-sub">// stub</span></li>
+            <li class="is-stub"><a href="#stub">§2 Map generation</a><span class="dim mn-nav-sub">// stub</span></li>
+            <li class="is-stub"><a href="#stub">§3 Tenets</a><span class="dim mn-nav-sub">// stub</span></li>
+            <li class="is-stub"><a href="#stub">§3.10 Turn structure</a><span class="dim mn-nav-sub">// stub</span></li>
+            <li class="is-stub"><a href="#stub">§3.12 The Vault</a><span class="dim mn-nav-sub">// stub</span></li>
+            <li class="is-stub"><a href="#stub">§4 Orbit phase</a><span class="dim mn-nav-sub">// stub</span></li>
+          </ul>
+          <div class="mn-nav-foot dim">
+            <div>build · manual v0.1</div>
+            <div>palette · from styles.css</div>
+          </div>
+        </aside>
+      </main>
+
+      <!-- floating tooltip element (repositioned on hover) -->
+      <div class="mn-tt" id="mn-tt" role="tooltip" aria-hidden="true"></div>
+
+      <!-- edit-log modal shell (populated by manual.js on demand) -->
+      <div class="mn-modal-shell" id="mn-modal-shell" hidden>
+        <div class="mn-modal" role="dialog" aria-modal="true" aria-labelledby="mn-modal-title">
+          <div class="mn-modal-head">
+            <div class="mn-modal-title" id="mn-modal-title">edit history</div>
+            <button class="mn-modal-close" id="mn-modal-close" aria-label="Close">×</button>
+          </div>
+          <div class="mn-modal-body" id="mn-modal-body"></div>
+          <div class="mn-modal-foot" id="mn-modal-foot"></div>
+        </div>
+      </div>
+      <!-- hidden file input for IMPORT LOG (manual.js clicks it) -->
+      <input type="file" id="mn-log-import-input" accept=".txt,.json,text/plain,application/json" hidden />
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────────
+         MN_EDITS · canonical text overrides.
+           Baked-in edits for every reader — no localStorage required.
+           Click [ EXPORT ] in the ?editor=1 toolbar to copy a new
+           snippet to your clipboard, then REPLACE the block below.
+           Empty by default; localStorage still overrides these live.
+         ───────────────────────────────────────────────────────────── -->
+    <script id="mn-edits-embed">
+      window.MN_EDITS = {
+  "mn-edit:loop:0:cite": "\"Harvesting the planet presents two unique challenges to the Houses: Firstly, the planet is covered in magnetic resonance making orbital scan impossible. Secondly, the planet's proximity to the sun makes the establishing of any permanent structure on the surface impossible.\"  §3.2 · Nox / Aurora cycle",
+  "mn-edit:loop:0:body": "When the game begins the board is fully dark, this is called **fog**. The planet is only harvestable during the night (**Nox**). At dawn (**Aurora**) the sun incinerates anything left on the surface.\n",
+  "mn-edit:loop:1:body": "Fog needs to be dispersed with vision from **probes** to reveal what is underneath.",
+  "mn-edit:loop:1:cite": "\"The magnetic cover hides everything. Orbital sensors read a blank rectangle.\" §0.4 · magnetic cover",
+  "mn-edit:loop:2:body": "An probe launched from orbit that reveals a radius of 4 squares. Once the probe has landed, the visible squares are **LIVE** vision- this means harvesters can land. Because the probe is launched through orbit, its destination is visible to all players. Probes are launched with the **PROBE** action and require a co-ordinate and available stock of probes. You begin the first night with 2, but must continue to build throughout the game.",
+  "mn-edit:loop:2:cite": "\"A ballistic · punches through the cover at high velocity. It's vector, and landing co-ordinate can be computed by all\" §3.9 · §3.11 · §3.15",
+  "mn-edit:loop:3:cite": "\"An orblift bends the harvester X through the magnetic cover onto a live tile — rivals can't track it.\" §0.4 · §3.9.7 · live_only drop mode",
+  "mn-edit:loop:3:body": "A harvester is the only way to extract red from the planet surface, but it needs to be delivered and picked up by orbital lifter (**Orblift**). The orblift needs LIVE vision to **DROP** a harvester and clear co-ordinates, but can always pickup harvester (**LIFT**), it does not need a destination.",
+  "mn-edit:loop:4:body": "Once on the ground the harvester automatically collects (**Harvests**) whatever it landed on. It can then be issued movement instructions in **STEP** actions, these require clear co-ordinates. Harvesters only move up/down/left/right and require clear co-ordinates. Any unreachable co-ordinate issued is automatically rejected by the game as illegal once your policy is submitted, so it is possible to make one error in co-ordinates that then invalidates a whole chain of steps! Harvesters automatically harvest any square they step onto, be that red, blue or green. Harvested red turns to green (called synthetic-green to differentiate it from green that was naturally on the board at the start) meaning any other harvester stepping into that square is penalised. ",
+  "mn-edit:loop:5:cite": "\"Orblift returns for the loaded harvester. Only picked-up parcels bank to the vault (stranded loads are lost at Aurora).\" §3.10 · §3.13 · §3.1",
+  "mn-edit:loop:4:cite": "\"Harvester walks up to 5 tiles — cardinal only. Every coloured tile it enters is picked up (hold cap 6).\" §3.9 · Manhattan-1 movement"
+};
+    </script>
+
+    <script src="./manual.js" defer></script>
+  </body>
+</html>

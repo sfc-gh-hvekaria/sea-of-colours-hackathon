@@ -1,0 +1,238 @@
+{
+  "agent": "tabula_v12",
+  "battles": {
+    "blind_grab_rival_seam@armed+emp": {
+      "failed": [
+        "denial_probe"
+      ],
+      "moves": 7,
+      "passed": false,
+      "score": 0.8,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "blind_grab_rival_seam@armed+empty": {
+      "failed": [
+        "denial_probe"
+      ],
+      "moves": 7,
+      "passed": false,
+      "score": 0.8,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "crowded_echo_seam@armed+emp": {
+      "failed": [
+        "no_green"
+      ],
+      "moves": 17,
+      "passed": false,
+      "score": 0.889,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "crowded_echo_seam@armed+empty": {
+      "failed": [
+        "no_green"
+      ],
+      "moves": 17,
+      "passed": false,
+      "score": 0.889,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "early_solo_seam@armed+emp": {
+      "failed": [
+        "min_steps_past_pure"
+      ],
+      "moves": 3,
+      "passed": false,
+      "score": 0.8,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "early_solo_seam@armed+empty": {
+      "failed": [
+        "min_steps_past_pure"
+      ],
+      "moves": 4,
+      "passed": false,
+      "score": 0.8,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "echo_pure_blind_rival@armed+emp": {
+      "failed": [],
+      "moves": 12,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "echo_pure_blind_rival@armed+empty": {
+      "failed": [],
+      "moves": 13,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "final_night_ring@armed+emp": {
+      "failed": [
+        "pure_first",
+        "no_wake_reentry",
+        "no_repeat_pure"
+      ],
+      "moves": 9,
+      "passed": false,
+      "score": 0.571,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "final_night_ring@armed+empty": {
+      "failed": [],
+      "moves": 11,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "no_probes_two_units@armed+emp": {
+      "failed": [
+        "no_wake_reentry"
+      ],
+      "moves": 10,
+      "passed": false,
+      "score": 0.8,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "no_probes_two_units@armed+empty": {
+      "failed": [],
+      "moves": 9,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "plain_night_armed@armed+emp": {
+      "failed": [
+        "min_red_cells"
+      ],
+      "moves": 10,
+      "passed": false,
+      "score": 0.8,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "plain_night_armed@armed+empty": {
+      "failed": [
+        "min_red_cells",
+        "probes_after_harvesters"
+      ],
+      "moves": 12,
+      "passed": false,
+      "score": 0.6,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "race_the_watched_pure@armed+emp": {
+      "failed": [],
+      "moves": 14,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "race_the_watched_pure@armed+empty": {
+      "failed": [],
+      "moves": 13,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "three_pures_one_unit@armed+emp": {
+      "failed": [],
+      "moves": 8,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "three_pures_one_unit@armed+empty": {
+      "failed": [],
+      "moves": 8,
+      "passed": true,
+      "score": 1.0,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "two_pures_poker@armed+emp": {
+      "failed": [
+        "max_steps_past_pure"
+      ],
+      "moves": 9,
+      "passed": false,
+      "score": 0.857,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    },
+    "two_pures_poker@armed+empty": {
+      "failed": [
+        "max_steps_past_pure"
+      ],
+      "moves": 9,
+      "passed": false,
+      "score": 0.857,
+      "weapons_fired": {
+        "chaff_flare": 0,
+        "emp_launch": 0
+      }
+    }
+  },
+  "loadouts": [
+    "empty",
+    "emp"
+  ],
+  "recorded": "2026-09-01",
+  "rung": "armed"
+}

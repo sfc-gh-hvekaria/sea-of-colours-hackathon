@@ -1,0 +1,10 @@
+{
+  "team": "emp",
+  "name": "harvest_test",
+  "participants": [
+    "Lucas Galan"
+  ],
+  "menu_label": "EMP_HARVEST_TEST \u2014 EMP doctrine fork of V12 (needs a Snowflake PAT \u00b7 slow)",
+  "entry": "harness:run",
+  "needs_llm": true
+}

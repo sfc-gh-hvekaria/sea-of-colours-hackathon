@@ -1,0 +1,1437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battle Room — Sea of Colours</title>
+<!--
+  The battle room: replay a scenario turn and read the card beside it.
+
+  Self-contained on purpose. It is copied next to its data by
+  `soc suite --record` and loads bakes with injected <script> tags, so
+  double-clicking the file works with no server, no build step and no
+  network. Do not add a fetch() — it will fail over file://.
+
+  Regenerate by re-running a recorded suite; the template lives at
+  sea_of_colours/evals/battles/room/room.html.
+-->
+<style>
+  :root {
+    /* Chrome. Darker and cooler than the panels so the board reads as
+       a lit surface set into an unlit frame. */
+    --bg:        #08090c;
+    --panel:     #0e1216;
+    --panel-2:   #141a20;
+    --panel-3:   #1a222a;
+    --line:      #1e262d;
+    --line-2:    #2b363f;
+    --ink:       #e4edf3;
+    --dim:       #94a3ae;
+    --faint:     #5b6b76;
+
+    /* The board's void — the engine's EMPTY tile (render.py, rgb(14,11,22))
+       so a cell here is the same colour it is in the terminal renderer. */
+    --void:      #0e0b16;
+
+    /* Terrain families, matching render.TILE_COLORS. */
+    --red:       #d14b4b;
+    --green:     #3fb950;
+    --blue:      #3b8fe0;
+
+    --accent:    #7fd4c1;   /* the seat under review */
+    --rival:     #e8a33c;   /* everyone else */
+    --pass:      #4dca5e;
+    --fail:      #ff6a52;
+
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: var(--bg); color: var(--ink);
+    font: 13px/1.5 var(--mono);
+    -webkit-font-smoothing: antialiased;
+  }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: #232c34; border: 2px solid var(--panel); border-radius: 6px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #32404b; }
+
+  /* ── top bar ─────────────────────────────────────────── */
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 16px; height: 46px; flex: 0 0 auto;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #131920, var(--panel));
+  }
+  .brand {
+    font-weight: 700; letter-spacing: .22em; font-size: 10.5px;
+    color: var(--faint); white-space: nowrap;
+  }
+  .brand b { color: var(--ink); font-weight: 700; }
+  .brand span { color: var(--accent); }
+  header label {
+    color: var(--faint); font-size: 9.5px; letter-spacing: .18em;
+  }
+  select {
+    background: var(--panel-2); color: var(--ink); font: inherit;
+    font-size: 12px; border: 1px solid var(--line-2); border-radius: 4px;
+    padding: 4px 8px; max-width: 380px;
+  }
+  select:hover { border-color: #3d4b57; }
+  .tally {
+    margin-left: auto; display: flex; align-items: center; gap: 14px;
+    color: var(--faint); font-size: 11px; white-space: nowrap;
+  }
+  .tally b { color: var(--ink); font-weight: 600; letter-spacing: .04em; }
+  .tally .ratio { color: var(--dim); }
+  .tally .ratio i { font-style: normal; color: var(--pass); }
+
+  /* ── layout ──────────────────────────────────────────── */
+  main { display: flex; flex: 1 1 auto; min-height: 0; }
+  #rail {
+    width: 272px; flex: 0 0 auto; overflow-y: auto; overscroll-behavior: contain;
+    border-right: 1px solid var(--line); background: var(--panel);
+  }
+  #stage {
+    flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;
+    padding: 12px 16px 10px; overflow: hidden;
+  }
+  #card {
+    width: 452px; flex: 0 0 auto; overflow-y: auto; overscroll-behavior: contain;
+    border-left: 1px solid var(--line); background: var(--panel);
+    padding: 0 16px 40px;
+  }
+
+  /* ── turn rail ───────────────────────────────────────── */
+  .grp {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 12px 6px; color: var(--faint);
+    font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+    position: sticky; top: 0; z-index: 2;
+    background: linear-gradient(180deg, var(--panel) 74%, transparent);
+  }
+  .grp .gname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .grp .gcount {
+    margin-left: auto; flex: 0 0 auto; letter-spacing: .06em;
+    color: var(--faint); font-variant-numeric: tabular-nums;
+  }
+  .grp .gcount.allp { color: var(--pass); }
+  .grp .gcount.anyf { color: var(--fail); }
+
+  .turn {
+    position: relative; display: grid; align-items: center;
+    grid-template-columns: 3px auto 1fr auto;
+    gap: 0 9px; padding: 5px 12px 6px; cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .turn:hover { background: #131a21; }
+  .turn.sel { background: #172029; border-left-color: var(--accent); }
+  .turn.sel .nm { color: #fff; }
+  /* The state marker. Square, not a dot: a fail should look like a fault
+     light, and at 7px a circle and a disc are the same smudge. */
+  .turn .mk {
+    grid-row: 1 / span 2; width: 3px; height: 26px; border-radius: 1px;
+    background: var(--faint);
+  }
+  .turn .mk.p { background: var(--pass); }
+  .turn .mk.f { background: var(--fail); box-shadow: 0 0 7px #ff6a5266; }
+  .turn .st {
+    font-size: 9px; letter-spacing: .12em; font-weight: 700;
+    padding: 1px 4px; border-radius: 2px;
+  }
+  .turn.p .st { color: var(--pass); background: #4dca5e1c; }
+  .turn.f .st { color: var(--fail); background: #ff6a521f; }
+  .turn .nm {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 12px; color: var(--dim);
+  }
+  .turn .sc {
+    font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums;
+  }
+  .turn.f .sc { color: #d9917f; }
+  /* Score bar: the rail's job is "where do I look first", and a bar
+     answers that a row of percentages does not. */
+  .turn .bar {
+    grid-column: 2 / -1; height: 2px; background: #1c242b; border-radius: 1px;
+    margin-top: 3px; overflow: hidden;
+  }
+  .turn .bar i { display: block; height: 100%; background: var(--pass); }
+  .turn.f .bar i { background: var(--fail); }
+
+  /* ── stage head ──────────────────────────────────────── */
+  .stage-head {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 9px; flex: 0 0 auto;
+  }
+  .stage-head h2 {
+    margin: 0; font-size: 15px; letter-spacing: .02em; font-weight: 600;
+  }
+  .stage-head .sub {
+    color: var(--faint); font-size: 11px; display: flex; gap: 8px;
+    flex-wrap: wrap; align-items: baseline;
+  }
+  .stage-head .sub em {
+    font-style: normal; color: var(--dim);
+  }
+  .stage-head .sub .dot { color: #313d46; }
+
+  /* ── board ───────────────────────────────────────────── */
+  /* The frame is on the canvas, not on this box, so it hugs the board
+     exactly instead of leaving a lit border round dead space. */
+  #boardwrap {
+    flex: 1 1 auto; min-height: 0; display: flex;
+    align-items: center; justify-content: center; position: relative;
+  }
+  canvas {
+    display: block; box-sizing: content-box;
+    max-width: 100%; max-height: 100%;
+    border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: 0 14px 44px #000000b0;
+  }
+  #tip {
+    position: absolute; pointer-events: none; display: none; z-index: 4;
+    background: #070a0ce8; backdrop-filter: blur(4px);
+    border: 1px solid var(--line-2); border-radius: 4px;
+    box-shadow: 0 6px 20px #000a;
+    padding: 6px 9px; font-size: 11px; line-height: 1.45;
+    white-space: pre; color: var(--ink); max-width: 260px;
+  }
+  #tip b { color: var(--accent); font-weight: 600; }
+
+  /* ── transport ───────────────────────────────────────── */
+  #transport {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 9px; flex: 0 0 auto;
+  }
+  button {
+    background: var(--panel-2); color: var(--dim); font: inherit;
+    font-size: 11.5px; border: 1px solid var(--line-2); border-radius: 4px;
+    padding: 5px 10px; cursor: pointer; line-height: 1.2;
+    transition: color .12s, border-color .12s, background .12s;
+  }
+  button:hover { border-color: #3f5560; color: var(--ink); background: var(--panel-3); }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .3; cursor: default; }
+  button:disabled:hover { border-color: var(--line-2); color: var(--dim);
+                          background: var(--panel-2); }
+  button.on {
+    color: #06110e; background: var(--accent); border-color: var(--accent);
+    font-weight: 700;
+  }
+  button.on:hover { color: #06110e; background: #96e0cf; border-color: #96e0cf; }
+  #play { min-width: 82px; }
+  input[type=range] {
+    flex: 1 1 auto; accent-color: var(--accent); height: 4px; cursor: pointer;
+  }
+  #hour {
+    color: var(--dim); font-size: 11px; min-width: 240px; text-align: right;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── legend ──────────────────────────────────────────── */
+  .legend {
+    display: flex; gap: 6px 16px; font-size: 10px; color: var(--faint);
+    padding-top: 9px; flex-wrap: wrap; align-items: center;
+    letter-spacing: .04em;
+  }
+  .legend .lg { display: flex; align-items: center; gap: 5px; }
+  .legend i {
+    width: 10px; height: 10px; display: inline-block; border-radius: 1px;
+  }
+  .legend .ramp { display: inline-flex; gap: 2px; }
+  .legend .ramp i { width: 12px; }
+  .legend .sep { width: 1px; height: 12px; background: var(--line-2); }
+
+  /* ── card ────────────────────────────────────────────── */
+  .verdict {
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 3;
+    margin: 0 -16px; padding: 12px 16px 11px;
+    background: linear-gradient(180deg, #141c23, #0e1216 88%);
+    border-bottom: 1px solid var(--line);
+  }
+  .verdict .vs {
+    font-size: 25px; font-weight: 700; line-height: 1;
+    font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+  }
+  .verdict.p .vs { color: var(--pass); }
+  .verdict.f .vs { color: var(--fail); }
+  .verdict .vmeta { flex: 1 1 auto; min-width: 0; }
+  .verdict .vlabel {
+    font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--faint); display: flex; gap: 8px; align-items: baseline;
+  }
+  .verdict.p .vlabel b { color: var(--pass); }
+  .verdict.f .vlabel b { color: var(--fail); }
+  .verdict .vbar {
+    height: 3px; background: #1b2229; border-radius: 2px; margin-top: 6px;
+    overflow: hidden;
+  }
+  .verdict .vbar i { display: block; height: 100%; background: var(--pass); }
+  .verdict.f .vbar i { background: var(--fail); }
+  .verdict .vsub { font-size: 10.5px; color: var(--faint); margin-top: 5px; }
+
+  .sec { border-top: 1px solid var(--line); padding: 11px 0 13px; }
+  .sec > h3 {
+    margin: 0; font-size: 9.5px; letter-spacing: .18em; color: var(--faint);
+    text-transform: uppercase; cursor: pointer; user-select: none;
+    display: flex; justify-content: space-between; gap: 10px;
+    align-items: center; font-weight: 600;
+  }
+  .sec > h3:hover { color: var(--accent); }
+  .sec > h3 .tog {
+    flex: 0 0 auto; font-size: 11px; color: #3c4954; letter-spacing: 0;
+  }
+  .sec > h3:hover .tog { color: var(--accent); }
+  .sec > h3 .note {
+    margin-left: auto; letter-spacing: .06em; color: #3f4c56;
+    text-transform: none; font-size: 10px;
+  }
+  .sec .body { padding-top: 9px; }
+  .sec.shut .body { display: none; }
+  .prose { color: var(--ink); white-space: pre-wrap; font-size: 12px;
+           line-height: 1.62; }
+  .muted { color: var(--dim); }
+  .faint { color: var(--faint); }
+  pre {
+    margin: 0; white-space: pre-wrap; word-break: break-word;
+    background: #0a0e12; border: 1px solid var(--line);
+    border-radius: 4px; padding: 9px 10px; font-size: 11px; line-height: 1.55;
+    max-height: 330px; overflow: auto; overscroll-behavior: contain;
+    color: var(--dim);
+  }
+  pre.tall { max-height: 460px; }
+
+  ol.moves {
+    margin: 0; padding: 0; list-style: none;
+    font-size: 11.5px; font-variant-numeric: tabular-nums;
+  }
+  ol.moves li {
+    display: flex; gap: 8px; align-items: baseline;
+    padding: 2px 6px; color: var(--dim); cursor: pointer;
+    border-left: 2px solid transparent; border-radius: 0 2px 2px 0;
+  }
+  ol.moves li .h { color: #4a5761; flex: 0 0 auto; }
+  ol.moves li .v { flex: 0 0 auto; }
+  ol.moves li.on {
+    color: var(--ink); background: #7fd4c114; border-left-color: var(--accent);
+  }
+  ol.moves li.on .h { color: var(--accent); }
+  ol.moves li:hover { color: var(--ink); background: #ffffff08; }
+  .v-drop   { color: var(--accent); }
+  .v-step   { color: #7fa8c4; }
+  .v-probe  { color: #b58ce0; }
+  .v-pickup { color: #e0d17f; }
+  .v-emp    { color: #7ab8ff; }
+  .v-chaff  { color: #d38ce0; }
+  .v-other  { color: var(--faint); }
+
+  .chk {
+    display: flex; gap: 9px; padding: 5px 0; font-size: 11.5px;
+    border-top: 1px solid #141b21;
+  }
+  .chk:first-child { border-top: 0; padding-top: 0; }
+  .chk .m {
+    flex: 0 0 40px; font-weight: 700; font-size: 9.5px; letter-spacing: .1em;
+    padding-top: 2px;
+  }
+  .chk.p .m { color: var(--pass); }
+  .chk.f .m { color: var(--fail); }
+  .chk .n { color: var(--ink); }
+  .chk.f .n { color: #ffb9ac; }
+  .chk .d { color: var(--dim); line-height: 1.55; margin-top: 1px; }
+
+  .pill {
+    display: inline-block; padding: 1px 7px; margin: 0 4px 4px 0;
+    border: 1px solid var(--line-2); border-radius: 10px;
+    font-size: 10px; color: var(--dim); letter-spacing: .04em;
+  }
+  .pill.on { border-color: var(--accent); color: var(--accent); }
+  .kv {
+    display: grid; grid-template-columns: auto 1fr; gap: 3px 12px;
+    font-size: 11.5px;
+  }
+  .kv dt { color: var(--faint); }
+  .kv dd { margin: 0; color: var(--dim); }
+  .warn {
+    border: 1px solid #ff6a5255; background: #ff6a520e; border-radius: 4px;
+    padding: 9px 10px; color: #ffb0a1; font-size: 11.5px; margin: 12px 0 0;
+    line-height: 1.55;
+  }
+  .warn b { color: var(--fail); letter-spacing: .1em; }
+  .empty {
+    color: var(--faint); font-size: 12px; padding: 48px 0;
+    text-align: center; line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><b>SOC</b> <span>· BATTLE ROOM</span></div>
+  <label for="bake">BAKE</label>
+  <select id="bake"></select>
+  <div class="tally" id="tally"></div>
+</header>
+
+<main>
+  <nav id="rail"></nav>
+
+  <section id="stage">
+    <div class="stage-head">
+      <h2 id="title">—</h2>
+      <div class="sub" id="subtitle"></div>
+    </div>
+    <div id="boardwrap">
+      <canvas id="board"></canvas>
+      <div id="tip"></div>
+    </div>
+    <div id="transport">
+      <button id="back" title="Previous hour (←)">◀</button>
+      <button id="play" title="Play the night (space)">▶ PLAY</button>
+      <button id="fwd" title="Next hour (→)">▶</button>
+      <input type="range" id="scrub" min="0" max="0" value="0">
+      <div id="hour">—</div>
+      <button id="fog" title="Show only what the seat could see when it planned (f)">
+        FOG</button>
+    </div>
+    <div class="legend">
+      <span class="lg">RED
+        <span class="ramp"><i style="background:#4a1a17"></i><i
+          style="background:#8f2a1e"></i><i style="background:#cf4429"></i><i
+          style="background:#ff7a4d"></i></span>
+        trace→pure</span>
+      <span class="lg">BLUE
+        <span class="ramp"><i style="background:#15304d"></i><i
+          style="background:#1d5488"></i><i style="background:#2f80c8"></i><i
+          style="background:#6bbcff"></i></span>
+        shallow→deep</span>
+      <span class="lg"><i style="background:#25401f"></i>green</span>
+      <span class="sep"></span>
+      <span class="lg"><i style="background:#7fd4c1"></i>yours</span>
+      <span class="lg"><i style="background:#e8a33c"></i>rival</span>
+      <span class="lg"><i style="background:#b58ce0"></i>probe</span>
+      <span class="lg"><i style="border:1px solid #d14b4b;background:#d14b4b22"></i>redsign</span>
+      <span class="lg"><i style="border:1px solid #7ab8ff;background:#7ab8ff22"></i>EMP</span>
+      <span class="sep"></span>
+      <span class="lg faint">dashed = later in the night</span>
+    </div>
+  </section>
+
+  <aside id="card"><div class="empty">Pick a turn.</div></aside>
+</main>
+
+<script src="index.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var INDEX = window.SOC_BATTLE_INDEX || [];
+  var state = {
+    bake: null, turn: null, plan: null, cells: null,
+    step: 0, timer: null, fog: false,
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ── loading ────────────────────────────────────────────
+  // Injected <script> rather than an XHR: a browser will not read a
+  // sibling file over file://, and this page has to work by
+  // double-clicking it.
+  function loadBake(id, done) {
+    var have = (window.SOC_BATTLE_BAKES || {})[id];
+    if (have) { done(have); return; }
+    var s = document.createElement("script");
+    s.src = "data/" + id + ".js";
+    s.onload = function () { done((window.SOC_BATTLE_BAKES || {})[id]); };
+    s.onerror = function () { done(null); };
+    document.head.appendChild(s);
+  }
+
+  // ── terrain bands ──────────────────────────────────────
+  // Mirrors the engine's cutoffs (render.RED_LEVEL_CUTOFFS, RULEBOOK
+  // §2.2): band 0 = 0-50, 1 = 51-150, 2 = 151-254, 3 = 255 exactly.
+  function band(p) {
+    if (p >= 255) return 3;
+    if (p >= 151) return 2;
+    if (p >= 51) return 1;
+    return 0;
+  }
+  var BAND_NAME = {
+    R: ["trace", "vein", "mass", "pure"],
+    B: ["shallow", "mid", "sink", "deep"],
+    G: ["green", "green", "green", "green"],
+  };
+  var GLYPH = ["\u2591", "\u2592", "\u2593", "\u2588"];
+
+  // Four steps per family rather than four alphas of one colour: alpha
+  // alone makes a trace and a fogged mass the same pixel, which is the
+  // one confusion this board cannot afford.
+  var RAMP = {
+    R: ["#58201b", "#8f2a1e", "#cf4429", "#ff7a4d"],
+    B: ["#15304d", "#1d5488", "#2f80c8", "#6bbcff"],
+    G: ["#25401f", "#25401f", "#25401f", "#25401f"],
+  };
+  var HILITE = { R: "#ffb08a", B: "#a9dcff", G: "#4dca5e" };
+  var TILE_NAME = { R: "RED", G: "GREEN", B: "BLUE" };
+
+  var OWN = "#7fd4c1", RIVAL = "#e8a33c", PROBE_INK = "#b58ce0";
+  var VOID = "#0d0a14";
+
+  // Boards and terrain are pooled in the bake, because the same board is
+  // staged once per rung, per loadout and per run. Turns carry keys.
+  function boardOf(t) { return (state.bake.boards || {})[t.board] || {}; }
+  function gridOf(t) {
+    return (state.bake.grids || {})[t.grid] ||
+           { width: 40, height: 28, cells: [] };
+  }
+  function indexCells(t) {
+    var m = {}, cells = gridOf(t).cells || [];
+    for (var i = 0; i < cells.length; i++) {
+      m[cells[i][0] + "," + cells[i][1]] = cells[i];
+    }
+    return m;
+  }
+  function key(x, y) { return x + "," + y; }
+
+  // ── the night, decoded once ────────────────────────────
+  // One pass over the move list gives both the full shape of the plan
+  // (drawn ghosted, so the board reads at a glance before you scrub)
+  // and everything the transport needs to replay it hour by hour.
+  function ats(m) {
+    // emp_launch carries either [x,y] or [[x,y], ...] (policy.py).
+    var a = m.at;
+    if (!a || !a.length) return [];
+    return Array.isArray(a[0]) ? a : [a];
+  }
+
+  function derive(t) {
+    var seat = (t.result || {}).seat;
+    var paths = {}, marks = [], units = {}, preProbes = [];
+    (t.entities || []).forEach(function (e) {
+      var ty = e.type || "";
+      if (e.x === null || e.y === null ||
+          e.x === undefined || e.y === undefined) return;
+      var mine = e.owner === seat;
+      if (ty.indexOf("probe") >= 0) {
+        preProbes.push({ x: e.x, y: e.y, mine: mine, h: 0 });
+      } else if (ty.indexOf("harvester") >= 0) {
+        units[e.id] = { mine: mine, damaged: !!e.damaged };
+        paths[e.id] = [[e.x, e.y, 0]];
+      }
+    });
+
+    (t.moves || []).forEach(function (m, i) {
+      var h = i + 1, u = m.unit || "";
+      if (m.a === "drop" && m.at) {
+        units[u] = units[u] || { mine: true };
+        units[u].mine = true;
+        paths[u] = [[m.at[0], m.at[1], h]];
+        marks.push({ k: "drop", x: m.at[0], y: m.at[1], h: h, u: u });
+      } else if (m.a === "step" && m.to) {
+        units[u] = units[u] || { mine: true };
+        (paths[u] = paths[u] || []).push([m.to[0], m.to[1], h]);
+      } else if (m.a === "pickup") {
+        var p = paths[u] || [];
+        var last = p[p.length - 1];
+        marks.push({
+          k: "pickup", h: h, u: u,
+          x: last ? last[0] : null, y: last ? last[1] : null,
+        });
+      } else if (m.a === "probe" && m.at) {
+        marks.push({ k: "probe", x: m.at[0], y: m.at[1], h: h, mine: true });
+      } else if (m.a === "emp_launch") {
+        marks.push({ k: "emp", h: h, cells: ats(m) });
+      } else if (m.a === "chaff_flare") {
+        marks.push({ k: "chaff", h: h });
+      }
+    });
+    return { paths: paths, marks: marks, units: units, pre: preProbes };
+  }
+
+  // Where each unit stands at ``step``, and whether it has lifted.
+  function stateAt(plan, step) {
+    var live = {}, lifted = {};
+    Object.keys(plan.paths).forEach(function (u) {
+      var p = plan.paths[u], node = null;
+      for (var i = 0; i < p.length; i++) {
+        if (p[i][2] <= step) node = p[i];
+      }
+      if (node) live[u] = { x: node[0], y: node[1], mine: plan.units[u].mine };
+    });
+    plan.marks.forEach(function (mk) {
+      if (mk.k === "pickup" && mk.h <= step) lifted[mk.u] = true;
+    });
+    return { live: live, lifted: lifted };
+  }
+
+  // ── canvas geometry ────────────────────────────────────
+  // GX/GY are the rulers' gutter, in board pixels. Everything after
+  // this point works in cell space and goes through X()/Y().
+  var cv = $("board"), ctx = cv.getContext("2d");
+  var CELL = 12, GX = 22, GY = 15, DPR = 1;
+
+  function X(x) { return GX + x * CELL; }
+  function Y(y) { return GY + y * CELL; }
+
+  function fit(g) {
+    var wrap = $("boardwrap");
+    var pad = 12, frame = 2;   // the canvas draws its own 1px border
+    CELL = Math.max(5, Math.min(30, Math.floor(Math.min(
+      (wrap.clientWidth - pad * 2 - frame - GX) / g.width,
+      (wrap.clientHeight - pad * 2 - frame - GY) / g.height
+    ))));
+    var w = GX + g.width * CELL + 6, h = GY + g.height * CELL + 6;
+    DPR = Math.min(3, window.devicePixelRatio || 1);
+    // Back the canvas at device resolution but lay it out in CSS pixels,
+    // else every hairline on a retina panel is a grey smear.
+    cv.width = Math.round(w * DPR);
+    cv.height = Math.round(h * DPR);
+    cv.style.width = w + "px";
+    cv.style.height = h + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    return { w: w, h: h };
+  }
+
+  // Stroke the boundary of a set of cells — the edges that have no
+  // neighbour in the set. Reads as one region instead of N squares.
+  function outline(set, stroke, width, dash) {
+    ctx.save();
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = width;
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath();
+    Object.keys(set).forEach(function (k) {
+      var p = k.split(","), x = +p[0], y = +p[1];
+      var l = X(x), r = X(x + 1), t = Y(y), b = Y(y + 1);
+      if (!set[key(x, y - 1)]) { ctx.moveTo(l, t + .5); ctx.lineTo(r, t + .5); }
+      if (!set[key(x, y + 1)]) { ctx.moveTo(l, b - .5); ctx.lineTo(r, b - .5); }
+      if (!set[key(x - 1, y)]) { ctx.moveTo(l + .5, t); ctx.lineTo(l + .5, b); }
+      if (!set[key(x + 1, y)]) { ctx.moveTo(r - .5, t); ctx.lineTo(r - .5, b); }
+    });
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function fillCells(set, style) {
+    ctx.fillStyle = style;
+    Object.keys(set).forEach(function (k) {
+      var p = k.split(",");
+      ctx.fillRect(X(+p[0]), Y(+p[1]), CELL, CELL);
+    });
+  }
+
+  // ── terrain ────────────────────────────────────────────
+  function paintCell(x, y, code, purity, dim) {
+    var s = CELL, px = X(x), py = Y(y);
+    var inset = s >= 11 ? 1 : 0.5;
+    var ix = px + inset, iy = py + inset, is = s - inset * 2;
+    var lv = band(purity);
+    var ramp = RAMP[code] || RAMP.R;
+    var hi = HILITE[code] || HILITE.R;
+
+    ctx.save();
+    ctx.globalAlpha = dim;
+
+    if (code === "G") {
+      // Synthetic green: flat, hatched, deliberately unappealing — it is
+      // a tax, and the board should not make it look like a prize.
+      ctx.fillStyle = ramp[0];
+      ctx.fillRect(ix, iy, is, is);
+      ctx.beginPath(); ctx.rect(ix, iy, is, is); ctx.clip();
+      ctx.strokeStyle = hi;
+      ctx.globalAlpha = dim * 0.30;
+      ctx.lineWidth = 1;
+      var gap = Math.max(3, s / 3);
+      for (var k = -is; k < is * 2; k += gap) {
+        ctx.beginPath();
+        ctx.moveTo(ix + k, iy + is); ctx.lineTo(ix + k + is, iy);
+        ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (purity <= 0) {
+      // Worked out: the ground remembers the tile, nothing is left in it.
+      ctx.globalAlpha = dim * 0.6;
+      ctx.strokeStyle = ramp[0];
+      ctx.lineWidth = 1;
+      ctx.strokeRect(ix + .5, iy + .5, is - 1, is - 1);
+      ctx.restore();
+      return;
+    }
+
+    if (lv === 3) {
+      // Pure. The whole suite is about whether an agent took these, so
+      // they get the only glow on the board.
+      ctx.shadowColor = code === "B" ? "#6bbcffaa" : "#ff7a4daa";
+      ctx.shadowBlur = s * 0.55;
+      ctx.fillStyle = ramp[3];
+      ctx.fillRect(ix, iy, is, is);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = code === "B" ? "#e8f5ff" : "#fff0e4";
+      ctx.globalAlpha = dim * 0.9;
+      var c = is * 0.30;
+      ctx.fillRect(ix + (is - c) / 2, iy + (is - c) / 2, c, c);
+      ctx.restore();
+      return;
+    }
+
+    ctx.fillStyle = ramp[lv];
+    ctx.fillRect(ix, iy, is, is);
+    ctx.beginPath(); ctx.rect(ix, iy, is, is); ctx.clip();
+
+    if (lv === 0) {                       // trace — sparse dither
+      ctx.fillStyle = hi;
+      ctx.globalAlpha = dim * 0.34;
+      var q = Math.max(1, is / 4);
+      ctx.fillRect(ix + q * 0.5, iy + q * 0.5, q, q);
+      ctx.fillRect(ix + q * 2.3, iy + q * 2.1, q, q);
+    } else if (lv === 1) {                // vein — hatched
+      ctx.strokeStyle = hi;
+      ctx.globalAlpha = dim * 0.30;
+      ctx.lineWidth = Math.max(1, is * 0.10);
+      var step = Math.max(3, is / 2.2);
+      for (var j = -is; j < is * 2; j += step) {
+        ctx.beginPath();
+        ctx.moveTo(ix + j, iy + is); ctx.lineTo(ix + j + is, iy);
+        ctx.stroke();
+      }
+    } else {                              // mass — solid core
+      ctx.fillStyle = hi;
+      ctx.globalAlpha = dim * 0.24;
+      ctx.fillRect(ix + is * 0.24, iy + is * 0.24, is * 0.52, is * 0.52);
+    }
+    ctx.restore();
+  }
+
+  // ── markers ────────────────────────────────────────────
+  function ring(px, py, r, stroke, fill, width) {
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, 6.2832);
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) {
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = width || 1.5;
+      ctx.stroke();
+    }
+  }
+
+  function bracket(x, y, colour, width) {
+    // Corner ticks rather than a full box: a box at 14px reads as a
+    // filled cell, ticks stay legible over terrain.
+    var px = X(x), py = Y(y), s = CELL, a = Math.max(3, s * 0.3);
+    ctx.strokeStyle = colour;
+    ctx.lineWidth = width || 1.5;
+    ctx.beginPath();
+    ctx.moveTo(px + .5, py + a); ctx.lineTo(px + .5, py + .5);
+    ctx.lineTo(px + a, py + .5);
+    ctx.moveTo(px + s - a, py + .5); ctx.lineTo(px + s - .5, py + .5);
+    ctx.lineTo(px + s - .5, py + a);
+    ctx.moveTo(px + s - .5, py + s - a); ctx.lineTo(px + s - .5, py + s - .5);
+    ctx.lineTo(px + s - a, py + s - .5);
+    ctx.moveTo(px + a, py + s - .5); ctx.lineTo(px + .5, py + s - .5);
+    ctx.lineTo(px + .5, py + s - a);
+    ctx.stroke();
+  }
+
+  function diamond(px, py, r) {
+    ctx.beginPath();
+    ctx.moveTo(px, py - r); ctx.lineTo(px + r, py);
+    ctx.lineTo(px, py + r); ctx.lineTo(px - r, py);
+    ctx.closePath();
+  }
+
+  var FONT = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+
+  function hourTag(px, py, text, colour) {
+    if (CELL < 13) return;
+    ctx.font = "600 " + Math.max(8, Math.round(CELL * 0.42)) +
+               "px " + FONT;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#05070a";
+    ctx.strokeText(text, px, py);
+    ctx.fillStyle = colour;
+    ctx.fillText(text, px, py);
+  }
+
+  // ── the board ──────────────────────────────────────────
+  function draw() {
+    var t = state.turn;
+    if (!t) return;
+    var g = gridOf(t), plan = state.plan;
+    var size = fit(g);
+    var step = state.step;
+
+    var sky = ctx.createLinearGradient(0, 0, 0, size.h);
+    sky.addColorStop(0, "#12101c");
+    sky.addColorStop(1, VOID);
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, size.w, size.h);
+
+    // Lattice. Two weights: a hairline every cell so the board has a
+    // grain, a brighter rule every five so a coordinate is countable.
+    ctx.lineWidth = 1;
+    for (var x = 0; x <= g.width; x++) {
+      ctx.strokeStyle = x % 5 === 0 ? "#1a1626" : "#13101d";
+      ctx.beginPath();
+      ctx.moveTo(X(x) + .5, GY); ctx.lineTo(X(x) + .5, Y(g.height));
+      ctx.stroke();
+    }
+    for (var y = 0; y <= g.height; y++) {
+      ctx.strokeStyle = y % 5 === 0 ? "#1a1626" : "#13101d";
+      ctx.beginPath();
+      ctx.moveTo(GX, Y(y) + .5); ctx.lineTo(X(g.width), Y(y) + .5);
+      ctx.stroke();
+    }
+
+    // Rulers.
+    ctx.font = "9px " + FONT;
+    ctx.fillStyle = "#3a4650";
+    ctx.textBaseline = "bottom";
+    ctx.textAlign = "center";
+    for (var rx = 0; rx < g.width; rx += 5) {
+      ctx.fillText(String(rx), X(rx) + CELL / 2, GY - 3);
+    }
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    for (var ry = 0; ry < g.height; ry += 5) {
+      ctx.fillText(String(ry), GX - 4, Y(ry) + CELL / 2);
+    }
+
+    // What the seat could see. Everything else is fogged.
+    var lit = null;
+    if (state.fog) {
+      lit = {};
+      (t.vision || []).forEach(function (c) { lit[key(c[0], c[1])] = 1; });
+    }
+    function seen(x, y) { return !lit || lit[key(x, y)]; }
+
+    // Redsign smears, under the terrain — a beacon is ground truth about
+    // the ground, not an object standing on it.
+    (t.redsigns || []).forEach(function (rs) {
+      var set = {};
+      (rs.cells || []).forEach(function (c) { set[key(c.x, c.y)] = 1; });
+      fillCells(set, "rgba(209,75,75,0.09)");
+      outline(set, "rgba(224,83,63,0.42)", 1, [4, 3]);
+      var px = X(rs.cx) + CELL / 2, py = Y(rs.cy) + CELL / 2;
+      ctx.save();
+      ctx.globalAlpha = 0.75;
+      diamond(px, py, Math.max(3, CELL * 0.30));
+      ctx.strokeStyle = "#e0533f";
+      ctx.lineWidth = 1.25;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // Terrain.
+    (g.cells || []).forEach(function (c) {
+      if (!RAMP[c[2]]) return;
+      paintCell(c[0], c[1], c[2], c[3], seen(c[0], c[1]) ? 1 : 0.45);
+    });
+
+    // Fog, as a wash rather than a blackout: the useful question is
+    // usually "did it act on something it could not see", and that needs
+    // both layers legible at once.
+    if (lit) {
+      ctx.save();
+      ctx.fillStyle = "rgba(6,8,14,0.46)";
+      for (var fy = 0; fy < g.height; fy++) {
+        for (var fx = 0; fx < g.width; fx++) {
+          if (!lit[key(fx, fy)]) ctx.fillRect(X(fx), Y(fy), CELL, CELL);
+        }
+      }
+      ctx.restore();
+      outline(lit, "rgba(127,212,193,0.30)", 1.25, null);
+      if (!(t.vision || []).length) {
+        ctx.save();
+        ctx.font = "600 12px " + FONT;
+        ctx.fillStyle = "#7fd4c199";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("THE SEAT SAW NOTHING AT ALL",
+                     GX + g.width * CELL / 2, GY + g.height * CELL / 2);
+        ctx.restore();
+      }
+    }
+
+    // EMP salvos: each missile is a Manhattan radius-2 cloud
+    // (weapons.EMP_RADIUS), so draw the cloud, not the pin.
+    plan.marks.forEach(function (mk) {
+      if (mk.k !== "emp") return;
+      var future = mk.h > step;
+      var set = {};
+      mk.cells.forEach(function (c) {
+        for (var dx = -2; dx <= 2; dx++) {
+          for (var dy = -2; dy <= 2; dy++) {
+            if (Math.abs(dx) + Math.abs(dy) <= 2) set[key(c[0] + dx, c[1] + dy)] = 1;
+          }
+        }
+      });
+      fillCells(set, future ? "rgba(122,184,255,0.06)" : "rgba(122,184,255,0.14)");
+      outline(set, future ? "rgba(122,184,255,0.30)" : "rgba(122,184,255,0.70)",
+              1.25, future ? [3, 3] : null);
+      mk.cells.forEach(function (c) {
+        var px = X(c[0]) + CELL / 2, py = Y(c[1]) + CELL / 2;
+        ctx.save();
+        ctx.globalAlpha = future ? 0.45 : 1;
+        ring(px, py, Math.max(2, CELL * 0.22), "#7ab8ff", null, 1.5);
+        ctx.strokeStyle = "#7ab8ff";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(px - CELL * 0.44, py); ctx.lineTo(px + CELL * 0.44, py);
+        ctx.moveTo(px, py - CELL * 0.44); ctx.lineTo(px, py + CELL * 0.44);
+        ctx.stroke();
+        ctx.restore();
+      });
+    });
+
+    // Walked paths. The whole night is drawn: dashed ahead of the
+    // playhead, solid behind it, so step 0 already shows the shape.
+    Object.keys(plan.paths).forEach(function (u) {
+      var path = plan.paths[u];
+      if (path.length < 2) return;
+      var mine = (plan.units[u] || {}).mine;
+      var ink = mine ? OWN : RIVAL;
+      ctx.save();
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+
+      ctx.setLineDash([3, 4]);
+      ctx.strokeStyle = mine ? "rgba(127,212,193,0.34)" : "rgba(232,163,60,0.30)";
+      ctx.lineWidth = Math.max(1, CELL * 0.09);
+      ctx.beginPath();
+      path.forEach(function (p, i) {
+        var px = X(p[0]) + CELL / 2, py = Y(p[1]) + CELL / 2;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      ctx.strokeStyle = ink;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = Math.max(1.5, CELL * 0.13);
+      ctx.beginPath();
+      var drawn = 0;
+      path.forEach(function (p, i) {
+        if (p[2] > step) return;
+        var px = X(p[0]) + CELL / 2, py = Y(p[1]) + CELL / 2;
+        if (drawn === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        drawn++;
+      });
+      if (drawn > 1) ctx.stroke();
+
+      // Direction, once per segment, so a doubled-back comb is readable.
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = ink;
+      for (var i = 1; i < path.length; i++) {
+        var a = path[i - 1], b = path[i];
+        var ax = X(a[0]) + CELL / 2, ay = Y(a[1]) + CELL / 2;
+        var bx = X(b[0]) + CELL / 2, by = Y(b[1]) + CELL / 2;
+        var mx = (ax + bx) / 2, my = (ay + by) / 2;
+        var ang = Math.atan2(by - ay, bx - ax);
+        var r = Math.max(2.2, CELL * 0.17);
+        ctx.save();
+        ctx.globalAlpha = b[2] > step ? 0.35 : 0.95;
+        ctx.translate(mx, my);
+        ctx.rotate(ang);
+        ctx.beginPath();
+        ctx.moveTo(r, 0); ctx.lineTo(-r * 0.75, r * 0.68);
+        ctx.lineTo(-r * 0.75, -r * 0.68);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    });
+
+    // Probes already on the board when the turn opened.
+    plan.pre.forEach(function (p) { drawProbe(p.x, p.y, p.mine, false, null); });
+
+    // Ordered markers.
+    plan.marks.forEach(function (mk) {
+      var future = mk.h > step;
+      if (mk.k === "probe") {
+        drawProbe(mk.x, mk.y, true, future, mk.h);
+      } else if (mk.k === "drop") {
+        ctx.save();
+        ctx.globalAlpha = future ? 0.55 : 1;
+        bracket(mk.x, mk.y, OWN, future ? 1.2 : 1.75);
+        ctx.restore();
+      } else if (mk.k === "pickup" && mk.x !== null) {
+        ctx.save();
+        ctx.globalAlpha = future ? 0.45 : 1;
+        var px = X(mk.x) + CELL / 2, py = Y(mk.y) + CELL / 2;
+        ring(px, py, CELL * 0.46, "#e0d17f", null, 1.4);
+        ctx.restore();
+      }
+    });
+
+    // Harvesters.
+    var st = stateAt(plan, step);
+    Object.keys(st.live).forEach(function (u) {
+      var e = st.live[u];
+      var ink = e.mine ? OWN : RIVAL;
+      var px = X(e.x), py = Y(e.y), m = Math.max(1.5, CELL * 0.20);
+      ctx.save();
+      ctx.shadowColor = e.mine ? "#7fd4c188" : "#e8a33c88";
+      ctx.shadowBlur = CELL * 0.5;
+      ctx.fillStyle = ink;
+      ctx.fillRect(px + m, py + m, CELL - m * 2, CELL - m * 2);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#04070a";
+      ctx.fillRect(px + CELL * 0.42, py + CELL * 0.42, CELL * 0.16, CELL * 0.16);
+      if (st.lifted[u]) {      // lifted = ringed, still on its last cell
+        ring(px + CELL / 2, py + CELL / 2, CELL * 0.46, "#ffffffcc", null, 1.4);
+      }
+      ctx.restore();
+    });
+
+    // The hour on the playhead.
+    var cur = (t.moves || [])[step - 1];
+    if (cur) {
+      var at = cur.at || cur.to;
+      if (at && !Array.isArray(at[0])) {
+        ctx.save();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.75;
+        ctx.shadowColor = "#ffffff99";
+        ctx.shadowBlur = 6;
+        ctx.strokeRect(X(at[0]) - 1.5, Y(at[1]) - 1.5, CELL + 3, CELL + 3);
+        ctx.restore();
+        hourTag(X(at[0]) + CELL / 2, Y(at[1]) - CELL * 0.42,
+                "H" + pad2(step), "#ffffff");
+      } else if (cur.a === "chaff_flare") {
+        banner("CHAFF \u2014 EVERY OTHER SEAT IS JAMMED THIS HOUR", "#d38ce0",
+               g, size);
+      }
+    }
+  }
+
+  function drawProbe(x, y, mine, future, h) {
+    var px = X(x) + CELL / 2, py = Y(y) + CELL / 2;
+    var r = Math.max(2.5, CELL * 0.30);
+    ctx.save();
+    ctx.globalAlpha = future ? 0.55 : 1;
+    diamond(px, py, r);
+    ctx.fillStyle = "#05070ad9";
+    ctx.fill();
+    ctx.strokeStyle = mine ? PROBE_INK : RIVAL;
+    ctx.lineWidth = future ? 1.2 : 1.6;
+    if (future) ctx.setLineDash([2, 2]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = mine ? PROBE_INK : RIVAL;
+    ctx.fillRect(px - 1, py - 1, 2, 2);
+    ctx.restore();
+    if (h && !future) hourTag(px, py - CELL * 0.72, "H" + pad2(h), PROBE_INK);
+  }
+
+  function banner(text, colour, g, size) {
+    ctx.save();
+    ctx.font = "600 11px " + FONT;
+    var w = ctx.measureText(text).width + 18;
+    var bx = GX + (g.width * CELL - w) / 2, by = GY + 6;
+    ctx.fillStyle = "#05070ae0";
+    ctx.fillRect(bx, by, w, 20);
+    ctx.strokeStyle = colour;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx + .5, by + .5, w - 1, 19);
+    ctx.fillStyle = colour;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, bx + w / 2, by + 10);
+    ctx.restore();
+  }
+
+  function pad2(n) { return String(n).length < 2 ? "0" + n : String(n); }
+
+  // ── tooltip ────────────────────────────────────────────
+  cv.addEventListener("mousemove", function (ev) {
+    var t = state.turn; if (!t) return;
+    var g = gridOf(t);
+    var r = cv.getBoundingClientRect();
+    var css = parseFloat(cv.style.width) || r.width;
+    var scale = (r.width - 2) / css;      // minus the 1px border each side
+    var x = Math.floor(((ev.clientX - r.left - 1) / scale - GX) / CELL);
+    var y = Math.floor(((ev.clientY - r.top - 1) / scale - GY) / CELL);
+    var tip = $("tip");
+    if (x < 0 || y < 0 || x >= g.width || y >= g.height) {
+      tip.style.display = "none";
+      return;
+    }
+    var cell = (state.cells || {})[key(x, y)];
+    var lines = ["(" + x + "," + y + ")"];
+    if (cell) {
+      var lv = band(cell[3]);
+      lines.push((TILE_NAME[cell[2]] || cell[2]) + "  " + GLYPH[lv] + " " +
+                 (BAND_NAME[cell[2]] || BAND_NAME.R)[lv] +
+                 "  purity " + cell[3]);
+    } else { lines.push("bare ground"); }
+    if ((t.vision || []).length) {
+      var live = (t.vision || []).some(function (c) {
+        return c[0] === x && c[1] === y;
+      });
+      lines.push(live ? "the seat could see this" : "fogged to the seat");
+    }
+    (t.redsigns || []).forEach(function (rs) {
+      if ((rs.cells || []).some(function (c) { return c.x === x && c.y === y; }))
+        lines.push("under redsign " + rs.id);
+    });
+    (state.plan.marks || []).forEach(function (mk) {
+      if (mk.x === x && mk.y === y) lines.push("H" + pad2(mk.h) + " " + mk.k);
+    });
+    tip.textContent = lines.join("\n");
+    tip.style.display = "block";
+    var wrapR = $("boardwrap").getBoundingClientRect();
+    var left = ev.clientX - wrapR.left + 14;
+    var top = ev.clientY - wrapR.top + 14;
+    tip.style.left = Math.min(left, wrapR.width - tip.offsetWidth - 6) + "px";
+    tip.style.top = Math.min(top, wrapR.height - tip.offsetHeight - 6) + "px";
+  });
+  cv.addEventListener("mouseleave", function () {
+    $("tip").style.display = "none";
+  });
+
+  // ── transport ──────────────────────────────────────────
+  function setStep(n) {
+    var t = state.turn; if (!t) return;
+    var max = (t.moves || []).length;
+    state.step = Math.max(0, Math.min(max, n));
+    $("scrub").value = state.step;
+    var m = (t.moves || [])[state.step - 1];
+    $("hour").textContent = state.step === 0
+      ? "before the turn \u00b7 " + max + " order(s) planned"
+      : "H" + pad2(state.step) + " / " + pad2(max) + "  \u00b7  " + describe(m);
+    Array.prototype.forEach.call(
+      document.querySelectorAll("ol.moves li"),
+      function (li, i) { li.classList.toggle("on", i === state.step - 1); }
+    );
+    draw();
+  }
+  function verb(m) { return (m && m.a) || "?"; }
+  function describe(m) {
+    if (!m) return "";
+    if (m.a === "chaff_flare") return "chaff_flare";
+    if (m.a === "emp_launch") {
+      return "emp_launch \u2192 " + ats(m).map(function (c) {
+        return "(" + c[0] + "," + c[1] + ")";
+      }).join(" ");
+    }
+    var at = m.at || m.to;
+    var where = at ? " \u2192 (" + at[0] + "," + at[1] + ")" : "";
+    return (m.a || "?") + (m.unit ? " " + m.unit : "") + where;
+  }
+  function stop() {
+    if (state.timer) { clearInterval(state.timer); state.timer = null; }
+    $("play").textContent = "\u25B6 PLAY";
+    $("play").classList.remove("on");
+  }
+  $("fog").onclick = function () {
+    state.fog = !state.fog;
+    this.classList.toggle("on", state.fog);
+    draw();
+  };
+  $("fwd").onclick  = function () { stop(); setStep(state.step + 1); };
+  $("back").onclick = function () { stop(); setStep(state.step - 1); };
+  $("scrub").oninput = function () { stop(); setStep(+this.value); };
+  $("play").onclick = function () {
+    if (state.timer) { stop(); return; }
+    if (state.step >= (state.turn.moves || []).length) setStep(0);
+    this.textContent = "\u25A0 STOP";
+    this.classList.add("on");
+    state.timer = setInterval(function () {
+      if (state.step >= (state.turn.moves || []).length) { stop(); return; }
+      setStep(state.step + 1);
+    }, 520);
+  };
+  window.addEventListener("resize", function () {
+    if (state.turn) draw();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (!state.turn) return;
+    var tag = (ev.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "select" || tag === "textarea") return;
+    if (ev.key === "ArrowRight") { stop(); setStep(state.step + 1); }
+    else if (ev.key === "ArrowLeft") { stop(); setStep(state.step - 1); }
+    else if (ev.key === " ") { ev.preventDefault(); $("play").onclick(); }
+    else if (ev.key === "f" || ev.key === "F") { $("fog").onclick(); }
+    else return;
+  });
+
+  // ── card ───────────────────────────────────────────────
+  function esc(s) {
+    return String(s === undefined || s === null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function section(title, inner, shut, note) {
+    return '<div class="sec' + (shut ? " shut" : "") + '">' +
+      '<h3><span>' + esc(title) + "</span>" +
+      (note ? '<span class="note">' + esc(note) + "</span>" : "") +
+      '<span class="tog">' + (shut ? "+" : "\u2212") + "</span></h3>" +
+      '<div class="body">' + inner + "</div></div>";
+  }
+  function asText(v) {
+    if (v === undefined || v === null) return "";
+    return typeof v === "string" ? v : JSON.stringify(v, null, 1);
+  }
+  function kb(s) {
+    var n = String(s == null ? "" : s).length;
+    return n > 2000 ? Math.round(n / 1024) + " KB" : n + " chars";
+  }
+  // Silence is a real doctrine, so say "rack untouched" rather than
+  // nothing — a blank means "no weapons in this loadout".
+  function firedText(r) {
+    var w = r.weapons_fired || {}, out = [];
+    Object.keys(w).forEach(function (k) {
+      if (w[k]) out.push(w[k] + "x " + k);
+    });
+    if (out.length) return out.join(", ");
+    return Object.keys(w).length ? "rack untouched" : "";
+  }
+
+  function renderCard() {
+    var t = state.turn, c = t.card || {}, r = t.result || {};
+    var bd = boardOf(t);
+    var checks = t.checks || [];
+    var won = checks.filter(function (k) { return k.passed; }).length;
+    var pct = Math.round((r.score || 0) * 100);
+    var ok = !!r.passed;
+    var h = "";
+
+    h += '<div class="verdict ' + (ok ? "p" : "f") + '">' +
+      '<div class="vs">' + pct + "%</div>" +
+      '<div class="vmeta"><div class="vlabel"><b>' +
+      (ok ? "PASS" : "FAIL") + "</b><span>" + won + " of " + checks.length +
+      " checks</span></div>" +
+      '<div class="vbar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="vsub">seat ' + esc(r.seat || "?") + " \u00b7 " +
+      (t.moves || []).length + " orders \u00b7 " +
+      (r.seconds ? r.seconds + "s" : "\u2014") +
+      (firedText(r) ? " \u00b7 " + esc(firedText(r)) : "") +
+      (c.plan_label ? " \u00b7 plan " + esc(c.plan_label) : "") +
+      (c.predicted_outcome
+        ? " \u00b7 predicted " + esc(asText(c.predicted_outcome)) : "") +
+      "</div></div></div>";
+
+    if (r.error) {
+      h += '<div class="warn"><b>CRASHED</b> \u2014 ' + esc(r.error) + "</div>";
+    }
+    if (r.fell_back) {
+      h += '<div class="warn"><b>FELL BACK</b> to the built-in heuristic ' +
+           "\u2014 the model was not reached, so this turn is not your " +
+           "agent's.</div>";
+    }
+
+    h += section("Situation",
+      '<div class="prose">' + esc(bd.question) + "</div>");
+
+    h += section("The canonical play",
+      '<div class="prose muted">' + esc(bd.canonical) + "</div>");
+
+    var chk = checks.map(function (k) {
+      return '<div class="chk ' + (k.passed ? "p" : "f") + '">' +
+        '<span class="m">' + (k.passed ? "PASS" : "FAIL") + "</span>" +
+        '<span><span class="n">' + esc(k.name) + "</span>" +
+        (k.detail ? '<div class="d">' + esc(k.detail) + "</div>" : "") +
+        "</span></div>";
+    }).join("") || '<div class="muted">no checks</div>';
+    h += section("Scored " + pct + "%", chk, false,
+                 ok ? "" : (checks.length - won) + " failing");
+
+    var moves = (t.moves || []).map(function (m, i) {
+      var v = verb(m);
+      var cls = "v-" + (v === "emp_launch" ? "emp"
+                : v === "chaff_flare" ? "chaff"
+                : ({ drop: 1, step: 1, probe: 1, pickup: 1 })[v] ? v : "other");
+      return '<li><span class="h">H' + pad2(i + 1) + '</span>' +
+        '<span class="v ' + cls + '">' + esc(v) + "</span>" +
+        "<span>" + esc(describe(m).replace(v, "").trim()) + "</span></li>";
+    }).join("");
+    h += section("Orders issued", moves
+      ? '<ol class="moves">' + moves + "</ol>"
+      : '<div class="muted">it ordered nothing</div>',
+      false, (t.moves || []).length + " hours");
+
+    var diff = c.corrections_diff || [];
+    if (diff.length) {
+      h += section("Corrections", diff.map(function (d) {
+        return '<div class="chk f"><span class="m">' + esc(d.kind) +
+          '</span><span><span class="n">#' + d.index + "</span>" +
+          '<div class="d">proposed: ' + esc(asText(d.proposed)) +
+          "<br>played: " + esc(asText(d.played)) + "</div></span></div>";
+      }).join(""), false,
+        "the compiler changed " + diff.length);
+    } else if (c.proposed_moves) {
+      h += section("Corrections",
+        '<div class="muted">none \u2014 what it ordered is what was played' +
+        "</div>", true, "clean");
+    }
+
+    if (c.options_offered) {
+      var chosen = (c.options_chosen || []).map(function (o) {
+        return '<span class="pill on">' + esc(o) + "</span>";
+      }).join("");
+      h += section("Options \u2014 the menu it chose from",
+        (chosen ? '<div style="margin-bottom:7px">chose ' + chosen + "</div>" : "") +
+        "<pre>" + esc(asText(c.options_offered)) + "</pre>", true,
+        (c.options_chosen || []).length + " chosen");
+    }
+    if (c.reasoning) {
+      h += section("Reasoning", "<pre>" + esc(asText(c.reasoning)) + "</pre>",
+                   false, kb(asText(c.reasoning)));
+    }
+    if (c.directive) {
+      h += section("Plan directive",
+        "<pre>" + esc(asText(c.directive)) + "</pre>", true,
+        kb(asText(c.directive)));
+    }
+    if (c.prompt) {
+      // Collapsed, capped and scrollable: this is routinely 90k chars and
+      // it must never be able to push the panel around.
+      h += section("The prompt it was given",
+        '<pre class="tall">' + esc(asText(c.prompt)) + "</pre>", true,
+        kb(asText(c.prompt)));
+    }
+    if (!c.prompt && !c.reasoning) {
+      h += section("Card",
+        '<div class="muted">This agent does not produce a card \u2014 a ' +
+        "heuristic has no prompt and no reasoning to show. Its rationale:" +
+        "</div><pre style=\"margin-top:7px\">" +
+        esc(r.rationale || "(none)") + "</pre>");
+    }
+
+    h += section("The rung and the loadout",
+      '<dl class="kv">' +
+      "<dt>rung</dt><dd>" + esc(t.rung.summary || t.rung.id) + "</dd>" +
+      (t.rung.teaches
+        ? "<dt>teaches</dt><dd>" + esc(t.rung.teaches) + "</dd>" : "") +
+      "<dt>loadout</dt><dd>" + esc(t.loadout.note || t.loadout.id) + "</dd>" +
+      (bd.observation
+        ? "<dt>observed</dt><dd>" + esc(bd.observation) + "</dd>" : "") +
+      "</dl>", true);
+
+    h += section("What stock V12 did",
+      '<div class="prose muted">' + esc(bd.baseline || "\u2014") +
+      "</div>", true);
+
+    $("card").innerHTML = h;
+
+    Array.prototype.forEach.call($("card").querySelectorAll(".sec h3"),
+      function (hd) {
+        hd.onclick = function () {
+          var sec = hd.parentNode;
+          sec.classList.toggle("shut");
+          var tog = hd.querySelector(".tog");
+          if (tog) tog.textContent =
+            sec.classList.contains("shut") ? "+" : "\u2212";
+        };
+      });
+    Array.prototype.forEach.call($("card").querySelectorAll("ol.moves li"),
+      function (li, i) { li.onclick = function () { stop(); setStep(i + 1); }; });
+  }
+
+  // ── selection ──────────────────────────────────────────
+  function selectTurn(i) {
+    stop();
+    state.turn = state.bake.turns[i];
+    var t = state.turn, bd = boardOf(t);
+    state.plan = derive(t);
+    state.cells = indexCells(t);
+    $("title").textContent = t.board;
+    var bits = [
+      t.rung.id, t.loadout.id, "run " + t.run_index,
+      "day " + bd.day + "/" + bd.season_day_cap,
+    ];
+    $("subtitle").innerHTML =
+      bits.map(function (b) { return "<em>" + esc(b) + "</em>"; })
+          .join('<span class="dot">\u00b7</span>') +
+      (bd.shape ? '<span class="dot">\u00b7</span>' + esc(bd.shape) : "");
+    $("scrub").max = (t.moves || []).length;
+    Array.prototype.forEach.call(document.querySelectorAll(".turn"),
+      function (el, n) { el.classList.toggle("sel", n === i); });
+    renderCard();
+    setStep(0);
+    requestAnimationFrame(draw);
+  }
+
+  function renderRail() {
+    var h = "", last = null, turns = state.bake.turns;
+    turns.forEach(function (t, i) {
+      if (t.board !== last) {
+        var group = turns.filter(function (o) { return o.board === t.board; });
+        var won = group.filter(function (o) {
+          return (o.result || {}).passed;
+        }).length;
+        var cls = won === group.length ? "allp" : won === 0 ? "anyf" : "";
+        h += '<div class="grp"><span class="gname">' + esc(t.board) +
+          '</span><span class="gcount ' + cls + '">' + won + "/" +
+          group.length + "</span></div>";
+        last = t.board;
+      }
+      var ok = (t.result || {}).passed;
+      var pct = Math.round(((t.result || {}).score || 0) * 100);
+      h += '<div class="turn ' + (ok ? "p" : "f") + '" data-i="' + i + '">' +
+        '<span class="mk ' + (ok ? "p" : "f") + '"></span>' +
+        '<span class="st">' + (ok ? "PASS" : "FAIL") + "</span>" +
+        '<span class="nm">' + esc(t.rung.id + " + " + t.loadout.id) +
+        (t.run_index ? " #" + t.run_index : "") + "</span>" +
+        '<span class="sc">' + pct + "%</span>" +
+        '<span class="bar"><i style="width:' + pct + '%"></i></span></div>';
+    });
+    $("rail").innerHTML = h;
+    Array.prototype.forEach.call($("rail").querySelectorAll(".turn"),
+      function (el) {
+        el.onclick = function () { selectTurn(+el.dataset.i); };
+      });
+  }
+
+  function openBake(id) {
+    loadBake(id, function (bake) {
+      if (!bake) {
+        $("rail").innerHTML = '<div class="empty">could not load</div>';
+        return;
+      }
+      state.bake = bake;
+      var pass = bake.turns.filter(function (t) {
+        return (t.result || {}).passed;
+      }).length;
+      var rate = bake.turns.length
+        ? Math.round(pass / bake.turns.length * 100) : 0;
+      $("tally").innerHTML =
+        "<b>" + esc(bake.agent) + "</b>" +
+        '<span class="ratio"><i>' + pass + "</i>/" + bake.turns.length +
+        " turns clean \u00b7 " + rate + "%</span>" +
+        "<span>" + new Date(bake.created * 1000).toLocaleString() + "</span>";
+      renderRail();
+      if (bake.turns.length) selectTurn(0);
+    });
+  }
+
+  // ── boot ───────────────────────────────────────────────
+  if (!INDEX.length) {
+    document.querySelector("main").innerHTML =
+      '<div class="empty" style="margin:auto">' +
+      "No bakes yet.<br><br>" +
+      "python scripts/soc.py suite --agent &lt;yours&gt; --record</div>";
+  } else {
+    $("bake").innerHTML = INDEX.map(function (b) {
+      return '<option value="' + esc(b.id) + '">' +
+        esc(b.agent) + " \u00b7 " + esc(b.id) +
+        " (" + b.passed + "/" + b.turns + ")</option>";
+    }).join("");
+    $("bake").onchange = function () { openBake(this.value); };
+    openBake(INDEX[0].id);
+  }
+})();
+</script>
+</body>
+</html>

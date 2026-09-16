@@ -1,0 +1,78 @@
+================================================================
+commit 2026-08-22T10:20:16.673Z
+  2 field(s) changed
+================================================================
+
+--- mn-edit:loop:0:body
++ When the game begins the board is fully dark, this is called **fog**. The planet is only harvestable during the night (**Nox**). At dawn (**Aurora**) the sun incinerates anything left on the surface.
++ 
+
+--- mn-edit:loop:0:cite
++ "Harvesting the planet presents two unique challenges to the Houses: Firstly, the planet is covered in magnetic resonance making orbital scan impossible. Secondly, the planet's proximity to the sun makes the establishing of any permanent structure on the surface impossible."  §3.2 · Nox / Aurora cycle
+================================================================
+commit 2026-08-22T10:21:57.688Z
+  2 field(s) changed
+================================================================
+
+--- mn-edit:loop:1:body
++ Fog needs to be dispersed with vision from **probes** to reveal what is underneath.
+
+--- mn-edit:loop:1:cite
++ "The magnetic cover hides everything. Orbital sensors read a blank rectangle." §0.4 · magnetic cover
+================================================================
+commit 2026-08-22T10:25:10.692Z
+  2 field(s) changed
+================================================================
+
+--- mn-edit:loop:2:body
++ An probe launched from orbit that reveals a radius of 4 squares. Once the probe has landed, the visible squares are **LIVE** vision- this means harvesters can land.
+
+--- mn-edit:loop:2:cite
++ "A ballistic · punches through the cover. Its landing point becomes a live Euclidean-radius-4 disk (~49 tiles)." §3.9 · §3.11 · §3.15
+================================================================
+commit 2026-08-22T10:31:18.241Z
+  1 field(s) changed
+================================================================
+
+--- mn-edit:loop:2:body
+- An probe launched from orbit that reveals a radius of 4 squares. Once the probe has landed, the visible squares are **LIVE** vision- this means harvesters can land.
++ An probe launched from orbit that reveals a radius of 4 squares. Once the probe has landed, the visible squares are **LIVE** vision- this means harvesters can land. Because the probe is launched through orbit, its destination is visible to all players.
+================================================================
+commit 2026-08-22T10:32:19.461Z
+  1 field(s) changed
+================================================================
+
+--- mn-edit:loop:2:cite
+- "A ballistic · punches through the cover. Its landing point becomes a live Euclidean-radius-4 disk (~49 tiles)." §3.9 · §3.11 · §3.15
++ "A ballistic · punches through the cover at high velocity. It's vector, and landing co-ordinate can be computed by all" §3.9 · §3.11 · §3.15
+================================================================
+commit 2026-08-22T10:35:18.960Z
+  2 field(s) changed
+================================================================
+
+--- mn-edit:loop:3:body
++ A harvester is the only way to extract red from the planet surface, but it needs to be delivered and picked up by orbital lifter (**Orblift**). The orblift needs LIVE vision to **DROP** a harvester and clear co-ordinates, but can always pickup harvester (**LIFT**), it does not need a destination.
+
+--- mn-edit:loop:3:cite
++ "An orblift bends the harvester X through the magnetic cover onto a live tile — rivals can't track it." §0.4 · §3.9.7 · live_only drop mode
+================================================================
+commit 2026-08-22T10:38:59.052Z
+  1 field(s) changed
+================================================================
+
+--- mn-edit:loop:2:body
+- An probe launched from orbit that reveals a radius of 4 squares. Once the probe has landed, the visible squares are **LIVE** vision- this means harvesters can land. Because the probe is launched through orbit, its destination is visible to all players.
++ An probe launched from orbit that reveals a radius of 4 squares. Once the probe has landed, the visible squares are **LIVE** vision- this means harvesters can land. Because the probe is launched through orbit, its destination is visible to all players. Probes are launched with the **PROBE** action and require a co-ordinate and available stock of probes. You begin the first night with 2, but must continue to build throughout the game.
+================================================================
+commit 2026-08-22T11:12:03.366Z
+  3 field(s) changed
+================================================================
+
+--- mn-edit:loop:4:body
++ Once on the ground the harvester automatically collects (**Harvests**) whatever it landed on. It can then be issued movement instructions in **STEP** actions, these require clear co-ordinates. Harvesters only move up/down/left/right and require clear co-ordinates. Any unreachable co-ordinate issued is automatically rejected by the game as illegal once your policy is submitted, so it is possible to make one error in co-ordinates that then invalidates a whole chain of steps! Harvesters automatically harvest any square they step onto, be that red, blue or green. Harvested red turns to green (called synthetic-green to differentiate it from green that was naturally on the board at the start) meaning any other harvester stepping into that square is penalised. 
+
+--- mn-edit:loop:4:cite
++ "Harvester walks up to 5 tiles — cardinal only. Every coloured tile it enters is picked up (hold cap 6)." §3.9 · Manhattan-1 movement
+
+--- mn-edit:loop:5:cite
++ "Orblift returns for the loaded harvester. Only picked-up parcels bank to the vault (stranded loads are lost at Aurora)." §3.10 · §3.13 · §3.1

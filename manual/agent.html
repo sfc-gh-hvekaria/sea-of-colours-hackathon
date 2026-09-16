@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sea_of_colours · agent &amp; harness</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <!-- manual.css owns the look; agent.css is the scroll-layout delta. -->
+    <link rel="stylesheet" href="./manual.css" />
+    <link rel="stylesheet" href="./agent.css" />
+  </head>
+  <body>
+    <div class="ag-viewport">
+      <header class="mn-header ag-header">
+        <span class="prompt-sigil">$</span>
+        <span class="prompt-cmd">sea_of_colours</span>
+        <span class="dim mn-subhead">· agent &amp; harness · tabula_v12</span>
+        <span class="prompt-caret">_</span>
+        <span class="mn-spacer"></span>
+        <span class="dim mn-hint" id="ag-hint"># one real turn, taken apart</span>
+        <a class="mn-btn" href="./index.html" style="text-decoration:none">[ ← PLAYER MANUAL ]</a>
+      </header>
+
+      <div class="ag-body">
+        <!-- ── nav rail ──────────────────────────────────────────── -->
+        <nav class="ag-nav" id="ag-nav" aria-label="Sections">
+          <div class="ag-nav-title">CONTENTS</div>
+          <div class="ag-nav-band">START HERE</div>
+          <a href="#s00"><span class="n">00</span>How a turn works</a>
+          <div class="ag-nav-band">PLAIN</div>
+          <a href="#s01"><span class="n">01</span>It is all text</a>
+          <a href="#s02"><span class="n">02</span>One night, end to end</a>
+          <a href="#s03"><span class="n">03</span>What it can see</a>
+          <a href="#s04"><span class="n">04</span>What it cannot see</a>
+          <div class="ag-nav-band">HOW IT DECIDES</div>
+          <a href="#s05"><span class="n">05</span>The value pyramid</a>
+          <a href="#s06"><span class="n">06</span>The option menu</a>
+          <a href="#s07"><span class="n">07</span>The card</a>
+          <a href="#s08"><span class="n">08</span>Think, then commit</a>
+          <div class="ag-nav-band">MACHINERY</div>
+          <a href="#s09"><span class="n">09</span>The packager</a>
+          <a href="#s10"><span class="n">10</span>Reaching the engine</a>
+          <a href="#s11"><span class="n">11</span>Memory</a>
+          <a href="#s12"><span class="n">12</span>Where the Python is</a>
+        </nav>
+
+        <!-- ── content ───────────────────────────────────────────── -->
+        <main id="ag-main">
+          <!-- 00 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s00">
+            <h2><span class="ag-num">00</span> Start here</h2>
+            <p class="ag-lede">
+              A plain-English walkthrough of how an AI takes a turn in this game, for
+              someone who has never wired a language model into anything. No prior
+              knowledge assumed. Everything after this section goes deeper on one piece
+              of it.
+            </p>
+
+            <h3>What the "AI" actually is</h3>
+            <p>
+              It is a <b>frontier model</b> — the same kind of general-purpose language
+              model behind a chat assistant. It was trained on text from the open world.
+              It has never seen this game, has no idea it is playing one, and cannot look
+              at anything. It has exactly one ability: <em>you give it text, and it gives
+              you text back</em>.
+            </p>
+            <p>
+              That is a strange thing to put in charge of a strategy game, so the
+              interesting engineering is not the model at all. It is the layer that
+              translates a live game into words the model can reason about, and translates
+              its answer back into legal moves. That layer is called the <b>harness</b>,
+              and it is ordinary Python.
+            </p>
+
+            <h3>Three parties, and what passes between them</h3>
+            <div class="ag-bridge" id="s00-bridge"></div>
+            <p>
+              Everything crossing those arrows is text. The model is stateless — it
+              remembers nothing between turns, cannot call functions, cannot query the
+              game, and never touches the board. If it is not written into the words the
+              harness sends, the model does not know it.
+            </p>
+
+            <h3>The whole turn, in one line</h3>
+            <p>
+              Blue is the game engine, green is our Python, amber is the model. That
+              colour code holds for the rest of the guide. Click any box to jump to it.
+            </p>
+            <div class="ag-mini" id="s00-mini"></div>
+            <div class="ag-mini-loop">
+              &#8630; and then the sun rises, and it happens again — seven nights to a season
+            </div>
+
+            <h3>The same thing, slowly</h3>
+            <p>
+              Now the long version. Each step below says who is acting, in their colour,
+              and shows the real thing that step produced on the night this whole guide
+              takes apart.
+            </p>
+            <div class="ag-steps" id="s00-steps"></div>
+
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                The model is one box in a nine-box loop, and it never touches the game. It
+                is handed a carefully written document and asked to pick from a list. The
+                skill in building an agent like this is almost entirely in the two green
+                boxes either side of it — deciding what it gets to know, and guaranteeing
+                that whatever it answers turns into a legal move.
+              </p>
+            </div>
+          </section>
+
+          <!-- 01 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s01">
+            <h2><span class="ag-num">01</span> It is all text</h2>
+            <p class="ag-lede">
+              There is no vision model, no board renderer, no grid of pixels anywhere in
+              the agent. Once a night, a Python program writes a long plain-text document,
+              sends it to a language model, and reads a short reply. Everything the agent
+              believes, wants and decides passes through those two pieces of text.
+            </p>
+            <p>
+              This guide takes apart <em>one real night</em> — day 4 of a 7-day season,
+              seat p1, playing against one opponent. It is a good specimen because most of
+              the machinery fires at once: p1 has found a pure seam of its own, a rival has
+              broadcast a second one across the map, and there are two harvesters and three
+              probes to spend on both.
+            </p>
+            <div class="ag-stat-row" id="s01-stats"></div>
+            <p>
+              Look at the shape of that first number. The document handed to the model is
+              about eighty-five thousand characters, and here is how it divides up.
+            </p>
+            <div id="s01-split"></div>
+            <p>
+              Almost none of it is the board. The rules and the doctrine — how the game
+              works and how it ought to be played — take about three fifths of the page, and
+              they are close to identical every night. The next largest block is the menu of
+              plays the harness has already worked out and priced. The <em>state of the
+              world</em>, the thing that actually changed since yesterday, is roughly a tenth
+              of what gets sent; the memory of last night is smaller still, and the question
+              itself is barely one percent.
+            </p>
+            <p>
+              And the part of that describing what the agent can see right now is smaller
+              still. Here it is in full — not an excerpt, the entire live view of the world
+              at the moment of decision:
+            </p>
+            <div id="s01-worldview"></div>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                Seventeen lines. A 40&times;28 board holds 1,120 cells, and on this night the
+                agent could see the contents of seventeen of them. Everything else it does —
+                every gamble, every walk, every attack on a rival — is reasoning over fog.
+              </p>
+            </div>
+          </section>
+
+          <!-- 02 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s02">
+            <h2><span class="ag-num">02</span> One night, end to end</h2>
+            <p class="ag-lede">
+              The night is a pipeline. The engine hands the harness a fogged view of the
+              board; the harness turns that into a document; the model reads it twice, once
+              to reason and once to commit; a compiler turns the commitment into legal
+              moves; and the moves go back to the engine. Click any stage to see what it
+              does and which file owns it.
+            </p>
+            <div class="ag-flow" id="s02-flow"></div>
+            <div id="s02-detail"></div>
+            <h3>Two passes, not one</h3>
+            <p>
+              The model is asked twice. The first pass — <b>THINK</b> — is prose only: no
+              JSON, no commitment, just reasoning about what is on the board and what the
+              night is for. The second pass — <b>PLAN</b> — receives that reasoning back
+              and must answer in strict JSON with the options it is choosing.
+            </p>
+            <p>
+              Splitting them is what stops the two jobs interfering. A model asked to
+              reason and emit schema-valid JSON in one breath tends to do both badly: the
+              reasoning gets clipped to fit the format, and the format gets broken by the
+              reasoning. Here the THINK pass has room to be wrong out loud, and the PLAN
+              pass has almost nothing to do except decide.
+            </p>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                The model occupies two boxes of this diagram. Everything to the left of it
+                is the harness deciding what the model is allowed to know, and everything to
+                the right is the harness deciding what it is allowed to do.
+              </p>
+            </div>
+          </section>
+
+          <!-- 03 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s03">
+            <h2><span class="ag-num">03</span> What it can actually see</h2>
+            <p class="ag-lede">
+              This is the board on the night in question — first as the engine holds it,
+              then as p1 receives it. The gap between the two is the whole game.
+            </p>
+            <div class="ag-stage">
+              <div class="mn-board-host" id="s03-board"></div>
+              <div class="ag-stage-side">
+                <div class="mn-stage-caption">
+                  <div class="mn-stage-label" id="s03-label">ENGINE TRUTH</div>
+                  <div class="mn-stage-body" id="s03-text"></div>
+                </div>
+                <div class="ag-legend" id="s03-legend"></div>
+              </div>
+            </div>
+            <div id="s03-controls"></div>
+            <h3>Vision is a set of circles</h3>
+            <p>
+              Live sight is not a radius around your units — harvesters are blind. It is
+              exactly the union of your probes' vision disks, and a probe covers a
+              Euclidean radius of four. On this night p1 has <b>one</b> probe still
+              standing, at (27,17), with one night of life left in it. That single disk is
+              the entirety of p1's live vision: 49 cells out of 1,120.
+            </p>
+            <p>
+              Everything outside it falls into one of two states. <b>Echo</b> is ground
+              this seat has seen before and no longer watches — exact coordinates, but a
+              reading that could be days stale and may since have been stripped by someone
+              else. <b>Fog</b> is ground it has never seen at all. Both are still walkable;
+              you simply move through them without knowing what you are stepping on.
+            </p>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                Probes buy sight, and sight is scarce and expiring. Most of what looks like
+                a bad decision by the agent turns out, on inspection, to be a reasonable
+                decision made inside one small circle.
+              </p>
+            </div>
+          </section>
+
+          <!-- 04 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s04">
+            <h2><span class="ag-num">04</span> What it knows but cannot see</h2>
+            <p class="ag-lede">
+              If sight were all there was, the game would be a slow crawl behind a probe.
+              It is not, because of one broadcast rule: <em>when any house finds a cell of
+              pure red, everybody is told</em>. That single mechanic is what makes the game
+              a race rather than a parallel solitaire.
+            </p>
+            <p>
+              But the broadcast is deliberately blurred. You are given a smear of weighted
+              cells and an off-centre point, never the square. On this night there are two
+              live signs — p1's own, and the rival's forty cells away. Below, the smear each
+              one broadcasts is drawn over the true position of the pure it is pointing at.
+            </p>
+            <div class="ag-stage">
+              <div class="mn-board-host" id="s04-board"></div>
+              <div class="ag-stage-side">
+                <div class="mn-stage-caption">
+                  <div class="mn-stage-label" id="s04-label">THE SMEAR</div>
+                  <div class="mn-stage-body" id="s04-text"></div>
+                </div>
+                <div class="ag-legend" id="s04-legend"></div>
+              </div>
+            </div>
+            <div id="s04-controls"></div>
+            <p>
+              Note how far the broadcast centre sits from the actual pure. That offset is
+              not noise in the data — it is the design. A sign tells every seat roughly
+              where to race; it does not tell anyone where to land.
+            </p>
+            <h3>How the agent is told about it</h3>
+            <p>
+              All of this arrives as a block of text under the world view, and the wording
+              works hard to keep the two kinds of knowledge apart, because confusing them
+              is expensive: treating a smear as a coordinate means dropping a harvester on
+              empty ground.
+            </p>
+            <div id="s04-oog"></div>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                A sign gives you an <b>area</b> and a deadline. An echo gives you an exact
+                <b>square</b> and a doubt. The agent's hardest decisions are almost all
+                about which of those two to act on tonight.
+              </p>
+            </div>
+          </section>
+
+          <!-- 05 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s05">
+            <h2><span class="ag-num">05</span> The value pyramid</h2>
+            <p class="ag-lede">
+              Before the model is asked anything, the harness ranks everything worth having
+              on the board. This is the value pyramid, and its job is to guarantee that the
+              obvious play is always on the menu.
+            </p>
+            <p>
+              It exists because of a specific failure. An earlier version could see a pure
+              cell and offer no way to take it: the pure was not wrapped in a redsign
+              pattern, so it fell through every precondition-gated branch in the option
+              machinery and the night banked nothing. Value and reachability were being
+              computed implicitly across five modules with no shared model. So the top of
+              the pyramid was made explicit and, importantly, <em>unconditional</em>:
+            </p>
+            <div class="ag-pyramid" id="s05-pyramid"></div>
+            <p>
+              The ranking is by provenance as much as by worth. <b>Live</b> means a probe
+              is on it right now. <b>Echo</b> means this seat saw it and looked away — the
+              engine tags each cell's freshness directly, so this is read, not guessed.
+              <b>Expected</b> means nobody has seen it and only a sign suggests it is
+              there.
+            </p>
+            <p>
+              A live pure outranks an echo pure because nobody can have taken it behind
+              your back. An echo pure outranks visible mass because 255 at the pure
+              multiplier is worth 765 points, and no amount of mass on a six-cell walk
+              catches that. Below those, it is ordinary arithmetic.
+            </p>
+            <h3>What it produced on this night</h3>
+            <p>
+              p1's own pure at (31,18) was in echo — seen on day 3, now outside the probe
+              disk — and there was a live cell adjacent enough to walk in from. That is
+              tier two, so the pyramid forced a walk-in grab onto the menu whatever else
+              the seam machinery decided to offer.
+            </p>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                The pyramid is not advice to the model — it is a floor under the menu. Its
+                promise is that if a pure is takeable tonight, some option on the card takes
+                it, no matter which other subsystem did or did not fire.
+              </p>
+            </div>
+          </section>
+
+          <!-- 06 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s06">
+            <h2><span class="ag-num">06</span> The option menu</h2>
+            <p class="ag-lede">
+              This is the hinge of the whole design. The model is never asked "where should
+              the harvester go?". It is handed a numbered list of fully-formed plays, each
+              with its route already drawn and priced, and asked which ones to run and in
+              what order. It answers with identifiers. It never composes a coordinate.
+            </p>
+            <p>
+              The reason is reliability. A language model asked for coordinates will
+              occasionally produce a beautiful plan that walks through a wall, off the map,
+              or onto ground it cannot legally drop on — and the failure is silent, because
+              the plan reads perfectly. Precomputing the geometry moves that entire class of
+              error out of the model's reach. What is left for the model is the part it is
+              actually good at: weighing a sure thing against a gamble.
+            </p>
+            <div id="s06-preamble"></div>
+            <h3>The thirteen plays offered on this night</h3>
+            <p>
+              Click any option to open it. The three highlighted in green are the ones the
+              model went on to choose.
+            </p>
+            <div id="s06-options"></div>
+            <h3>What each option carries</h3>
+            <p>
+              Every entry is priced before the model sees it: the exact walk, the expected
+              yield broken down by tier, whether any of that yield is echo rather than
+              live, whether it double-counts a cell another option also claims, what it
+              crushes, and a collision-risk note that names who else can reach it.
+            </p>
+            <p>
+              The double-count warning matters more than it looks. Four separate options on
+              this card end on the same pure at (31,18). Their yields cannot be added — the
+              first one there banks it and the rest arrive at stripped green worth
+              <code>-100</code> a cell. Saying so explicitly is cheaper than hoping the
+              model notices.
+            </p>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                The menu is authoritative for what is <b>legal</b>, but it is not the whole
+                board — it deliberately does not surface everything the world view and the
+                signs contain. The model is told to use those to choose <em>between</em>
+                options and to trim them, never to invent new ones.
+              </p>
+            </div>
+          </section>
+
+          <!-- 07 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s07">
+            <h2><span class="ag-num">07</span> The card</h2>
+            <p class="ag-lede">
+              Everything so far has been a piece of one document. This is the document. The
+              harness calls it the <em>card</em>: one page per turn holding exactly what the
+              model was given, what it wrote back, and what that compiled to.
+            </p>
+            <p>
+              The card exists because a season night happens once. The audit table truncates
+              the stored prompt at 32&nbsp;KB, which on a card this size does not even reach
+              the option menu, and the board cannot be reconstructed afterwards without
+              replaying the whole season. Without the card, a bad decision is
+              unexaminable — you can see what the agent did but never what it was looking
+              at when it decided.
+            </p>
+            <h3>What is on it</h3>
+            <div id="s07-anatomy"></div>
+            <p>
+              The proportions are worth dwelling on. The rules and doctrine are nearly
+              static — the same text most nights, and the place where strategy gets taught.
+              The board and the memory are what change nightly, and together they are about
+              a sixth of the page. The option menu, sitting physically inside the
+              last-night section, is bigger than both of them combined, because it carries
+              thirteen fully-priced plays.
+            </p>
+            <p>
+              The question at the end is 1% of the document. By the time the model reaches
+              it, the work of framing the decision has already been done.
+            </p>
+            <h3>Read it yourself</h3>
+            <p>
+              Below is the real prompt from this turn, verbatim and complete. It is a long
+              scroll — that is the point. Every night, this is what the agent wakes up to.
+            </p>
+            <div id="s07-full"></div>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                Most of the engineering effort in this agent is not in the model call. It is
+                in deciding what goes on this page, in what order, and in what words —
+                because that is the entire mechanism by which the agent is steered.
+              </p>
+            </div>
+          </section>
+
+          <!-- 08 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s08">
+            <h2><span class="ag-num">08</span> Thinking, then committing</h2>
+            <p class="ag-lede">
+              Here is what came back. On the left, the reasoning pass, in the model's own
+              words. On the right, the JSON it committed to afterwards. This is the entire
+              output of the agent for the night — a few hundred words and one object.
+            </p>
+            <div class="ag-cols is-pair" id="s08-pair"></div>
+            <h3>What the reasoning is doing</h3>
+            <p>
+              Read the THINK pass and you can see it working through the same structure the
+              card laid out. It reflects on last night and correctly attributes the probe
+              losses to the EMP. It reads both signs, tags its own with the doctrine's
+              label — <code>CASE 1, mine=true</code> — and notes that the rival's at (17,6)
+              is fogged to it but lit by their probe at (16,9). It counts its remaining
+              vision: one disk, one night left. Then it makes the call that decides the
+              turn: <em>secure my own pure first, then attack theirs with the second
+              harvester</em>.
+            </p>
+            <p>
+              That ordering is not incidental. Both signs are public, so both seats know
+              about both pures, and the seat that arrives first at a cell takes it while the
+              second arrives at stripped ground worth <code>-100</code>. Tempo is the
+              currency, and the model is explicitly reasoning about it.
+            </p>
+            <h3>What the commitment contains</h3>
+            <div id="s08-fields"></div>
+            <p>
+              Note that <code>plan</code> is just three strings. That is the entire
+              instruction to the game — no coordinates, no hours, no unit assignments. The
+              rest of the JSON is bookkeeping: a posture, a read of the situation, and two
+              pieces of prose written for the agent's own future self, which is what
+              section 11 is about.
+            </p>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                The model's job is compressed to almost nothing: pick three identifiers from
+                a menu of thirteen and put them in order. Everything that makes that a
+                <em>good</em> three came before it, in how the menu was built and priced.
+              </p>
+            </div>
+          </section>
+
+          <!-- 09 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s09">
+            <h2><span class="ag-num">09</span> The packager</h2>
+            <p class="ag-lede">
+              Three identifiers go in. Fifteen concrete moves come out. The packager is the
+              compiler between the model's intent and the engine's wire format, and the
+              most important thing about it is what it is <em>not</em> allowed to do.
+            </p>
+            <div id="s09-expand"></div>
+            <h3>Legality, not authorship</h3>
+            <p>
+              The packager may refuse anything the engine would reject: a drop on a cell
+              with no live coverage, a step onto ground known to be stripped, a run for a
+              harvester that does not exist, a probe when the stock is empty, a walk past
+              the hold cap, more than 21 moves. It also reorders runs so that a probe
+              bought to make a drop legal lands before the drop that needs it.
+            </p>
+            <p>
+              It must <b>not</b> shorten a route because the route looks dangerous, swap a
+              target it disagrees with, or quietly drop a play it thinks is unwise. When it
+              disagrees, it reports and keeps.
+            </p>
+            <p>
+              That line is load-bearing rather than stylistic. A compiler that silently
+              edits plans makes the agent's reasoning unfalsifiable: you can no longer tell
+              a bad decision from a good decision that was overwritten, so every subsequent
+              diagnosis is built on sand. This constraint was learned the hard way — earlier
+              versions did rewrite plans, and the debugging cost was severe.
+            </p>
+            <h3>What it said on this night</h3>
+            <p>
+              The model set <code>chaff_react</code>, flagging that it expected to be jammed.
+              An earlier packager would have quietly shortened the walks. This one says so
+              and changes nothing:
+            </p>
+            <div id="s09-log"></div>
+            <p>
+              Every intervention, and every deliberate non-intervention like this one,
+              appears in the log and lands on the card — so the next turn's reader can see
+              precisely where the agent's plan and the engine's reality diverged.
+            </p>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                The division of labour is strict. The agent chooses <b>what</b>; the packager
+                guarantees <b>legal execution</b> and narrates any gap between the two. Neither
+                is allowed to do the other's job.
+              </p>
+            </div>
+          </section>
+
+          <!-- 10 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s10">
+            <h2><span class="ag-num">10</span> Reaching the engine</h2>
+            <p class="ag-lede">
+              The moves leave the harness as one JSON array through a single call, and
+              that is the last the agent has to do with the night. Everything below is the
+              engine's business.
+            </p>
+            <div id="s10-wire"></div>
+            <p>
+              Four verbs, and that is the entire vocabulary. <code>drop</code> puts a
+              harvester on a cell — legal only where you have live coverage.
+              <code>step</code> moves it one cell and harvests whatever it lands on, legal
+              anywhere including fog. <code>pickup</code> lifts it back to orbit with its
+              cargo. <code>probe</code> drops an eye from orbit onto any cell at all.
+            </p>
+            <p>
+              Note the asymmetry, because most of the agent's cleverness lives in it:
+              <em>you must be able to see where you land, but not where you walk.</em>
+              That single rule is what makes a blind walk into fog possible, and it is the
+              basis of every attack on a seam nobody can see.
+            </p>
+            <h3>The night, hour by hour</h3>
+            <p>
+              Step through the fifteen moves below. The board shows engine truth — what is
+              really under each cell — so you can watch the walk cross ground the agent was
+              guessing about.
+            </p>
+            <div class="ag-stage">
+              <div class="mn-board-host" id="s10-board"></div>
+              <div class="ag-stage-side">
+                <div class="mn-stage-caption">
+                  <div class="mn-stage-label" id="s10-label">H01</div>
+                  <div class="mn-stage-body" id="s10-text"></div>
+                </div>
+                <div class="ag-legend" id="s10-legend"></div>
+              </div>
+            </div>
+            <div id="s10-controls"></div>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                Two harvesters, two seams, opposite corners of the map. One walks a known
+                route onto a pure it remembers; the other lands blind next to a rival's
+                sign and gropes for a pure it has never seen. That is the shape of a good
+                night in this game.
+              </p>
+            </div>
+          </section>
+
+          <!-- 11 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s11">
+            <h2><span class="ag-num">11</span> Memory</h2>
+            <p class="ag-lede">
+              Each night is a fresh model call with no memory of the last one. Continuity
+              is not something the model has — it is something the harness manufactures,
+              by writing the night down and reading it back tomorrow.
+            </p>
+            <p>
+              The mechanism is deliberately not "let the agent take notes". It is
+              adversarial: the agent's own claim about what it would do is stored, and then
+              placed <em>next to the engine's record of what actually happened</em>. The
+              agent is then made to reconcile the two.
+            </p>
+            <div class="ag-flow" id="s11-flow"></div>
+            <div id="s11-detail"></div>
+            <h3>What last night looked like on this card</h3>
+            <p>
+              This is the block that greeted the agent on day 4. Its own intent from day 3
+              in quotes, the orders it gave, and then the engine's per-hour truth — which is
+              read back out of the stored replay frames, not reconstructed from the plan.
+            </p>
+            <div id="s11-lastnight"></div>
+            <p>
+              Everything after <code>EXECUTION LOG</code> is engine testimony. That is what
+              makes the block hard to argue with, and it is why the instruction above it
+              reads <em>never claim a harvest that is not listed there</em>. An agent
+              grading its own homework will report a clean night after a disaster; an agent
+              handed the hour log has to account for the gap.
+            </p>
+            <p>
+              Notice what the log surfaces on this night: two probes lost, one to an EMP at
+              hour 1 and one to expiry. That is why the agent enters day 4 with a single
+              disk of vision, and it is the fact that shapes the whole turn.
+            </p>
+            <h3>The running thread</h3>
+            <p>
+              Beside the nightly block sits the journal — one compressed entry per night,
+              carrying the intent, the outcome, what was seen, and the reflection. It is
+              the agent's only long-term memory, and it is short by design.
+            </p>
+            <div id="s11-journal"></div>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                Memory here is a control, not a convenience. Pairing the agent's stated
+                intent with the engine's record is what stops a season drifting into
+                confident fiction — and it is why nearly every bug in this agent was found
+                by reading a card rather than a stack trace.
+              </p>
+            </div>
+          </section>
+
+          <!-- 12 ───────────────────────────────────────────────── -->
+          <section class="ag-scene" id="s12">
+            <h2><span class="ag-num">12</span> Where the Python lives</h2>
+            <p class="ag-lede">
+              All of the above is one package:
+              <code>sea_of_colours/orchestrator_2/harnesses/tabula_v12/</code>. Modules
+              marked in green left something on the card this guide has been taking apart,
+              and the mark says what to point at. The unmarked ones are part of the harness
+              but produced nothing identifiable on this particular night.
+            </p>
+            <div class="ag-mods" id="s12-mods"></div>
+            <h3>The engine boundary</h3>
+            <p>
+              The rule that keeps all of this honest is narrow and worth stating exactly.
+              The harness reads game state through <b>one</b> function and writes it through
+              <b>two</b>:
+            </p>
+            <div class="ag-flow" id="s12-boundary"></div>
+            <p>
+              Nothing else in the package touches a session. No module mutates state as a
+              side effect of computing an option, and none reaches past
+              <code>build_agent_view</code> for information the seat has not earned. It
+              would be easy to do — the engine is right there in the same process — and it
+              would invalidate every game the agent has played.
+            </p>
+            <p>
+              Constants are imported rather than copied for the same reason. Probe radius,
+              hold capacity, weapon dials and the day cap all come from
+              <code>game/tuning.py</code>, <code>game/session.py</code> and
+              <code>game/weapons.py</code>, so a retune reaches the agent's prompts without
+              anyone remembering to update them. The full contract is written down in
+              <code>ENGINE_INTERFACE.md</code> next to the package.
+            </p>
+            <div class="ag-takeaway">
+              <span class="lbl">WHAT TO TAKE AWAY</span>
+              <p>
+                One way in, two ways out, no shortcuts. The agent plays the same game as a
+                human at the same screen, with the same fog — which is the only reason its
+                results mean anything.
+              </p>
+            </div>
+          </section>
+
+          <footer class="ag-foot" id="ag-foot"></footer>
+        </main>
+      </div>
+    </div>
+
+    <!-- Generated from one real turn; see scripts/export_agent_guide_data.py.
+         Loaded as a script rather than fetched so the page works from file://. -->
+    <script src="./agent-data.js"></script>
+    <script src="./agent.js"></script>
+  </body>
+</html>

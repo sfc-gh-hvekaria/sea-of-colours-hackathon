@@ -1,0 +1,3389 @@
+/* sea_of_colours · manual — mirrors the game's CLI aesthetic.
+ *
+ * Palette / fonts copied verbatim from server/static/styles.css so this
+ * page reads identically to a live game frame side-by-side.
+ */
+
+:root {
+  /* chrome — from styles.css:11-33 */
+  --bg: #0d0d12;
+  --panel-bg: #0d0d12;
+  --fg: #f0f6fc;
+  --dim: #a8b1bd;
+  --frame: #4a4a5a;
+
+  /* tile accents — from render.py TILE_COLORS + styles.css:24-26 */
+  --green: #4dca5e;
+  --red:   #ff8585;
+  --blue:  #7ab8ff;
+
+  /* canonical tile paint (matches app.js computeParcelPaintFallback) */
+  --tile-void:  rgb(14, 11, 22);
+  --tile-red:   rgb(255, 0, 0);
+  --tile-green: rgb(63, 185, 80);
+  --tile-blue:  rgb(59, 143, 224);
+
+  /* trail overlay — anonymous off-white per RULEBOOK §3.12 */
+  --trail: rgba(240, 246, 252, 0.55);
+
+  /* seat colours mirror SEAT_DEFAULT_COLORS */
+  --seat-p1: #FFFFFF;
+  --seat-p2: #FCF871;
+  --seat-p3: #FF7EB6;
+  --seat-p4: #7EE0FF;
+
+  --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'Menlo',
+          ui-monospace, monospace;
+  --retro: 'VT323', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* one board cell = 2 columns wide × 1 row tall.
+   * A "column" is one monospace character. Sized generously so glyph
+   * texture reads at a glance without a magnifier. */
+  --cell-w: 24px;
+  --cell-h: 24px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  height: 100%;
+  overflow: hidden;    /* page must never scroll — everything fits */
+}
+
+body { height: 100vh; overflow: hidden; }
+
+.fg-red   { color: var(--red);   }
+.fg-blue  { color: var(--blue);  }
+.fg-green { color: var(--green); }
+.dim      { color: var(--dim);   }
+.mono     { font-family: var(--mono); }
+.cite     { color: var(--dim); font-size: 11px; letter-spacing: 0.06em; }
+
+.mn-viewport {
+  height: 100vh;
+  max-height: 100vh;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+/* ── header ─────────────────────────────────────────────────────── */
+.mn-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5ch;
+  padding: 6px 10px;
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  font-size: 13px;
+}
+.prompt-sigil { color: var(--green); }
+.prompt-cmd { color: var(--fg); }
+.prompt-caret {
+  color: var(--green);
+  animation: mn-blink 1.1s steps(2, start) infinite;
+}
+@keyframes mn-blink { to { opacity: 0; } }
+.mn-subhead { margin-left: 0.25ch; }
+.mn-spacer { flex: 1; }
+.mn-hint { letter-spacing: 0.04em; }
+
+/* ── layout ─────────────────────────────────────────────────────── */
+.mn-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mn-centre {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mn-nav { overflow: hidden; }
+.mn-tabpane { overflow: hidden; }
+
+/* ── tab strip ──────────────────────────────────────────────────── */
+.mn-tabstrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  padding: 6px;
+}
+.mn-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+.mn-tabs::-webkit-scrollbar { display: none; }
+
+.mn-tab, .mn-tab-arrow, .mn-btn {
+  background: transparent;
+  color: var(--dim);
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 6px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mn-tab:hover, .mn-tab-arrow:hover, .mn-btn:hover {
+  color: var(--fg);
+  border-color: var(--frame);
+}
+.mn-tab.is-active {
+  color: var(--green);
+  border-color: var(--green);
+}
+.mn-tab:focus-visible, .mn-tab-arrow:focus-visible, .mn-btn:focus-visible {
+  outline: 1px dotted var(--green);
+  outline-offset: 2px;
+}
+
+/* ── tab panes ──────────────────────────────────────────────────── */
+.mn-tabpane {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+.mn-tabpane.is-active {
+  display: flex;
+  animation: mn-fadein 220ms ease-out;
+}
+@keyframes mn-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── frame (map area) ───────────────────────────────────────────── */
+.mn-frame {
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  padding: 10px 12px 12px;
+}
+.mn-frame-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1ch;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--frame);
+}
+.mn-frame-title {
+  color: var(--green);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mn-frame-sub { font-size: 12px; }
+
+.mn-board-host {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 8px;
+  min-height: var(--cell-h);
+}
+
+.mn-controls {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 10px;
+}
+.mn-status { font-size: 12px; }
+
+/* ── board / cell rendering (matches app.js paint) ──────────────── */
+/* Absolute-positioned cell grid. We switched away from CSS grid because
+ * grid-auto-rows + inherited line-height was inflating row tracks in
+ * Chrome. Absolute positioning pins every cell to exact pixel
+ * coordinates so gaps are physically impossible. */
+.mn-board {
+  position: relative;
+  font-family: var(--mono);
+  font-size: 0;
+  line-height: 0;
+  letter-spacing: 0;
+  user-select: none;
+}
+.mn-cell {
+  position: absolute;
+  width: var(--cell-w);
+  height: var(--cell-h);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--tile-void);
+  color: transparent;
+  text-align: center;
+}
+.mn-cell-terrain {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--cell-font, 20px);
+  line-height: var(--cell-line-height, 1);
+}
+.mn-cell-trail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--cell-font, 20px);
+  line-height: var(--cell-line-height, 1);
+  color: var(--trail);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms;
+}
+.mn-cell-trail.is-on { opacity: 1; }
+.mn-cell-entity {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--seat-p1);
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 0 4px rgba(0,0,0,0.7);
+  line-height: 1;
+}
+
+/* Probe lifetime rings — direct port of engine styles.css:2574-2596.
+ *   nights_remaining ≥ 3 → 2 rings (double border, "fresh probe")
+ *   nights_remaining == 2 → 1 ring (aging)
+ *   nights_remaining == 1 → no rings, bare · glyph (expiring)
+ * The rings are drawn as concentric box-shadow strokes on a ::after
+ * pseudo-element sized in ems relative to the entity font-size, so
+ * they scale with the cell. */
+.mn-cell-entity--probe::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 1px;
+  pointer-events: none;
+  opacity: 0.9;
+}
+.mn-cell-entity--probe-life-1::after {
+  box-shadow: 0 0 0 1px currentColor;
+}
+.mn-cell-entity--probe-life-2::after {
+  box-shadow:
+    0 0 0 1px currentColor,
+    0 0 0 2px transparent,
+    0 0 0 3px currentColor;
+}
+/* Fog — engine parity (app.js:1904 + styles.css:1357,1372):
+ *   ░░ glyph in --dim, opacity 0.24 (--opa-fog), same void background
+ *   as an EMPTY tile. Faint speckled grey — not a solid black block.
+ *
+ * A cell with fog HIDES its terrain/trail/entity, because in the
+ * engine those layers aren't rendered for `kind:"fog"` cells at all
+ * (the fog paint is the only thing in the DOM for that tile). Once
+ * the probe clears fog (.is-clear), the terrain/trail/entity flip
+ * back to visible.
+ */
+.mn-cell-fog {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dim);
+  opacity: 0.24;
+  font-size: var(--cell-font, 20px);
+  line-height: var(--cell-line-height, 1);
+  z-index: 3;
+  transition: opacity 400ms;
+}
+.mn-cell-fog.is-clear { opacity: 0; }
+.mn-cell.is-fogged .mn-cell-terrain,
+.mn-cell.is-fogged .mn-cell-trail,
+.mn-cell.is-fogged .mn-cell-entity {
+  visibility: hidden;
+}
+
+/* Probe survival pulse — engine port of .cell--dawn-decay .entity-overlay
+ * (styles.css:8231-8238). Fires on a surviving probe as the dawn front
+ * passes its cell: a fast warm shrink + brightness flash + soft glow. */
+.mn-cell-dawn-decay .mn-cell-entity {
+  animation: mn-dawn-decay 620ms ease-out;
+}
+@keyframes mn-dawn-decay {
+  0%   { transform: scale(1);    filter: none; }
+  35%  { transform: scale(0.74); filter: brightness(1.7) drop-shadow(0 0 4px rgba(255, 190, 110, 0.9)); }
+  100% { transform: scale(1);    filter: none; }
+}
+
+/* soft flash for tile-1 pulse */
+@keyframes mn-tile-pulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.6); }
+}
+.mn-cell.is-pulsing .mn-cell-terrain { animation: mn-tile-pulse 900ms ease-in-out; }
+
+/* ── prose blocks under boards ──────────────────────────────────── */
+.mn-prose {
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--fg);
+}
+.mn-prose p { margin: 0 0 8px; }
+.mn-prose p:last-child { margin-bottom: 0; }
+
+.mn-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+.mn-legend-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  border: 1px solid var(--frame);
+  background: rgba(255,255,255,0.02);
+}
+.mn-legend-swatch {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  background: var(--tile-void);
+  position: relative;
+}
+.mn-legend-swatch[data-swatch="red-pure"]::before  { content: "██"; color: var(--tile-red);   display: flex; align-items: center; justify-content: center; height: 100%; font-size: 22px; }
+.mn-legend-swatch[data-swatch="blue-deep"]::before { content: "██"; color: var(--tile-blue);  display: flex; align-items: center; justify-content: center; height: 100%; font-size: 22px; }
+.mn-legend-swatch[data-swatch="green"]::before     { content: "██"; color: var(--tile-green); display: flex; align-items: center; justify-content: center; height: 100%; font-size: 22px; }
+.mn-legend-name { font-weight: 500; margin-bottom: 4px; }
+.mn-legend-body { font-size: 12px; }
+
+.mn-steps { padding-left: 22px; margin: 0; }
+.mn-steps li { margin-bottom: 6px; }
+.mn-steps li:last-child { margin-bottom: 0; }
+
+/* ── right nav ──────────────────────────────────────────────────── */
+.mn-nav {
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  min-width: 0;
+}
+.mn-nav-head {
+  color: var(--green);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--frame);
+  margin-bottom: 4px;
+}
+.mn-nav-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.mn-nav-list li {
+  padding: 6px 8px;
+  border-left: 2px solid transparent;
+}
+.mn-nav-list li a {
+  color: var(--fg);
+  text-decoration: none;
+  display: block;
+}
+.mn-nav-list li.is-active {
+  border-left-color: var(--green);
+  background: rgba(77, 202, 94, 0.06);
+}
+.mn-nav-list li.is-active a { color: var(--green); }
+.mn-nav-list li.is-stub a { color: var(--dim); }
+.mn-nav-list li.is-stub:hover { background: rgba(255,255,255,0.02); }
+/* Clickable rulebook section — hover feedback + pointer cursor.
+ * Selecting a section filters the tab strip above to just that
+ * section's tabs. */
+.mn-nav-list li[data-section] {
+  cursor: pointer;
+  transition: background 100ms ease, border-left-color 100ms ease;
+}
+.mn-nav-list li[data-section]:hover:not(.is-active) {
+  background: rgba(255, 255, 255, 0.03);
+  border-left-color: rgba(77, 202, 94, 0.4);
+}
+.mn-nav-sub { display: block; font-size: 10px; letter-spacing: 0.06em; margin-top: 2px; }
+.mn-nav-foot {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed var(--frame);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+/* ── tooltip ────────────────────────────────────────────────────── */
+.mn-tt {
+  position: fixed;
+  z-index: 999;
+  min-width: 180px;
+  max-width: 280px;
+  padding: 8px 10px;
+  border: 1px solid var(--green);
+  background: #080810;
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms, transform 120ms;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.mn-tt.is-on {
+  opacity: 1;
+  transform: none;
+}
+.mn-tt-title {
+  color: var(--green);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.mn-tt-body { color: var(--fg); }
+.mn-tt-cite { color: var(--dim); font-size: 10px; margin-top: 6px; letter-spacing: 0.06em; }
+
+/* ── loop stage (tab 3) — board + fx canvas overlay ─────────────── */
+.mn-loop-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 8px;
+}
+.mn-loop-stage .mn-board-host {
+  padding: 0;
+  min-height: unset;
+}
+.mn-fx-canvas {
+  /* engine creates canvas per-invocation via document.body (see app.js
+   * spawnProbeTrail:8683). This rule is inert — retained as documentation
+   * of the position/z stack the runtime canvas uses. */
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 9;
+}
+.mn-aurora-wash {
+  position: absolute;
+  inset: 14px 0 8px 0;
+  background: linear-gradient(180deg,
+    rgba(255, 210, 120, 0) 0%,
+    rgba(255, 210, 120, 0.14) 50%,
+    rgba(255, 210, 120, 0) 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms;
+  z-index: 5;
+}
+.mn-aurora-wash.is-on { opacity: 1; }
+
+/* Orblift ghost — mirrors .replay-anim-ghost--orbital from the game.
+ * Position:fixed on body, transforms drive the arc, cargo positioned
+ * absolute below the ▲ so the ghost transform doesn't push it around.
+ * Engine ref: app.js runOrbitalArcAnimation:7524-7554.
+ */
+.mn-orblift-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 8;
+  pointer-events: none;
+  font-family: var(--mono);
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  overflow: visible;
+  text-shadow: 0 0 6px rgba(0,0,0,0.7);
+  will-change: transform;
+}
+.mn-orblift-glyph { display: block; text-align: center; line-height: 1; }
+.mn-orblift-cargo {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Probe landing ripple — expanding ring in probe owner's colour.
+ * Engine ref: app.js:7799-7807 .probe-ripple.
+ */
+.mn-probe-ripple {
+  position: fixed;
+  z-index: 10;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  margin-top: -10px;
+  border: 2px solid rgb(var(--rr), var(--rg), var(--rb));
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.9;
+  animation: mn-ripple 620ms ease-out forwards;
+}
+@keyframes mn-ripple {
+  0%   { transform: scale(0.4); opacity: 0.95; }
+  70%  { opacity: 0.55; }
+  100% { transform: scale(5.2); opacity: 0; }
+}
+
+/* Cell states used by the probe reveal: pending (freshly revealed but
+ * held under fog) → revealing (fog fades in 280ms). Matches app.js
+ * classes cell--probe-pending / cell--probe-revealing. */
+.mn-cell-fog.is-revealing {
+  transition: opacity 280ms ease-out;
+  opacity: 0;
+}
+
+
+/* ── event log strip ────────────────────────────────────────────── */
+.mn-eventlog {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--frame);
+  background: #06060a;
+  font-family: var(--retro);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--fg);
+  min-height: 72px;
+  max-height: 72px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.mn-eventlog-line {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: mn-log-in 300ms ease-out forwards;
+}
+.mn-eventlog-line .ts { color: var(--dim); margin-right: 0.75ch; }
+.mn-eventlog-line.k-fog     { color: var(--dim); }
+.mn-eventlog-line.k-probe   { color: var(--fg); }
+.mn-eventlog-line.k-cover   { color: var(--green); }
+.mn-eventlog-line.k-drop    { color: var(--fg); }
+.mn-eventlog-line.k-harvest { color: var(--red); }
+.mn-eventlog-line.k-lift    { color: var(--blue); }
+.mn-eventlog-line.k-aurora  { color: #ffd278; }
+@keyframes mn-log-in {
+  to { opacity: 1; transform: none; }
+}
+
+/* Tab-3 layout: three columns side-by-side — board on the left,
+ * caption panel in the middle, vault on the right. Board width is
+ * 20 cells × 26px = 520px; caption panel ~260px; vault ~200px. */
+.mn-loop-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  padding: 10px 0 6px;
+}
+.mn-loop-stage {
+  padding: 0;
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+}
+/* Stage caption box — sits between the board and the vault so the
+ * explanation text has its own column, not stacked over the vault. */
+.mn-stage-caption {
+  flex: 1 1 260px;
+  min-width: 220px;
+  max-width: 320px;
+  padding: 14px 16px;
+  border: 1px solid var(--frame);
+  background: #06060a;
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+.mn-stage-label {
+  color: var(--green);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mn-stage-body { color: var(--fg); font-size: 14px; }
+.mn-stage-body p {
+  margin: 0 0 9px 0;
+}
+.mn-stage-body p:last-child { margin-bottom: 0; }
+.mn-stage-body .kw {
+  color: rgb(255, 199, 40);
+  font-weight: 600;
+}
+.mn-stage-cite { font-size: 11px; letter-spacing: 0.06em; }
+/* ── vault ──────────────────────────────────────────────────────── */
+/* Right-most column in the 3-column loop layout. Fixed width so the
+ * 3×2 slot grid stays perfectly gridded. */
+.mn-vault {
+  flex: 0 0 200px;
+  padding: 12px 14px;
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.mn-vault-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--frame);
+}
+.mn-vault-title {
+  color: var(--green);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mn-vault-cap  { font-size: 11px; letter-spacing: 0.04em; }
+.mn-vault-score {
+  color: var(--fg);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.mn-vault-score b { color: var(--green); font-size: 18px; }
+.mn-vault-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  gap: 8px;
+  justify-content: start;
+}
+.mn-vault-slot {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--frame);
+  background: var(--tile-void);
+  font-family: var(--mono);
+  overflow: hidden;
+}
+.mn-vault-slot-num {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+  z-index: 2;
+  pointer-events: none;
+}
+.mn-vault-slot-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+}
+.mn-vault-slot--empty { opacity: 0.35; }
+.mn-vault-slot--full {
+  animation: mn-vault-drop 380ms cubic-bezier(.22,.9,.24,1);
+}
+@keyframes mn-vault-drop {
+  0%   { transform: translateY(-14px) scale(0.7); opacity: 0; }
+  60%  { transform: translateY(2px)  scale(1.06); opacity: 1; }
+  100% { transform: none; }
+}
+.mn-vault-foot {
+  margin-top: auto;
+  padding-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+/* ── step + harvest FX ─────────────────────────────────────────── */
+/* Step ghost — a floating X that slides from source cell to destination
+ * over 180ms with a 3-step transition (matches engine styles.css:6501
+ * .replay-anim-ghost--step). Position:fixed on body so viewport coords
+ * survive DOM repaints. */
+.mn-step-ghost {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--seat-p1);
+  pointer-events: none;
+  z-index: 6;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.85),
+    0 0 6px rgba(255, 255, 255, 0.18);
+  transition: transform 180ms steps(3, end);
+  transform: translate(0, 0);
+  will-change: transform;
+}
+/* Harvest blink — a coloured wash flashes over the cell 3 times then
+ * vanishes, hiding the moment terrain converts to GREEN underneath.
+ * Direct port of engine .harvest-blink-overlay + @keyframes harvest-blink
+ * (styles.css:6738-6749). */
+.mn-harvest-blink {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: var(--blink-color, #ff4040);
+  animation: mn-harvest-blink 360ms step-start forwards;
+}
+@keyframes mn-harvest-blink {
+  0%,  34%, 67%       { opacity: 0.85; }
+  17%, 51%, 84%, 100% { opacity: 0;    }
+}
+/* Particle: a small square that flies outward on a random angle,
+ * fading over 420ms. Port of engine .harvest-particle + fly keyframe
+ * (styles.css:6753-6764). */
+.mn-harvest-particle {
+  position: fixed;
+  pointer-events: none;
+  image-rendering: pixelated;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  animation: mn-harvest-particle-fly 420ms cubic-bezier(0.15, 0.8, 0.35, 1) forwards;
+}
+@keyframes mn-harvest-particle-fly {
+  0%   { transform: translate(-50%, -50%) translate(0px, 0px);           opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
+/* ── coord axes (Tab 4) ────────────────────────────────────────── */
+/* A 2×2 grid: [empty corner | top axis] / [left axis | board]. Sized
+ * exactly to the board's pixel dimensions via JS. The axes get their
+ * cell size from JS so labels align to columns/rows perfectly. */
+.mn-board-wrap {
+  display: grid;
+  grid-template-columns: 18px auto;
+  grid-template-rows: 14px auto;
+  gap: 0;
+  width: max-content;
+}
+.mn-board-corner { grid-column: 1; grid-row: 1; }
+.mn-coord-row {
+  grid-column: 2; grid-row: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 0;
+  padding-bottom: 2px;
+}
+.mn-coord-col {
+  grid-column: 1; grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  font-size: 9px;
+  color: var(--dim);
+  padding-right: 4px;
+  padding-top: 0;
+}
+.mn-coord-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  opacity: 0.62;
+  font-variant-numeric: tabular-nums;
+}
+.mn-coord-label.is-highlight {
+  color: var(--seat-p1);
+  opacity: 1;
+}
+.mn-board-wrap > .mn-board-host { grid-column: 2; grid-row: 2; }
+
+/* ── policy roster (Tab 4) ─────────────────────────────────────── */
+/* Vertical list of 21 slots — replaces the vault in the orders tab.
+ * Each row: hour label + action verb + target coord. Rows highlight
+ * yellow when currently executing, green when done, dim when empty. */
+.mn-roster {
+  flex: 0 0 240px;
+  padding: 12px 14px;
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.mn-roster-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--frame);
+}
+.mn-roster-title {
+  color: var(--seat-p1);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mn-roster-nox {
+  color: var(--fg);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.mn-roster-cap { font-size: 10px; letter-spacing: 0.04em; }
+.mn-roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  padding-right: 2px;
+  min-height: 0;
+}
+.mn-roster-slot {
+  display: grid;
+  grid-template-columns: 28px auto 1fr;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  font-size: 11px;
+  line-height: 1.15;
+  border-left: 2px solid transparent;
+  color: var(--dim);
+  min-height: 18px;
+  border-radius: 1px;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+.mn-roster-slot .mn-roster-hour {
+  color: var(--fg);
+  opacity: 0.55;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.mn-roster-slot .mn-roster-verb {
+  color: var(--fg);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.mn-roster-slot .mn-roster-target {
+  color: var(--dim);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+/* Empty (WAIT) rows */
+.mn-roster-slot.is-empty .mn-roster-verb {
+  color: var(--dim);
+  opacity: 0.35;
+  font-weight: 400;
+}
+.mn-roster-slot.is-empty .mn-roster-target { opacity: 0.35; }
+/* Filled (queued) row — full colour but unhighlit */
+.mn-roster-slot.is-queued .mn-roster-hour { opacity: 0.85; color: var(--fg); }
+.mn-roster-slot.is-queued { color: var(--fg); }
+/* Currently executing row — yellow tint, side bar */
+.mn-roster-slot.is-running {
+  background: rgba(255, 199, 40, 0.13);
+  border-left-color: rgb(255, 199, 40);
+  color: var(--fg);
+}
+.mn-roster-slot.is-running .mn-roster-verb { color: rgb(255, 199, 40); }
+/* Completed row — green tint */
+.mn-roster-slot.is-done {
+  background: rgba(63, 185, 80, 0.08);
+  border-left-color: rgba(63, 185, 80, 0.55);
+  color: var(--fg);
+  opacity: 0.82;
+}
+.mn-roster-slot.is-done .mn-roster-verb { color: var(--green); }
+/* Verb colour hints — probe drop distinct from harvester drop */
+.mn-roster-slot[data-verb="probe"]   .mn-roster-verb.is-neutral { color: var(--seat-p1); }
+.mn-roster-slot[data-verb="drop"]    .mn-roster-verb.is-neutral { color: var(--red); }
+.mn-roster-slot[data-verb="step"]    .mn-roster-verb.is-neutral { color: var(--fg); }
+.mn-roster-slot[data-verb="pickup"]  .mn-roster-verb.is-neutral { color: var(--seat-p1); }
+.mn-roster-slot[data-verb="wait"]    .mn-roster-verb.is-neutral { color: var(--dim); opacity: 0.5; }
+.mn-roster-foot {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--frame);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+/* Optional tag for harvester name on the roster row */
+.mn-roster-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 4px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  vertical-align: 1px;
+  opacity: 0.75;
+}
+.mn-roster-tag[data-unit="A"] { color: var(--seat-p1); }
+.mn-roster-tag[data-unit="B"] { color: var(--seat-p2, #ffb74d); }
+.mn-roster-tag[data-unit="C"] { color: var(--seat-p3, #b389ff); }
+
+/* ── PLAN → PRAXIS overlay (Tab 4) ─────────────────────────────
+ * Two pieces:
+ *   1. Cell-level plan markers that light up the cells the queued
+ *      policy will touch — yellow border + tiny hour/coord badge.
+ *      Sit above the fog so you can see the plan even while the map
+ *      is still fully obscured.
+ *   2. A small transient banner that announces PLAN vs PRAXIS at the
+ *      top of the stage. It does NOT cover the map — just a badge so
+ *      the phase change reads clearly. */
+
+/* Cell markers */
+.mn-plan-marker {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  border: 1.5px solid rgba(255, 199, 40, 0.95);
+  background: rgba(255, 199, 40, 0.10);
+  box-sizing: border-box;
+  animation: mn-plan-pulse 1400ms ease-in-out infinite;
+}
+.mn-plan-marker-tag {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  background: rgb(255, 199, 40);
+  color: #0a0a0f;
+  font-size: 8px;
+  padding: 1px 4px;
+  font-family: var(--mono);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-radius: 1px;
+  pointer-events: none;
+}
+.mn-plan-marker-tag.is-below {
+  bottom: auto;
+  top: 100%;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+@keyframes mn-plan-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1;    }
+}
+
+/* Small non-blocking phase banner */
+.mn-plan-praxis-overlay {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 22;
+  pointer-events: none;
+  background: rgba(2, 5, 12, 0.94);
+  color: var(--fg);
+  font-family: var(--mono);
+  opacity: 0;
+  transition: opacity 260ms ease;
+  padding: 6px 14px 7px;
+  border: 1px solid rgba(255, 199, 40, 0.55);
+  text-align: center;
+  border-radius: 1px;
+  max-width: min(560px, 90%);
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+}
+.mn-plan-praxis-overlay.is-on { opacity: 1; }
+.mn-ppo-eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: var(--dim);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.mn-ppo-title {
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  font-weight: 700;
+  color: rgb(255, 199, 40);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.mn-ppo-title.is-praxis { color: rgb(63, 185, 80); }
+.mn-ppo-body {
+  font-size: 11px;
+  line-height: 1.35;
+  max-width: 520px;
+  color: var(--fg);
+  white-space: nowrap;
+}
+.mn-ppo-sub {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  max-width: 520px;
+  color: var(--dim);
+}
+
+/* ── Maps tab (Tab 5) ──────────────────────────────────────────
+ * Three map cards side-by-side. Each card shows its seed, the
+ * board host that will fill with a generated map, and a compact
+ * caption line with the tile-count breakdown. The prose block
+ * below explains the algorithm. */
+.mn-maps-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px 0;
+}
+.mn-map-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  border-radius: 1px;
+}
+.mn-map-seed {
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mn-map-seed b {
+  color: var(--seat-p1);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.mn-map-cap {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-align: center;
+}
+.mn-maps-prose {
+  padding: 6px 20px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.mn-maps-prose p { margin: 0 0 8px 0; }
+.mn-maps-prose p:last-child { margin-bottom: 0; }
+
+/* ── Vision tab (Tab 5) ────────────────────────────────────────
+ * LIVE cells: subtle low-opacity white wash. Adjacent live cells
+ * fuse into one continuous highlight — no per-cell border artefact.
+ * ECHO cells: the wash goes grey and the terrain colour desaturates.
+ * That's the whole visual language. No dashed borders, no rings. */
+.mn-cell.is-live::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.09);
+  animation: mn-live-pulse 1800ms ease-in-out infinite;
+}
+@keyframes mn-live-pulse {
+  0%, 100% { opacity: 0.72; }
+  50%      { opacity: 1;    }
+}
+.mn-cell.is-echo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: rgba(168, 177, 189, 0.13);
+  animation: mn-echo-fade-in 700ms ease-out both;
+}
+.mn-cell.is-echo .mn-cell-terrain {
+  filter: saturate(0.35) brightness(0.85);
+  transition: filter 700ms ease-out;
+}
+@keyframes mn-echo-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Vision-tab legend — compact text-only key. No sample cells; the
+ * board itself is the illustration. Just three colored bullets and
+ * their explanations. */
+.mn-vision-legend {
+  flex: 0 0 220px;
+  padding: 12px 14px;
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+.mn-vision-legend-head {
+  color: var(--fg);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--frame);
+}
+.mn-vision-legend-row {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 10px;
+  align-items: flex-start;
+}
+.mn-vision-swatch {
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.mn-vision-swatch[data-swatch="fog"]  { background: var(--dim); opacity: 0.4; }
+.mn-vision-swatch[data-swatch="live"] { background: #ffffff; box-shadow: 0 0 6px rgba(255,255,255,0.45); }
+.mn-vision-swatch[data-swatch="echo"] { background: var(--dim); opacity: 0.7; }
+.mn-vision-name {
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.mn-vision-body {
+  font-size: 10px;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+.mn-vision-legend-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed var(--frame);
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 800px) {
+  .mn-main { grid-template-columns: 1fr; }
+  .mn-nav { order: -1; }
+  .mn-legend { grid-template-columns: 1fr; }
+}
+
+/* ── Opponents tab (Tab 6) ─────────────────────────────────────
+ * Tab 3 board style (24px cells), plus two side-by-side POLICY
+ * panels showing both seats' 21-hour scripts. Panels reuse the
+ * .mn-roster-slot rendering from Tab 4 for consistency. */
+
+/* Nox-praxis sticker floating at the top-left of the opponents
+ * board while a PRAXIS animation is running. Tells the viewer
+ * "this is Nox 1 firing" vs "this is Nox 2 firing". */
+.mn-opp-layout .mn-loop-stage {
+  position: relative;
+}
+.mn-nox-sticker {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  z-index: 20;
+  padding: 4px 12px 5px;
+  border: 1px solid rgba(63, 185, 80, 0.65);
+  background: rgba(2, 5, 12, 0.94);
+  color: rgb(63, 185, 80);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  border-radius: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms ease;
+  white-space: nowrap;
+}
+.mn-nox-sticker.is-on { opacity: 1; }
+
+/* Vespera → Aurora sweep. Full-board overlay that runs a bright
+ * gradient band left-to-right (dusk → dawn) with a centred label
+ * announcing the phase. Used to show time passes between Nox 1
+ * and Nox 2 in animations that span both. Total duration ~1800ms:
+ *   0-900ms   VESPERA (dusk of Nox 1) — amber tint
+ *   900-1800  AURORA  (dawn of Nox 2) — cool white tint
+ */
+.mn-nox-sweep {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  overflow: hidden;
+  background: transparent;
+}
+.mn-nox-sweep.is-on { background: transparent; }
+/* Legacy gradient band retired — the sweep is now the engine's
+ * heat-front (see playAuroraSweepLocal / playVesperaSweepLocal in
+ * manual.js Tab 6). The .mn-nox-sweep-band element is kept in the
+ * DOM but never rendered. */
+.mn-nox-sweep-band {
+  display: none;
+}
+.mn-nox-sweep.is-on .mn-nox-sweep-band { display: none; }
+@keyframes mn-nox-sweep-band {
+  0%, 100% { opacity: 0; }
+}
+.mn-nox-sweep-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 6px 20px 7px;
+  background: rgba(2, 5, 12, 0.94);
+  border: 1px solid rgba(255, 199, 40, 0.65);
+  color: rgb(255, 199, 40);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  white-space: nowrap;
+  opacity: 0;
+  border-radius: 1px;
+  transition: opacity 240ms ease, color 320ms ease, border-color 320ms ease;
+}
+.mn-nox-sweep.is-on .mn-nox-sweep-label {
+  opacity: 1;
+  animation: none;
+}
+.mn-nox-sweep-label.is-aurora {
+  border-color: rgba(190, 220, 255, 0.75);
+  color: rgb(190, 220, 255);
+}
+@keyframes mn-nox-sweep-label {
+  0%, 100% { opacity: 1; }
+}
+
+/* Universal-visibility override for probes only. Probes broadcast
+ * their location to every seat (§3.11), so their entity glyph shines
+ * through fog. Trails and harvesters are strictly vision-gated —
+ * you must actually see the cell to see the trail or the machine. */
+#mn-board-opp .mn-cell.is-fogged .mn-cell-entity.mn-cell-entity--probe {
+  visibility: visible;
+}
+
+/* Probes are orbital — every seat sees the landing, even through
+ * their own fog. Same override as #mn-board-opp, extended to the
+ * probes / emp / chaff / signs manual boards so the "PROBES ARE
+ * PUBLIC" / "EMP IS PUBLIC" / "CHAFF IS PUBLIC" / signs phase-B
+ * stages actually show enemy probe glyphs in the player's fog.
+ * `!important` because signs (z-index 5) can also paint on these
+ * boards and we want probes to bleed through cleanly. */
+#mn-board-probes .mn-cell.is-fogged .mn-cell-entity.mn-cell-entity--probe,
+#mn-board-emp    .mn-cell.is-fogged .mn-cell-entity.mn-cell-entity--probe,
+#mn-board-chaff  .mn-cell.is-fogged .mn-cell-entity.mn-cell-entity--probe,
+#mn-board-signs  .mn-cell.is-fogged .mn-cell-entity.mn-cell-entity--probe {
+  visibility: visible !important;
+  z-index: 6;  /* above blue-sign / redsign overlays (z-index 5) */
+}
+
+/* Redacted-policy row style — the P2 panel gets these when we're
+ * showing P1's view (you never see the opponent's policy). */
+.mn-opp-policy-list .mn-roster-slot[data-verb="redacted"] .mn-roster-verb {
+  color: var(--dim);
+  opacity: 0.4;
+  letter-spacing: 0.15em;
+}
+.mn-opp-policy.is-redacted .mn-opp-policy-title {
+  color: var(--dim) !important;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.mn-opp-policy.is-redacted .mn-opp-policy-nox {
+  color: var(--dim);
+  opacity: 0.5;
+}
+.mn-opp-policies {
+  flex: 0 0 320px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: min-content;
+  gap: 8px;
+  min-height: 0;
+}
+/* 4-panel layout for the 4-seat stages — widens the container and
+ * squeezes each panel into a quarter-column.  min-width guarantees
+ * the four panels stay in one row even when the parent flex is tight. */
+.mn-opp-policies[data-panels="4"] {
+  flex: 0 0 460px;
+  min-width: 460px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+/* P3/P4 fade in when the parent switches to 4-panel mode. Small
+ * stagger so P3 appears slightly before P4 — it makes the moment
+ * that the game "opens up to 4 seats" read visually. Triggered by
+ * the JS-added `is-appearing` class in configureFourPanel(). */
+@keyframes mn-panel-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+.mn-opp-policy.is-appearing {
+  animation: mn-panel-fade-in 520ms ease-out;
+  animation-fill-mode: backwards;
+}
+.mn-opp-policy[data-seat="p4"].is-appearing {
+  animation-delay: 160ms;
+}
+.mn-opp-policies[data-panels="4"] .mn-opp-policy-head {
+  padding: 4px 5px 3px;
+}
+.mn-opp-policies[data-panels="4"] .mn-opp-policy-title {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+.mn-opp-policies[data-panels="4"] .mn-opp-policy-nox {
+  font-size: 8px;
+}
+.mn-opp-policies[data-panels="4"] .mn-opp-policy-list {
+  padding: 3px 4px 4px;
+}
+.mn-opp-policies[data-panels="4"] .mn-opp-policy-list .mn-roster-slot {
+  padding: 0 1px;
+  font-size: 9px;
+  line-height: 1.25;
+  grid-template-columns: 22px 1fr;
+  gap: 2px;
+}
+.mn-opp-policy {
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  min-width: 0;
+}
+/* [hidden] must beat the .mn-opp-policy display: flex above.  Without
+ * this override, hiding P3/P4 in 2-seat stages fails and they wrap
+ * into a second grid row with stale content. */
+.mn-opp-policy[hidden] { display: none !important; }
+.mn-opp-policy[data-seat="p1"] { border-left: 2px solid var(--seat-p1); }
+.mn-opp-policy[data-seat="p2"] { border-left: 2px solid var(--seat-p2); }
+.mn-opp-policy[data-seat="p3"] { border-left: 2px solid var(--seat-p3); }
+.mn-opp-policy[data-seat="p4"] { border-left: 2px solid var(--seat-p4); }
+.mn-opp-policy-head {
+  padding: 6px 8px 4px;
+  border-bottom: 1px dashed var(--frame);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mn-opp-policy-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mn-opp-policy[data-seat="p1"] .mn-opp-policy-title { color: var(--seat-p1); }
+.mn-opp-policy[data-seat="p2"] .mn-opp-policy-title { color: var(--seat-p2); }
+.mn-opp-policy[data-seat="p3"] .mn-opp-policy-title { color: var(--seat-p3); }
+.mn-opp-policy[data-seat="p4"] .mn-opp-policy-title { color: var(--seat-p4); }
+.mn-opp-policy-nox {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+/* Compact single-line rows: H01  MOVE.  Verb + target collapsed
+ * into the "verb" span so the row stays narrow. */
+.mn-opp-policy-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 4px 6px 6px;
+}
+.mn-opp-policy-list .mn-roster-slot {
+  padding: 1px 2px;
+  font-size: 10px;
+  line-height: 1.4;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 4px;
+  align-items: baseline;
+}
+.mn-opp-policy-list .mn-roster-hour {
+  min-width: 0;
+  padding: 0;
+}
+.mn-opp-policy-list .mn-roster-verb {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mn-opp-policy-list .mn-roster-target { display: none; }
+.mn-opp-policy-note {
+  grid-column: 1 / -1;
+  padding: 6px 8px;
+  border: 1px dashed var(--frame);
+  font-size: 9px;
+  line-height: 1.4;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * Tab 8 · SEASON · THE FULL LOOP
+ * Real board (like tab 3) framed by:
+ *   • left rail: the player's orbital-station diamond (identity
+ *     anchor — matches the game's os-station diamond from the
+ *     Snowflake CLI/streamlit renderer)
+ *   • right rail: stage caption
+ *   • far right: EARTH · shipped-score card
+ * The stage machine walks: Nox → Aurora → orbital → Vespera → zoom
+ * out to season → full pipeline loop.
+ * ═══════════════════════════════════════════════════════════════ */
+.mn-season-layout {
+  grid-template-columns:
+    minmax(120px, 140px)
+    1fr
+    minmax(230px, 280px)
+    minmax(120px, 140px);
+  gap: 12px;
+}
+.mn-season-stage {
+  position: relative;
+  min-height: 340px;
+  overflow: hidden;
+}
+
+/* ── TAB 13 · ORBITAL STATION · layout ─────────────────────── */
+/* 3-column: [station panel | fogged board | caption]. Reuses
+ * the season-station diamond/vault CSS via a shared class. */
+.mn-orbital-layout {
+  display: grid;
+  grid-template-columns:
+    minmax(140px, 160px)
+    1fr
+    minmax(230px, 280px);
+  gap: 12px;
+}
+.mn-orbital-station-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+}
+.mn-orbital-stage {
+  position: relative;
+  min-height: 300px;
+  overflow: visible;
+}
+/* Fullscreen fixed canvas — arcs cross the station↔board boundary
+ * so viewport coords are simplest. pointer-events:none so it never
+ * eats clicks. z-index above the board (2) but below tooltips. */
+.mn-orbital-arc-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 40;
+}
+/* Engine-faithful diamond: 9-row rhombus with a 3×5 top-left
+ * vault cut, matching server/static/station.js OS_DIA_HALF=5 +
+ * OS_VAULT_ROWS=3 / OS_VAULT_COLS=5. Font-size + line-height
+ * mirror server/static/station.css (14px / 0.6). No drop-shadow
+ * glow — the engine's diamond is a clean flat block.
+ * The double-class selector wins specificity over the season
+ * fallback (`.mn-season-station .os-diamond` at 9px). */
+.mn-orbital-station.mn-season-station .os-diamond,
+.mn-orbital-station.mn-season-station .os-vault-pre {
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 0.6;
+  letter-spacing: 0;
+  filter: none;
+}
+.mn-orbital-station.mn-season-station .os-diamond {
+  color: var(--os-color);
+}
+/* Each vault char clipped to exactly one line-height slot so the
+ * uniform shade glyphs don't bleed into the row above/below. */
+.mn-orbital-station.mn-season-station .os-vault-pre span {
+  display: inline-block;
+  width: 1ch;
+  height: 0.6em;
+  overflow: hidden;
+  vertical-align: top;
+}
+.mn-orbital-station.mn-season-station .os-diamond-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(20, 20, 30, 0.9);
+  text-shadow: none;
+}
+/* Brief bright pulse the moment the station fires. */
+.mn-orbital-station.mn-season-station.is-pulse .os-diamond {
+  filter: brightness(1.6);
+}
+
+/* ── LEFT RAIL: orbital station diamond ─────────────────────── */
+.mn-season-station-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+}
+.mn-season-station {
+  --os-color: var(--seat-p1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  color: var(--os-color);
+}
+.mn-season-station .os-diamond-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+.mn-season-station .os-diamond {
+  margin: 0;
+  color: var(--os-color);
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 9px;
+  letter-spacing: 0;
+  filter: drop-shadow(0 0 4px rgba(255, 199, 40, 0.15));
+  transition: filter 260ms ease, opacity 260ms ease;
+}
+.mn-season-station .os-vault-pre {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 9px;
+  letter-spacing: 0;
+  color: rgb(240, 240, 250);
+  pointer-events: none;
+}
+.mn-season-station .os-diamond-tag {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(20, 20, 30, 0.9);
+  text-shadow: 0 0 4px var(--os-color);
+  pointer-events: none;
+}
+.mn-season-station .os-score {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--os-color);
+  letter-spacing: 0.06em;
+  transition: transform 220ms ease, color 220ms ease;
+}
+.mn-season-station .os-score.is-tick {
+  transform: scale(1.2);
+  color: rgb(255, 199, 40);
+}
+.mn-season-station .os-score-delta {
+  min-height: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgb(255, 199, 40);
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+.mn-season-station .os-score-delta.is-on { opacity: 1; }
+.mn-season-station.is-pulse .os-diamond {
+  filter: drop-shadow(0 0 10px rgba(255, 199, 40, 0.65));
+}
+.mn-season-station-cap {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-align: center;
+  padding-top: 6px;
+  border-top: 1px dashed var(--frame);
+  width: 100%;
+  color: rgba(200, 210, 230, 0.65);
+}
+
+/* ── CENTRE: board with sticker + 21-hour strip + season overlay ─ */
+.mn-season-sticker {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  padding: 3px 8px 4px;
+  background: rgba(2, 5, 12, 0.94);
+  border: 1px solid rgba(255, 199, 40, 0.65);
+  color: rgb(255, 199, 40);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  border-radius: 1px;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 220ms ease, border-color 240ms ease, color 240ms ease;
+}
+.mn-season-sticker.is-on { opacity: 1; }
+.mn-season-sticker.is-aurora {
+  border-color: rgba(190, 220, 255, 0.75);
+  color: rgb(190, 220, 255);
+}
+.mn-season-sticker.is-day {
+  border-color: rgba(255, 210, 130, 0.9);
+  color: rgba(255, 220, 160, 1);
+}
+.mn-season-sticker.is-vespera {
+  border-color: rgba(150, 130, 200, 0.8);
+  color: rgba(200, 180, 240, 1);
+}
+
+.mn-season-hour-strip {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  display: grid;
+  grid-template-columns: repeat(21, 1fr);
+  gap: 2px;
+  height: 10px;
+  z-index: 15;
+  padding: 2px;
+  background: rgba(2, 5, 12, 0.6);
+  border: 1px solid rgba(90, 120, 160, 0.35);
+}
+.mn-season-hour-cell {
+  background: rgba(60, 80, 120, 0.18);
+  border-right: 1px solid rgba(90, 120, 160, 0.15);
+  transition: background 160ms ease;
+}
+.mn-season-hour-cell:last-child { border-right: none; }
+.mn-season-hour-cell.is-live {
+  background: rgba(150, 200, 255, 0.85);
+  box-shadow: 0 0 3px rgba(150, 200, 255, 0.6);
+}
+.mn-season-hour-cell.is-done {
+  background: rgba(80, 130, 200, 0.55);
+}
+
+.mn-season-strip-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  background: rgba(2, 5, 12, 0.72);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+.mn-season-strip-overlay:not([hidden]) { opacity: 1; }
+.mn-season-strip-title {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  color: rgba(240, 240, 250, 0.9);
+  text-align: center;
+}
+.mn-season-strip-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+.mn-season-strip-blocks {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 3px;
+  align-items: stretch;
+  height: 68px;
+}
+.mn-season-strip-block {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 2px;
+  border: 1px solid var(--frame);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 240ms ease, transform 240ms ease,
+              background 220ms ease, border-color 220ms ease,
+              box-shadow 220ms ease, color 220ms ease;
+}
+.mn-season-strip-block.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mn-season-strip-block[data-kind="night"] {
+  background: rgba(10, 14, 30, 0.9);
+  color: rgba(180, 200, 235, 0.8);
+  border-color: rgba(70, 100, 150, 0.5);
+}
+.mn-season-strip-block[data-kind="day"] {
+  background: rgba(28, 20, 6, 0.9);
+  color: rgba(255, 210, 130, 0.85);
+  border-color: rgba(150, 110, 40, 0.5);
+}
+.mn-season-strip-block.is-current[data-kind="night"] {
+  background: rgba(30, 50, 105, 0.95);
+  color: rgba(220, 240, 255, 1);
+  border-color: rgba(150, 200, 255, 0.9);
+  box-shadow: 0 0 8px rgba(120, 180, 255, 0.4);
+}
+.mn-season-strip-block.is-current[data-kind="day"] {
+  background: rgba(120, 70, 15, 0.95);
+  color: rgba(255, 240, 200, 1);
+  border-color: rgba(255, 199, 40, 0.95);
+  box-shadow: 0 0 8px rgba(255, 199, 40, 0.4);
+}
+.mn-season-strip-block-name {
+  font-weight: 700;
+  line-height: 1;
+}
+.mn-season-strip-block-sub {
+  font-size: 8px;
+  opacity: 0.6;
+  margin-top: 1px;
+}
+
+/* ── FAR RIGHT: EARTH · shipping score ──────────────────────── */
+.mn-season-earth {
+  align-self: stretch;
+  border: 1px solid rgba(80, 200, 120, 0.55);
+  background: rgba(6, 20, 10, 0.85);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.mn-season-earth-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: rgba(180, 240, 200, 0.9);
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(80, 200, 120, 0.5);
+  width: 100%;
+  text-align: center;
+}
+.mn-season-earth-score {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: rgb(80, 220, 130);
+  line-height: 1;
+  transition: transform 240ms ease, color 240ms ease;
+}
+.mn-season-earth-score.is-tick {
+  transform: scale(1.25);
+  color: rgb(255, 199, 40);
+}
+.mn-season-earth-delta {
+  min-height: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgb(255, 199, 40);
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+.mn-season-earth-delta.is-on { opacity: 1; }
+.mn-season-earth-cap {
+  margin-top: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-align: center;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(80, 200, 120, 0.35);
+  width: 100%;
+  line-height: 1.45;
+}
+
+/* — Shipping ghost that flies from diamond edge to earth card — */
+.mn-season-ship-fx {
+  position: fixed;
+  z-index: 40;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: rgb(255, 90, 70);
+  text-shadow: 0 0 6px rgba(255, 100, 60, 0.7);
+  pointer-events: none;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+.mn-season-ship-fx.is-flying { opacity: 1; }
+
+/* — When the board is dimmed for the zoom-out season stage — */
+.mn-season-stage.is-zoomed .mn-board-host { filter: brightness(0.32) saturate(0.6); }
+.mn-season-stage.is-zoomed .mn-season-sticker { opacity: 0; }
+.mn-season-stage.is-zoomed .mn-season-hour-strip { opacity: 0.2; }
+
+/* ═══════════════════════════════════════════════════════════════
+ * Tab 9 · PROBES · deep dive
+ * Five sections walking through: (1) probe = vision, (2) probe
+ * degrades 3→2→1→destroyed over 3 Auroras, (3) probe crush + ECHO
+ * after pickup, (4) EMP salvo (3 missiles, r=2 cyan clouds),
+ * (5) placeholder.
+ *
+ * EMP graphics ported from server/static/styles.css:2223-2309 —
+ * the engine's canonical EMP visual (cyan diagonal streak → 100ms
+ * flash at impact → pulsing r=2 cyan cloud).
+ * ═══════════════════════════════════════════════════════════════ */
+.mn-probes-layout {
+  grid-template-columns: 1fr minmax(260px, 340px);
+}
+.mn-probes-stage {
+  position: relative;
+  min-height: 320px;
+}
+
+/* Nox/phase sticker top-left of the board */
+.mn-probes-sticker {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  padding: 3px 8px 4px;
+  background: rgba(2, 5, 12, 0.94);
+  border: 1px solid rgba(255, 199, 40, 0.65);
+  color: rgb(255, 199, 40);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 220ms ease, border-color 240ms ease, color 240ms ease;
+}
+.mn-probes-sticker.is-on { opacity: 1; }
+.mn-probes-sticker.is-aurora {
+  border-color: rgba(190, 220, 255, 0.75);
+  color: rgb(190, 220, 255);
+}
+.mn-probes-sticker.is-emp {
+  border-color: rgba(0, 232, 255, 0.85);
+  color: rgb(120, 240, 255);
+}
+
+/* Probe-life badge — 3 rings that decay across stage 1 */
+.mn-probes-life-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 4px 8px 5px;
+  background: rgba(2, 5, 12, 0.94);
+  border: 1px solid rgba(120, 180, 255, 0.6);
+  color: rgba(210, 230, 255, 0.9);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+.mn-probes-life-badge.is-on { opacity: 1; }
+.mn-probes-life-lbl {
+  font-size: 9px;
+  opacity: 0.7;
+}
+.mn-probes-life-rings {
+  font-size: 14px;
+  color: rgba(180, 220, 255, 1);
+  letter-spacing: 0.14em;
+}
+.mn-probes-life-nights {
+  font-size: 10px;
+  color: rgba(200, 220, 245, 0.75);
+}
+.mn-probes-life-badge.is-dead .mn-probes-life-rings {
+  color: rgba(200, 100, 220, 0.9);
+}
+.mn-probes-life-badge.is-dead .mn-probes-life-nights {
+  color: rgba(200, 100, 220, 0.75);
+}
+
+/* ── EMP graphics (ported from engine) ────────────────────────
+ * Source: server/static/styles.css lines 2223-2309
+ * Three layers:
+ *   1. .mn-emp-ghost   — cyan diagonal streak (arrival)
+ *   2. .mn-emp-flash   — 100ms bloom at impact
+ *   3. .mn-emp-cloud   — pulsing cyan overlay, r=2 disk
+ */
+.mn-emp-ghost {
+  position: fixed;
+  z-index: 60;
+  color: transparent;
+  pointer-events: none;
+  will-change: transform, opacity;
+  font-family: var(--mono);
+  transition:
+    transform 560ms cubic-bezier(0.18, 0.55, 0.32, 1),
+    opacity 220ms ease-out;
+  opacity: 0;
+}
+.mn-emp-ghost.is-flying { opacity: 1; }
+.mn-emp-ghost::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #00e8ff;
+  box-shadow:
+    0 0 4px 2px rgba(0, 232, 255, 0.88),
+    0 0 10px 4px rgba(0, 232, 255, 0.45);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.mn-emp-ghost::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 240px;
+  height: 3px;
+  background: linear-gradient(
+    to right,
+    rgba(0, 232, 255, 0.0),
+    rgba(0, 232, 255, 0.95)
+  );
+  transform: translate(-100%, -50%);
+  pointer-events: none;
+  transition: opacity 150ms ease-out 410ms;
+}
+
+.mn-emp-flash {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  /* 100ms flash with a per-cell animation-delay derived from Manhattan
+   * distance to the impact center — ripples out in rings. */
+  animation: mn-emp-flash-anim 100ms ease-out both;
+}
+@keyframes mn-emp-flash-anim {
+  0%   { opacity: 0;    background: rgba(0, 232, 255, 0.95); }
+  18%  { opacity: 1;    background: rgba(0, 232, 255, 0.95); }
+  60%  { opacity: 0.65; background: rgba(0, 232, 255, 0.55); }
+  100% { opacity: 0;    background: transparent; }
+}
+
+/* Cloud tile — ports .emp-cloud-cell from server/static/styles.css:2289.
+ * Each tile contains a plasma-derived ASCII density block; the JS ticker
+ * repaints the glyphs every ~90ms so the cloud SWIRLS in place. */
+.mn-emp-cloud {
+  position: absolute;
+  pointer-events: none;
+  z-index: 18;
+  background: rgba(116, 220, 255, 0.06);
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1;
+  white-space: pre;
+  letter-spacing: 0;
+  word-spacing: 0;
+  color: rgba(0, 232, 255, 0.92);
+  text-shadow:
+    0 0 3px rgba(0, 232, 255, 0.85),
+    0 0 8px rgba(0, 232, 255, 0.35);
+  animation: mn-emp-cloud-pulse 350ms ease-in-out infinite;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@keyframes mn-emp-cloud-pulse {
+  0%   { opacity: 0.50; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 0.50; }
+}
+.mn-emp-cloud.is-fading {
+  animation: none;
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+
+/* ── Section 5 (supersede) — planning overlays + strategy strip ──
+ * Reuses the existing manual components:
+ *   .mn-opp-policy / .mn-opp-policy-list / .mn-roster-slot  (policy)
+ *   .mn-vault / .mn-vault-grid / .mn-vault-slot             (vault)
+ *   ↑ ported from tab 3 + tab 6, styled identically.
+ *
+ * Planning glyph overlay mirrors engine's .cc-order-marker
+ * (server/static/styles.css:2106): a pulsing seat-coloured glyph
+ * painted on the destination cell, NO dashed box, so the marker
+ * reads as "planned drop" without inventing new chrome. */
+.mn-probes-order-marker {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  font-size: 15px;
+  color: var(--marker-color, #7ab8ff);
+  text-shadow:
+    0 0 2px #000,
+    0 0 4px rgba(0, 0, 0, 0.9);
+  animation: mn-probes-order-marker-pulse 1.6s ease-in-out infinite;
+}
+.mn-probes-order-marker-lbl {
+  position: absolute;
+  bottom: -10px;
+  font-size: 7px;
+  letter-spacing: 0.16em;
+  opacity: 0.9;
+  color: inherit;
+  text-shadow: 0 0 2px #000;
+}
+@keyframes mn-probes-order-marker-pulse {
+  0%, 100% { opacity: 0.60; transform: scale(0.92); }
+  50%      { opacity: 1.00; transform: scale(1.06); }
+}
+
+/* CANCELLED badge — red circle-slash overlay + "CANCELLED" caption. */
+.mn-probes-cancelled {
+  position: absolute;
+  inset: 0;
+  z-index: 42;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #ff5555;
+  font-size: 22px;
+  text-shadow:
+    0 0 4px rgba(255, 85, 85, 0.85),
+    0 0 10px rgba(255, 85, 85, 0.45);
+  animation: mn-probes-cancelled-in 220ms ease-out both;
+}
+.mn-probes-cancelled-lbl {
+  position: absolute;
+  z-index: 42;
+  padding: 2px 5px;
+  background: rgba(30, 5, 5, 0.92);
+  border: 1px solid rgba(255, 85, 85, 0.75);
+  color: #ff8080;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: mn-probes-cancelled-in 220ms ease-out both;
+}
+@keyframes mn-probes-cancelled-in {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* Strategy strip — a THIRD column in the layout (stage 4 only).
+ * Board | Caption | Strip. The caption keeps its commentary; the
+ * strip holds P2/P1 policy + vault cards stacked vertically. */
+.mn-loop-layout.mn-probes-layout:has(.mn-probes-strategy-strip) {
+  grid-template-columns: 1fr minmax(220px, 300px) 340px;
+}
+.mn-probes-strategy-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+.mn-probes-strategy-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  align-items: stretch;
+  min-height: 0;
+  min-width: 0;
+}
+/* Constrain the inner .mn-opp-policy + .mn-vault so both fit in
+ * the 340px right column. */
+.mn-probes-strategy-col .mn-opp-policy {
+  min-height: 0;
+  max-height: 240px;
+  min-width: 0;
+}
+.mn-probes-strategy-col .mn-opp-policy-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.mn-probes-strategy-col .mn-opp-policy-list .mn-roster-slot {
+  font-size: 10px;
+  padding: 1px 4px;
+}
+.mn-probes-strategy-col .mn-vault {
+  min-height: 0;
+  min-width: 0;
+  padding: 6px 8px;
+  flex: 0 0 auto;
+}
+.mn-probes-strategy-col .mn-vault-title { font-size: 10px; }
+.mn-probes-strategy-col .mn-vault-score { font-size: 10px; }
+.mn-probes-strategy-col .mn-vault-score b { font-size: 14px; }
+.mn-probes-strategy-col .mn-vault-cap { font-size: 8px; }
+.mn-probes-strategy-col .mn-vault-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+.mn-probes-strategy-col .mn-vault-slot {
+  min-height: 0;
+  font-size: 10px;
+}
+
+/* Verdict — a single-line summary under the strip. Matches the
+ * manual's dim-caption idiom (mono, 10px, dashed frame). */
+.mn-probes-verdict {
+  margin-top: 4px;
+  padding: 6px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  color: rgba(230, 235, 245, 0.85);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px dashed var(--frame);
+  text-align: center;
+}
+.mn-probes-verdict.is-loss { color: rgb(255, 130, 130); border-color: rgba(255, 90, 90, 0.6); }
+.mn-probes-verdict.is-win  { color: rgb(140, 220, 160); border-color: rgba(90, 200, 130, 0.6); }
+
+/* ═══════════════════════════════════════════════════════════════
+ * Tab 10 · HARVESTERS · deep dive
+ *   Reuses PROBES-tab primitives (.mn-opp-policy, .mn-vault,
+ *   .mn-probes-order-marker, spawnXOverlayLocal, cancelled badge)
+ *   under new .mn-harv-* selectors.  Adds a DAMAGED-harvester state
+ *   (orange glyph, pulse) and a CRASH SCAR overlay (dashed yellow +
+ *   diagonal stripes) matching the engine spec (RULEBOOK §3.17).
+ * ═══════════════════════════════════════════════════════════════ */
+.mn-harv-layout {
+  grid-template-columns: 1fr minmax(260px, 340px);
+}
+.mn-harv-stage {
+  position: relative;
+  min-height: 320px;
+}
+
+/* Sticker — same silhouette as .mn-probes-sticker; own name so
+ * neither tab needs to hunt for a shared element. */
+.mn-harv-sticker {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  padding: 3px 8px 4px;
+  background: rgba(2, 5, 12, 0.94);
+  border: 1px solid rgba(255, 199, 40, 0.65);
+  color: rgb(255, 199, 40);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 220ms ease, border-color 240ms ease, color 240ms ease;
+}
+.mn-harv-sticker.is-on { opacity: 1; }
+.mn-harv-sticker.is-crash {
+  border-color: rgba(255, 120, 80, 0.9);
+  color: rgb(255, 150, 100);
+}
+.mn-harv-sticker.is-good {
+  border-color: rgba(120, 220, 160, 0.75);
+  color: rgb(150, 230, 180);
+}
+
+/* DAMAGED-harvester glyph — orange override on the entity span.
+ * The engine paints damaged harvesters in `#ff8c40`; we mimic
+ * that and add a slow pulse so the eye catches the wreck state. */
+.mn-cell-entity.is-damaged {
+  color: #ff8c40 !important;
+  text-shadow:
+    0 0 3px rgba(255, 140, 64, 0.85),
+    0 0 8px rgba(255, 140, 64, 0.4);
+  animation: mn-harv-damaged-pulse 900ms ease-in-out infinite;
+}
+@keyframes mn-harv-damaged-pulse {
+  0%, 100% { opacity: 0.75; }
+  50%      { opacity: 1;    }
+}
+
+/* CRASH SCAR — matches engine spec (server/static/styles.css:2607
+ * `.cell-collision`). Dashed yellow-orange outline flush with the cell
+ * edge, diagonal amber stripes inset 14%, one-day lifespan. Replaces
+ * the earlier bespoke stripe pattern with the canonical hues. */
+.mn-harv-crash-scar {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  pointer-events: none;
+  outline: 1px dashed rgba(240, 195, 74, 0.85);
+  outline-offset: -1px;
+  animation: mn-harv-scar-in 220ms ease-out both;
+}
+.mn-harv-crash-scar::after {
+  content: "";
+  position: absolute;
+  inset: 14%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(240, 195, 74, 0.30) 0 2px,
+    transparent 2px 5px
+  );
+  opacity: 0.85;
+}
+@keyframes mn-harv-scar-in {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* Brightness-flash on the crashed cell (mirrors engine keyframe
+ * `cell-collision-flash`: brightness 1 → 4 → 1 in 500ms). Apply
+ * during a collision impact to make the crash unmistakable. */
+@keyframes mn-cell-collision-flash {
+  0%   { filter: brightness(1); }
+  20%  { filter: brightness(4); }
+  100% { filter: brightness(1); }
+}
+.mn-cell.mn-cell--collision-flash {
+  animation: mn-cell-collision-flash 500ms ease-out;
+}
+.mn-harv-crash-scar-lbl {
+  position: absolute;
+  z-index: 42;
+  padding: 2px 5px;
+  background: rgba(30, 20, 5, 0.94);
+  border: 1px solid rgba(255, 221, 68, 0.75);
+  color: rgb(255, 221, 90);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: mn-harv-scar-in 220ms ease-out both;
+}
+
+/* Walking-sensor ping — a subtle glowing halo around the harvester
+ * when it steps into fog. Reads as "own sensors light the way". */
+.mn-harv-walk-ping {
+  position: absolute;
+  inset: -4px;
+  z-index: 24;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(138, 192, 255, 0.35) 0%,
+    rgba(138, 192, 255, 0.10) 45%,
+    transparent 70%
+  );
+  animation: mn-harv-walk-ping-anim 520ms ease-out both;
+}
+@keyframes mn-harv-walk-ping-anim {
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(1.4); opacity: 0;   }
+}
+
+/* Reuse of ORDER MARKER + CANCELLED badge styling from probes tab.
+ * Same look, different classname to keep the two tabs decoupled. */
+.mn-harv-order-marker {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  font-size: 15px;
+  color: var(--marker-color, #7ab8ff);
+  text-shadow:
+    0 0 2px #000,
+    0 0 4px rgba(0, 0, 0, 0.9);
+  animation: mn-probes-order-marker-pulse 1.6s ease-in-out infinite;
+}
+.mn-harv-order-marker-lbl {
+  position: absolute;
+  bottom: -10px;
+  font-size: 7px;
+  letter-spacing: 0.16em;
+  opacity: 0.9;
+  color: inherit;
+  text-shadow: 0 0 2px #000;
+}
+
+/* Strategy strip for tab 10 — SAME 3-column trick as tab 9, gated
+ * on the strip's presence via :has(). Only fires when a strip is
+ * injected (i.e. inside a scenario that has policy+vault panels). */
+.mn-loop-layout.mn-harv-layout:has(.mn-harv-strategy-strip) {
+  grid-template-columns: 1fr minmax(220px, 300px) 340px;
+}
+.mn-harv-strategy-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+.mn-harv-strategy-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  align-items: stretch;
+  min-height: 0;
+  min-width: 0;
+}
+.mn-harv-strategy-col .mn-opp-policy {
+  min-height: 0;
+  max-height: 240px;
+  min-width: 0;
+}
+.mn-harv-strategy-col .mn-opp-policy-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.mn-harv-strategy-col .mn-opp-policy-list .mn-roster-slot {
+  font-size: 10px;
+  padding: 1px 4px;
+}
+.mn-harv-strategy-col .mn-vault {
+  min-height: 0;
+  min-width: 0;
+  padding: 6px 8px;
+  flex: 0 0 auto;
+}
+.mn-harv-strategy-col .mn-vault-title { font-size: 10px; }
+.mn-harv-strategy-col .mn-vault-score { font-size: 10px; }
+.mn-harv-strategy-col .mn-vault-score b { font-size: 14px; }
+.mn-harv-strategy-col .mn-vault-cap { font-size: 8px; }
+.mn-harv-strategy-col .mn-vault-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+.mn-harv-strategy-col .mn-vault-slot {
+  min-height: 0;
+  font-size: 10px;
+}
+/* Damaged / spilled vault — X the whole grid + strike-through */
+.mn-harv-strategy-col.is-wrecked .mn-vault-grid {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+}
+.mn-harv-strategy-col.is-wrecked .mn-vault-score b {
+  color: #ff8c40 !important;
+  text-decoration: line-through;
+}
+
+/* Vault-cargo state model (in-harvester vs banked vs lost).
+ * A vault slot goes through three states inside a single outing:
+ *   1. --empty   : starting state
+ *   2. --pending : the harvester is HOLDING this parcel on the surface.
+ *                  Cargo is NOT yet safe. Dashed orange outline reads as
+ *                  "not committed".
+ *   3. --full    : parcel BANKED to the vault after a successful pickup
+ *                  (§3.9 v0.6.0: cargo only becomes vault at pickup).
+ * A spill (crash / chaff kill) drops slots from --pending back to --empty
+ * and the score resets — the cargo never made it into the vault. */
+.mn-vault-slot--pending {
+  background: rgba(255, 180, 100, 0.06);
+  outline: 1px dashed rgba(255, 180, 100, 0.75);
+  outline-offset: -2px;
+}
+.mn-vault-slot--pending .mn-vault-slot-glyph {
+  filter: saturate(0.7) brightness(0.9);
+}
+.mn-vault-slot--pending .mn-vault-slot-num {
+  color: rgba(255, 180, 100, 0.9);
+  font-style: italic;
+}
+/* Small STATUS ribbon on the vault card telling the reader which
+ * state the cargo is in. Driven by data-hold on the .mn-vault card. */
+.mn-vault-status {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  margin-top: 2px;
+  color: var(--dim);
+  transition: color 200ms ease;
+  min-height: 10px;
+}
+.mn-vault[data-hold="pending"] .mn-vault-status {
+  color: rgb(255, 180, 100);
+  font-weight: 700;
+}
+.mn-vault[data-hold="banked"] .mn-vault-status {
+  color: rgb(140, 220, 160);
+  font-weight: 700;
+}
+.mn-vault[data-hold="lost"] .mn-vault-status {
+  color: rgb(255, 130, 130);
+  font-weight: 700;
+}
+/* When cargo is pending, show the score in the same amber as the
+ * "IN HARVESTER" status so the reader instantly knows those points
+ * are at risk until pickup. */
+.mn-vault[data-hold="pending"] .mn-vault-score b {
+  color: rgb(255, 180, 100) !important;
+}
+.mn-vault[data-hold="banked"] .mn-vault-score b {
+  color: rgb(140, 220, 160) !important;
+}
+.mn-harv-verdict {
+  margin-top: 4px;
+  padding: 6px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  color: rgba(230, 235, 245, 0.85);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px dashed var(--frame);
+  text-align: center;
+}
+.mn-harv-verdict.is-loss { color: rgb(255, 130, 130); border-color: rgba(255, 90, 90, 0.6); }
+.mn-harv-verdict.is-win  { color: rgb(140, 220, 160); border-color: rgba(90, 200, 130, 0.6); }
+.mn-harv-verdict.is-crash { color: rgb(255, 180, 100); border-color: rgba(255, 180, 100, 0.6); }
+.mn-harv-verdict.is-emp   { color: rgb(90,  220, 255); border-color: rgba(90, 220, 255, 0.7); }
+.mn-harv-verdict.is-chaff { color: rgb(230, 235, 245); border-color: rgba(230, 235, 245, 0.7); }
+
+/* CHAFF — whole-map horizontal-scanline static (port of engine's
+ * `.chaff-static`, server/static/styles.css:2500). Stretched over the
+ * harvester stage (not per-cell like EMP) so it reads as a global jam
+ * event, not a localized cloud. Fires once per jammed hour at ~620ms
+ * cadence, matching engine's replay tick. */
+.mn-harv-chaff-static {
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  overflow: hidden;
+  mix-blend-mode: screen;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.45) 0,
+    rgba(255, 255, 255, 0.45) 2px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0) 4px
+  );
+  animation: mn-harv-chaff-scroll 600ms steps(8, end) forwards;
+}
+@keyframes mn-harv-chaff-scroll {
+  0%   { background-position: 0 0;      opacity: 0.95; }
+  50%  { background-position: 0 -7px;   opacity: 0.85; }
+  100% { background-position: 0 -14px;  opacity: 0;    }
+}
+
+/* Policy slot marked CHAFFED (action cancelled by someone's chaff) —
+ * yellow strikethrough, distinct from red (cancelled by crash), cyan
+ * (empd), and grey (done). */
+.mn-harv-strategy-col .mn-roster-slot.is-chaffed {
+  text-decoration: line-through;
+  color: rgb(240, 210, 100) !important;
+  opacity: 0.85;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-chaffed .mn-roster-verb {
+  color: rgb(240, 210, 100) !important;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-chaffed .mn-roster-verb::after {
+  content: " (chaffed)";
+  margin-left: 4px;
+  opacity: 0.85;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Launcher's own locked self-jam rows (§4.9.5 v0.9.16). These are real
+ * queue slots but the launcher can't fill them; matches engine class
+ * `.solo-queue-row--chaff-jam`. */
+.mn-harv-strategy-col .mn-roster-slot.is-chaff-jam {
+  color: rgba(200, 200, 220, 0.6) !important;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.05) 0 3px,
+    rgba(255, 255, 255, 0.15) 3px 6px
+  );
+  font-style: italic;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-chaff-jam .mn-roster-verb::after {
+  content: " (self-jam)";
+  margin-left: 4px;
+  opacity: 0.85;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  font-style: normal;
+  display: inline-block;
+}
+
+/* Policy slot marked EMPD (empd no-op — action was replaced by the
+ * disable rule §4.9.3). Reads as a cyan strike-through so the reader
+ * can distinguish it from red (cancelled by crash) and grey (done). */
+.mn-harv-strategy-col .mn-roster-slot.is-empd {
+  text-decoration: line-through;
+  color: rgb(90, 220, 255) !important;
+  opacity: 0.75;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-empd .mn-roster-verb {
+  color: rgb(90, 220, 255) !important;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-empd .mn-roster-verb::after {
+  content: " (emp'ed)";
+  margin-left: 4px;
+  opacity: 0.85;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Illegal / waste-frame row (v0.9.10 `not adjacent` etc.). Red strike
+ * with a bold "WASTE" cue — distinct from cancelled-by-crash (which
+ * uses a plain red strike) via the italic tail. */
+.mn-harv-strategy-col .mn-roster-slot.is-illegal {
+  text-decoration: line-through;
+  color: rgb(255, 130, 130) !important;
+  opacity: 0.85;
+  font-style: italic;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-illegal .mn-roster-verb {
+  color: rgb(255, 130, 130) !important;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-illegal .mn-roster-verb::after {
+  content: " (illegal)";
+  margin-left: 4px;
+  opacity: 0.85;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  font-style: normal;
+  display: inline-block;
+}
+
+/* Cloud-cover row — passive cyan tint on the ENEMY's policy strip
+ * for hours where an EMP cloud they launched is still active but no
+ * action was queued. Just colour + a faint band, no extra text — the
+ * cyan band is enough for the reader to see the 8-hour cloud span. */
+.mn-harv-strategy-col .mn-roster-slot.is-cloud-cover {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 232, 255, 0.08) 0%,
+    rgba(0, 232, 255, 0.18) 50%,
+    rgba(0, 232, 255, 0.08) 100%
+  );
+}
+.mn-harv-strategy-col .mn-roster-slot.is-cloud-cover .mn-roster-hour {
+  color: rgb(140, 235, 255) !important;
+  opacity: 0.95;
+}
+.mn-harv-strategy-col .mn-roster-slot.is-cloud-cover .mn-roster-verb {
+  color: rgba(140, 235, 255, 0.75) !important;
+  font-style: italic;
+}
+
+/* Dawn heat sweep — per-cell warm glow driven by JS. The `.mn-cell-heat`
+ * class + `--heat` custom property below do the whole visual — matches
+ * engine's `_runHeatSweep` (server/static/app.js:9501). No separate
+ * decorative overlay: the cells ARE the sun edge. */
+
+/* Per-cell heat overlay applied by runDawnSweepLocal. The heat value
+ * is driven from JS via the --heat CSS variable (0..1), matching the
+ * engine's _heatApplyCell scale. Warm background lift + text-shadow
+ * glow — no glyph shimmer here (the manual keeps the demo tight). */
+.mn-cell.mn-cell-heat {
+  transition: background 120ms linear;
+  background: rgba(
+    calc(15 + var(--heat, 0) * 42),
+    calc(12 + var(--heat, 0) * 32),
+    calc(24 + var(--heat, 0) * 24),
+    1
+  ) !important;
+}
+.mn-cell.mn-cell-heat .mn-cell-terrain,
+.mn-cell.mn-cell-heat .mn-cell-entity {
+  filter:
+    saturate(calc(1 + var(--heat, 0) * 1.5))
+    brightness(calc(1 + var(--heat, 0) * 0.45));
+  text-shadow:
+    0 0 calc(3px + var(--heat, 0) * 5px)
+    rgba(255, 200, 80, calc(var(--heat, 0) * 0.7));
+  transition: filter 120ms linear, text-shadow 120ms linear;
+}
+
+/* Grey X gravestone marker — matches engine's inline
+ * `<span class="entity-overlay" style="color:#d6d6de">X</span>`
+ * (server/static/app.js:1831). Persists until stage reset. */
+.mn-harv-gravestone {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d6d6de;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.95);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+  animation: mn-harv-grave-in 320ms ease-out both;
+}
+@keyframes mn-harv-grave-in {
+  0%   { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 1; transform: scale(1);   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * IN-PLACE EDITOR — caption text overrides
+ *   Gated by `?editor=1` in the URL: the toolbar is `hidden` in the
+ *   HTML by default and only revealed when the URL param is present.
+ *   `body.is-editing` unlocks the click-to-edit affordances on every
+ *   element carrying `[data-mn-edit-key]`. Saves persist to
+ *   localStorage per `{tab}:{stage}:{field}` key.
+ * ═══════════════════════════════════════════════════════════════ */
+.mn-edit-tools {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 12px;
+}
+/* The `.mn-edit-tools` class and the `[hidden]` attribute have the
+ * same specificity — the author `display: inline-flex` above would
+ * silently defeat the built-in `[hidden]{display:none}`. Force the
+ * hide with a higher-specificity combined selector so the toolbar
+ * stays hidden until JS explicitly flips `hidden` off. */
+.mn-edit-tools[hidden] {
+  display: none;
+}
+.mn-edit-toggle,
+.mn-edit-save,
+.mn-edit-history,
+.mn-edit-export,
+.mn-edit-clear,
+.mn-edit-lock {
+  font-size: 11px;
+  padding: 2px 8px;
+  line-height: 1.4;
+}
+.mn-edit-toggle.is-on {
+  color: var(--green);
+  border-color: var(--green);
+}
+.mn-edit-save {
+  color: rgb(140, 220, 160);
+  border-color: rgba(140, 220, 160, 0.65);
+}
+.mn-edit-history {
+  color: rgba(180, 200, 240, 0.9);
+  border-color: rgba(180, 200, 240, 0.5);
+}
+.mn-edit-clear {
+  color: rgba(230, 130, 220, 0.85);
+  border-color: rgba(230, 130, 220, 0.5);
+}
+.mn-edit-lock {
+  color: rgba(255, 170, 80, 0.85);
+  border-color: rgba(255, 170, 80, 0.5);
+}
+
+/* Modal shell — full-screen dim overlay + centered card. Used by the
+ * HISTORY viewer to show the edit log with per-entry revert actions. */
+.mn-modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: mn-modal-fade-in 140ms ease-out both;
+}
+.mn-modal-shell[hidden] { display: none; }
+@keyframes mn-modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.mn-modal {
+  width: 820px;
+  max-width: 92vw;
+  max-height: 86vh;
+  background: rgba(12, 15, 21, 0.98);
+  border: 1px solid var(--frame);
+  color: var(--fg);
+  font-family: var(--mono);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.mn-modal-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--frame);
+  background: rgba(255, 255, 255, 0.02);
+}
+.mn-modal-title {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+.mn-modal-close {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--frame);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 8px;
+}
+.mn-modal-close:hover { border-color: var(--red); color: var(--red); }
+.mn-modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 8px 14px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.mn-modal-foot {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--frame);
+  background: rgba(255, 255, 255, 0.02);
+  flex-wrap: wrap;
+}
+
+/* History / diff — commit cards and per-field diff blocks. Rendered
+ * both in the SAVE-FILE preview modal AND the HISTORY viewer, so the
+ * same visual language is reused (green = after, red = before). */
+.mn-log-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--dim);
+  font-style: italic;
+}
+.mn-diff-preview-hint {
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--frame);
+  border-left: 3px solid rgba(255, 199, 40, 0.75);
+  background: rgba(255, 199, 40, 0.04);
+  color: rgba(230, 235, 245, 0.9);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.mn-diff-preview-hint code {
+  color: rgb(140, 220, 160);
+  background: rgba(140, 220, 160, 0.08);
+  padding: 0 3px;
+  font-family: var(--mono);
+}
+.mn-diff-commit {
+  border: 1px solid var(--frame);
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.015);
+}
+.mn-diff-commit-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--frame);
+  background: rgba(90, 180, 255, 0.05);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.mn-diff-commit-tag {
+  color: rgb(90, 180, 255);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.mn-diff-commit-ts {
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.mn-diff-commit-count {
+  margin-left: auto;
+  color: var(--dim);
+}
+.mn-diff-commit-body {
+  padding: 6px 10px;
+}
+.mn-diff-delta {
+  border: 1px solid var(--frame);
+  border-left-width: 3px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.01);
+}
+.mn-diff-delta[data-kind="add"]    { border-left-color: rgba(140, 220, 160, 0.75); }
+.mn-diff-delta[data-kind="modify"] { border-left-color: rgba(255, 199, 40, 0.75); }
+.mn-diff-delta[data-kind="remove"] { border-left-color: rgba(255, 130, 130, 0.75); }
+.mn-diff-delta-head {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin-bottom: 4px;
+  font-size: 10px;
+}
+.mn-diff-delta-kind {
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.mn-diff-delta[data-kind="add"]    .mn-diff-delta-kind { color: rgb(140, 220, 160); }
+.mn-diff-delta[data-kind="modify"] .mn-diff-delta-kind { color: rgb(255, 199, 40); }
+.mn-diff-delta[data-kind="remove"] .mn-diff-delta-kind { color: rgb(255, 130, 130); }
+.mn-diff-delta-key {
+  color: var(--fg);
+  opacity: 0.9;
+  font-family: var(--mono);
+}
+.mn-diff-delta-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.mn-diff-delta[data-kind="add"]    .mn-diff-delta-body,
+.mn-diff-delta[data-kind="remove"] .mn-diff-delta-body {
+  grid-template-columns: 1fr;
+}
+.mn-diff-side {
+  border: 1px solid var(--frame);
+  padding: 4px 6px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.mn-diff-side-label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 2px;
+}
+.mn-diff-side-text {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  max-height: 8em;
+  overflow-y: auto;
+  margin: 0;
+  color: var(--fg);
+}
+.mn-diff-before .mn-diff-side-text { color: rgba(255, 130, 130, 0.92); }
+.mn-diff-after  .mn-diff-side-text { color: rgba(140, 220, 160, 0.98); }
+
+/* Toolbar buttons inside the modal footer. */
+.mn-modal-btn {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--frame);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 4px 10px;
+}
+.mn-modal-btn:hover { border-color: var(--green); color: var(--green); }
+.mn-modal-btn--danger { color: rgba(255, 130, 130, 0.9); border-color: rgba(255, 130, 130, 0.5); }
+.mn-modal-btn--danger:hover { border-color: rgb(255, 130, 130); color: rgb(255, 130, 130); }
+.mn-modal-btn--primary { color: rgb(140, 220, 160); border-color: rgba(140, 220, 160, 0.6); }
+.mn-modal-btn--primary:hover { border-color: rgb(140, 220, 160); }
+.mn-modal-spacer { flex: 1 1 auto; }
+
+/* When editing is ON — every editable element gets a dashed amber
+ * outline on hover and a pencil cursor. Fields the user has already
+ * overridden get a persistent amber corner marker. */
+body.is-editing [data-mn-edit-key] {
+  cursor: text;
+  transition: outline-color 120ms ease, background 120ms ease;
+  outline: 1px dashed transparent;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+body.is-editing [data-mn-edit-key]:hover {
+  outline-color: rgba(255, 199, 40, 0.75);
+  background: rgba(255, 199, 40, 0.05);
+}
+body.is-editing [data-mn-edit-key][data-mn-edited="1"]::before {
+  content: "●";
+  color: rgba(255, 199, 40, 0.85);
+  font-size: 8px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+body.is-editing .mn-edit-reset {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 4px;
+  font-size: 9px;
+  color: rgba(255, 130, 130, 0.85);
+  border: 1px solid rgba(255, 130, 130, 0.4);
+  cursor: pointer;
+  background: transparent;
+  border-radius: 2px;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+body.is-editing .mn-edit-reset:hover {
+  color: rgb(255, 150, 150);
+  border-color: rgba(255, 130, 130, 0.8);
+}
+
+/* Inline textarea shown when the user clicks a field. Styled to match
+ * the parent field's typography so the swap doesn't jar the layout. */
+.mn-inline-editor {
+  display: block;
+  width: 100%;
+  min-height: 1.4em;
+  padding: 4px 6px;
+  margin: 0;
+  font-family: var(--mono);
+  background: rgba(0, 0, 0, 0.6);
+  color: inherit;
+  border: 1px solid rgba(255, 199, 40, 0.75);
+  border-radius: 2px;
+  outline: none;
+  resize: vertical;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1.35;
+}
+.mn-inline-editor:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 1px rgba(90, 200, 130, 0.35);
+}
+.mn-inline-editor-hint {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(255, 199, 40, 0.75);
+  margin-top: 2px;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-weight: normal;
+}
+
+/* ── SIGNS TAB · blue-sign + redsign overlays ─────────────────────
+ * Ported from server/static/styles.css (§4.10 blue-sign / §4.11
+ * redsign) and server/static/app.js so the manual paints the same
+ * beacons the engine does.
+ *
+ * Blue-sign is precomputed at season birth — the fog cell itself is
+ * tinted (background + glyph colour) per-cell by intensity. It is
+ * NOT a separate overlay div; see paintBlueSign() in manual.js.
+ * Red-sign is discovery-triggered — a filled diamond pulses once at
+ * the seam, then a per-cell unicode fill persists on fog cells
+ * around the jittered centre.
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Blue-sign: BAKED INTO THE FOG CELL, not a separate overlay.
+ * Engine parity (server/static/app.js:_blueSignStyles + fog render
+ * at app.js:1901). Per-cell intensity in [0..1] blends:
+ *   cell background: rgb(15,12,24) → rgb(8,22,70)  @ alpha 0.96
+ *   fog glyph color: rgb(168,177,189) → rgb(100,160,255)
+ * The manual's paintBlueSign() applies these inline via
+ * `cell.style.background` and `.mn-cell-fog.style.color`, so no
+ * dedicated class is needed. `.mn-blue-sign-baked` is just a marker
+ * so clearAllSigns() knows which cells to reset. The old radial-
+ * gradient overlay (v0.9.x prehistoric implementation) was removed. */
+/* Blue-sign overlay — same architecture as redsign so it BLENDS with
+ * the fog instead of stamping over it. A `.mn-blue-sign-cell` span is
+ * layered inside every signed fog cell; its `░░` / `▒▒` glyph uses
+ * `mix-blend-mode: screen` so the vivid blue ADDS to the grey fog
+ * dots underneath (rather than replacing them). Colour alpha rides
+ * `--bs-int` so cells closer to the seam read brighter, edges fade
+ * into the surrounding fog. No breathe animation — blue-sign is
+ * "always on" per §4.10, unlike the discovery-driven redsign pulse. */
+.mn-blue-sign-cell {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  white-space: pre;
+  font-family: var(--mono, "Courier New", monospace);
+  color: rgba(100, 160, 255, calc(var(--bs-int, 0.5) * 0.85));
+  mix-blend-mode: screen;
+  user-select: none;
+  z-index: 4;
+  font-size: var(--cell-font, 20px);
+  line-height: var(--cell-line-height, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Engine behaviour: blue-sign only lives on fog cells. When a probe
+ * unfogs the cell (removes `is-fogged`), the sign vanishes so terrain
+ * reads cleanly. Same rule the engine enforces by rendering live
+ * cells with a completely different markup that has no sign. */
+.mn-cell:not(.is-fogged) .mn-blue-sign-cell { display: none; }
+
+/* Sign / pure-cell tooltip — same silhouette as `.mn-harv-sticker`
+ * (dark opaque bg, coloured border, mono uppercase spaced text) so
+ * every callout in the manual has one consistent look. Anchored to
+ * the BOARD via inline left/top so `.mn-cell { overflow: hidden }`
+ * doesn't clip it. `--blue` variant borders/text in blue; `--red`
+ * variant in red. */
+.mn-signs-tooltip {
+  position: absolute;
+  transform: translateX(-50%);
+  padding: 6px 12px 7px;
+  background: rgba(2, 5, 12, 0.94);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 11;
+  border: 1px solid transparent;
+}
+.mn-signs-tooltip--blue {
+  border-color: rgba(120, 180, 255, 0.75);
+  color: rgb(120, 180, 255);
+}
+.mn-signs-tooltip--red {
+  border-color: rgba(255, 120, 110, 0.75);
+  color: rgb(255, 120, 110);
+}
+.mn-blue-sign-baked {
+  /* Legacy marker class from the earlier fog-glyph tint approach —
+   * kept so old localStorage entries don't break, but no styling. */
+}
+
+/* Redsign persistent smear. Unicode fill (░░ / ▒▒ toward centre)
+ * so it tiles at the cell's own metric; colour alpha rides
+ * `--rs-int` so the field reads brighter toward the seam centre.
+ * Fog cells get a stronger, more opaque glow via the --fog variant.
+ * Engine parity: font-size + line-height match the cell metric so
+ * the glyph fills edge-to-edge (see app.js:10444). */
+.mn-redsign-cell {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  white-space: pre;
+  font-family: var(--mono, "Courier New", monospace);
+  color: rgba(228, 46, 40, calc(var(--rs-int, 0.5) * 0.9));
+  mix-blend-mode: screen;
+  user-select: none;
+  animation: mn-redsign-breathe 2400ms ease-in-out infinite;
+  z-index: 5;
+  font-size: var(--cell-font, 20px);
+  line-height: var(--cell-line-height, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mn-redsign-cell--fog {
+  color: rgba(240, 58, 50, var(--rs-int, 0.5));
+}
+/* Engine behaviour: redsign smears only render on FOG cells. When a
+ * probe unfogs the cell (removes `is-fogged`), the smear vanishes so
+ * revealed terrain reads cleanly. Same rule as the blue-sign overlay
+ * — signs live on fog, live cells have no sign. */
+.mn-cell:not(.is-fogged) .mn-redsign-cell { display: none; }
+@keyframes mn-redsign-breathe {
+  0%   { opacity: 0.30; }
+  50%  { opacity: 1;    }
+  100% { opacity: 0.30; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-redsign-cell,
+  .mn-redsign-cell--fog { animation: none; }
+}
+
+/* Redsign discovery burst — fires once at the exact praxis hour a
+ * pure-RED seam is first witnessed. Rotated 45° so it reads as a
+ * rhombus (distinct from probe-landing ripples which are circular).
+ * Position: fixed on the body so it survives host repaints. */
+.mn-redsign-burst {
+  position: fixed;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  z-index: 31;
+  background: rgba(255, 72, 60, 0.85);
+  box-shadow:
+    0 0 18px 6px rgba(255, 70, 60, 0.5),
+    0 0 40px 14px rgba(255, 60, 50, 0.22);
+  animation: mn-redsign-burst-expand 1150ms cubic-bezier(0.12, 0.68, 0.3, 1) forwards;
+}
+@keyframes mn-redsign-burst-expand {
+  0%   { width: 4px;   height: 4px;   opacity: 0; }
+  12%  { opacity: 1;                               }
+  55%  { opacity: 0.75;                            }
+  100% { width: 156px; height: 156px; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-redsign-burst { display: none; }
+}
+
+/* Twin-board layout for stage 3 · truth vs orbital view. Two mini
+ * boards side by side inside the stage host so the reader can
+ * compare where the material actually is with what the smear
+ * suggests. */
+.mn-signs-twin {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 6px;
+}
+.mn-signs-twin-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.mn-signs-twin-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 2px 8px;
+  border: 1px solid var(--frame);
+  background: rgba(255, 255, 255, 0.015);
+}
+.mn-signs-twin-col[data-view="truth"] .mn-signs-twin-label {
+  border-color: rgba(140, 220, 160, 0.5);
+  color: rgb(140, 220, 160);
+}
+.mn-signs-twin-col[data-view="orbital"] .mn-signs-twin-label {
+  border-color: rgba(90, 180, 255, 0.5);
+  color: rgb(90, 180, 255);
+}
+
+/* ── TAB 1 — staged tiles/purities view ─────────────────────────
+ * Left: persistent generated board (~16×11). Right: caption + a
+ * per-stage info panel that swaps content when the stage changes.
+ * Cells outside the focused colour get a `.tab1-dim` class that
+ * fades them to 0.15 opacity; focused cells get `.tab1-hi` with a
+ * soft pulse so the eye lands on the tier being taught. */
+.mn-tiles-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  padding: 10px 0 6px;
+}
+.mn-tiles-stage {
+  padding: 0;
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+}
+.mn-tiles-caption {
+  flex: 1 1 auto;
+  min-width: 320px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Cells outside the current colour focus fade back so the taught
+ * tier reads clearly. Fog layer is unaffected. */
+.mn-cell.tab1-dim {
+  opacity: 0.18;
+  transition: opacity 320ms ease;
+}
+.mn-cell.tab1-hi {
+  opacity: 1;
+  transition: opacity 320ms ease;
+  animation: mn-tab1-pulse 2400ms ease-in-out infinite;
+}
+@keyframes mn-tab1-pulse {
+  0%, 100% { filter: brightness(1);   }
+  50%      { filter: brightness(1.4); }
+}
+
+/* Info panel — appended below the stage cite. Holds the mini tier
+ * ramp during RED/BLUE stages and the natural/synthetic explainer
+ * during the GREEN stage. */
+.mn-tiles-panel {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--frame);
+  background: rgba(255, 255, 255, 0.015);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.mn-tiles-panel[hidden] { display: none; }
+.mn-tier-title {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+/* Host for the mini tier-ramp boards — 4 cells wide × 1 row of 42px
+ * cells. Kept flush-left so the labels row below aligns to it. */
+.mn-tier-boardhost {
+  display: flex;
+  justify-content: flex-start;
+  margin: 4px 0;
+}
+/* Labels beneath the tier ramp — one span per cell, evenly spaced
+ * so each label sits under its cell. */
+.mn-tier-labels {
+  display: grid;
+  grid-template-columns: repeat(4, 42px);
+  gap: 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  text-transform: lowercase;
+  margin: 2px 0 6px;
+}
+.mn-tier-labels span {
+  text-align: center;
+}
+.mn-tier-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.mn-tier-row {
+  display: grid;
+  grid-template-columns: 32px 70px 1fr;
+  gap: 6px;
+  align-items: baseline;
+  padding: 2px 4px;
+  border-left: 2px solid rgba(255, 255, 255, 0.06);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.mn-tier-row[data-tier="trace"]  { border-left-color: rgba(255, 199, 40, 0.4); }
+.mn-tier-row[data-tier="vein"]   { border-left-color: rgba(255, 199, 40, 0.6); }
+.mn-tier-row[data-tier="mass"]   { border-left-color: rgba(255, 199, 40, 0.8); }
+.mn-tier-row[data-tier="pure"]   { border-left-color: rgba(255, 199, 40, 1);   }
+.mn-tier-list--simple .mn-tier-row {
+  grid-template-columns: 90px 1fr;
+}
+.mn-tier-glyph {
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-align: center;
+}
+.mn-tier-name {
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+}
+.mn-tier-range {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+.mn-tier-note {
+  font-size: 10.5px;
+  color: rgba(230, 235, 245, 0.85);
+  line-height: 1.55;
+  padding-top: 6px;
+  border-top: 1px dashed var(--frame);
+}

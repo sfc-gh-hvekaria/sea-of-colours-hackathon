@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>tabula v8 — Worldview · Sea of Colours Chronicle</title>
+<link rel="stylesheet" href="chronicle.css" />
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">Agent detail · generation 8</div>
+  <h1>v8 — giving the agent a worldview</h1>
+  <p class="subtitle">Containment made the plan trustworthy. v8 asks: is the agent even being <i>told</i> what happened to it? The answer was no — so v8 rebuilds how the agent is fed the game, the board, and last night.</p>
+  <div class="meta">haiku-4-5 · Cortex Inference API · contained split native · true fork of the feeding layer</div>
+  <a class="backlink" href="../agent_build_chronicle.html">← back to the overview</a>
+</header>
+
+<div class="wrap">
+
+<section id="what">
+  <h2><span class="num">v8</span>What v8 is</h2>
+  <p class="lead">The <b>worldview</b> release. v7 proved the agent could reliably <i>finish</i> a plan and <i>reason</i> before it. v8's investigation found the reasoning was operating on an incomplete picture — the agent literally never saw one of the most important things that happened to it. v8 is a <b>true fork of the feeding layer</b>: it owns the prompt, the doctrine, and the rules module, while reusing v7's proven computation layer (hint compilers, sanitizer, wishlist, memory, weapon inference, recorder) unchanged.</p>
+  <div class="callout">
+    <div class="tag">Scope note — v8 vs v9</div>
+    <p style="margin:0">v8 stays on the <b>current stack</b> (haiku + the contained two-call split) and spends its effort on <b>data, doctrine, and observability</b>. The separate bet — bounded <i>native</i> thinking on a thinking-capable model (sonnet) via <code>reasoning.max_tokens</code> — is <b>v9</b>. Fixing what the agent <i>knows</i> comes before making it think harder about it.</p>
+  </div>
+</section>
+
+<section id="blindspot">
+  <h2><span class="num">01</span>The investigation — a three-way pile-up the agent never saw</h2>
+  <p class="lead">The seed-42 arena produced a perfect case study. On day 2 a pure-RED beacon broadcast near (2,13). All three agents fixated on it. What happened next was almost comedic.</p>
+  <div class="timeline">
+    <div class="tl dead"><span class="v">day 3</span> <span class="d">— <b>everyone rushes the exact cell, everyone crashes.</b> SIMULTANEOUS DROP COLLISION at (2,9): all three harvesters (p1+p2+p3) dropped on the same broadcast cell and mutually annihilated. All stayed orbital-damaged, 0 cargo. Nobody banked the pure.</span></div>
+    <div class="tl win"><span class="v">day 4</span> <span class="d">— v8 drops <b>offset</b> at (2,14) onto the seam → harvested 6 parcels (incl. purity 210/245). v7 dropped on the exact beacon (2,9) again → 0. v6's drop was rejected (no live sensor).</span></div>
+    <div class="tl win"><span class="v">day 5</span> <span class="d">— v8 ships the haul: <b>+2349</b> (two purity-255 pures + 245 + 210 + 161). Meanwhile v7 and v6 collided on (2,9) <i>again</i>. v8 dropped offset at (2,12) and banked 6 more.</span></div>
+  </div>
+  <p>In that earlier arena (v8 still on the pre-fork shim) v8 came out ahead. But that raised the sharp question that drove this whole release: <b>did it actually understand the pile-up, or did it get lucky?</b> We read its own chain-of-thought. The answer was damning.</p>
+
+  <div class="callout warn">
+    <div class="tag">The smoking gun — day 7, verbatim from the thinker's CoT</div>
+    <p style="margin:0">Racing the final-night beacon, the thinker <b>recites the exact risk</b> — and dives onto the exact cell anyway:</p>
+  </div>
+<pre>- Mitigation: the hot drop lands on the beacon itself (not adjacent), so if both
+  harvesters land on the same cell in the same hour, <span class="r">both take damage and return
+  with ZERO parcels. This is a LOSS.</span>
+...
+FINAL CALL:
+- POSTURE: <span class="n">redsign_race</span>
+- STRATEGY:
+  1. Launch probe at (4,8) hour 1
+  2. <span class="r">Hot-drop harvester_p1 at (2,9)</span> hour 2   <span class="c"># the exact advertised beacon cell</span></pre>
+  <p>It <i>knew</i> the collision rule and still chose the mutual-kill cell. Why? Because on the nights it actually collided, <b>the agent was never told it had collided.</b></p>
+</section>
+
+<section id="rootcause">
+  <h2><span class="num">02</span>The root cause — a silently-dropped channel</h2>
+  <p>The engine records every collision: <code>collision_marks[&quot;x:y&quot;] = {day, owners}</code>, the public ring the frontend renders. But the agent's "last night" recap is built by <code>view._last_night_recap</code>, whose free-text attribution filter (<code>_is_my_row</code>) keys on the player's slug at the start of a log caption. The collision frame is logged with <b><code>owner=None</code></b> and a caption that filter drops. So:</p>
+  <div class="grid2">
+    <div class="card bad"><span class="icon">what the agent saw</span><h4>"banked 0"</h4><p class="dim">No cause. So it confabulated one — a "thin seam," or "held in hoard, not lost." The grounded-reflection loop, ironically, made the lie <i>confident</i>.</p></div>
+    <div class="card good"><span class="icon">the truth on the map</span><h4>a three-way collision ring on (2,9)</h4><p class="dim">Public, fog-safe, sitting in <code>collision_marks</code> — just never surfaced into the reflection channel the agent reads.</p></div>
+  </div>
+  <div class="callout big">
+    <div class="tag">The keystone insight</div>
+    <p style="margin:0">You cannot reason your way out of a mistake you were never told you made. Before making the agent think <i>harder</i> (v9), we had to make sure it could <i>see what happened to it</i>. That is the whole thesis of v8.</p>
+  </div>
+</section>
+
+<section id="changes">
+  <h2><span class="num">03</span>The engineering — a restructured worldview</h2>
+  <p class="lead">v8 rebuilds the prompt around <b>three explicit pillars</b> so the agent (and the thinker especially) has a clean scaffold, then fills the gaps the investigation exposed.</p>
+  <table>
+    <thead><tr><th>Pillar</th><th>Contains</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">SECTION 1<br>THE GAME</td><td>engine RULES (physics) + DOCTRINE (core + state-triggered appendices, incl. the new redsign-poker book) + the STRATEGIST DIRECTIVE handoff.</td></tr>
+      <tr><td class="mono">SECTION 2<br>THE BOARD NOW</td><td>your state, visible RED, drop-legal zones, fog+echo, <b>ENEMY PROBES</b> (new), opponent intel, <b>OPPONENT WEAPONS + WEAPON GEOMETRY</b> (new), the hint menu.</td></tr>
+      <tr><td class="mono">SECTION 3<br>LAST NIGHT</td><td>the engine record — now including <b>COLLISIONS</b> (the keystone) — plus the grounded REFLECT block that names a collision loss as <b>LOST</b>, not "held".</td></tr>
+    </tbody>
+  </table>
+
+  <h3>The keystone (§4e) — the collision channel</h3>
+  <p>A new fog-safe <code>my_collisions</code> channel in <code>view._last_night_recap</code>, sourced directly from <code>collision_marks</code> (self-party only — surfaced only when this seat is in the <code>owners</code> list). The v8 LAST NIGHT block renders it explicitly, and the v8 REFLECT block prepends a hard loss-framing line the model must acknowledge:</p>
+<pre><span class="c"># SECTION 3 — what the agent now reads after a pile-up</span>
+my_collisions (1) — YOU banked ZERO here:
+  - harvester COLLIDED at [2,9] with ['p2','p3'] — returned orbital
+    damaged, 0 cargo (cargo <span class="r">LOST, NOT held in hoard</span>). The advertised
+    cell was a mutual-kill zone.
+
+<span class="c"># REFLECT</span>
+COLLISION LOSS: a harvester of yours collided at [2,9] with ['p2','p3']
+  and banked ZERO — this cargo is LOST, not held. ... next time drop
+  <span class="s">OFFSET onto the seam</span> instead of the advertised cell.</pre>
+
+  <h3>The doctrine (§5) — redsign poker</h3>
+  <p>A new state-triggered appendix that rides with any live redsign. It names the beacon a <b>honeypot</b>, prescribes the winning read (drop <b>offset</b> onto the seam, not the advertised cell), and scales the advice with seat count (more opponents → higher collision odds on the beacon → offset + backup probe + a second harvester are worth <i>more</i>). This is the doctrine that turns the day-7 quote from a tragedy into a play.</p>
+
+  <div class="grid2">
+    <div class="card good"><h4>§4c · Enemy probes, first-class</h4><p class="dim">Public enemy probe launches promoted from a buried <code>! WATCHED</code> annotation to a standing block on every night (age + source) — for route-around, staging, supersede, and understanding that a rival can hot-drop into these disks (the collision risk on a shared cell).</p></div>
+    <div class="card good"><h4>§4d · Weapon geometry</h4><p class="dim">A constants block (EMP radius-2 / 3 missiles / 8h cloud, chaff 3h) rendered whenever a seat is armed — so EMP is reasoned about as a targeted orbital strike with known blast, not a distance-from-a-cluster gamble.</p></div>
+    <div class="card good"><h4>§4b · Weapons, reframed</h4><p class="dim">Fired = fact; un-fired build estimate = estimate. Weapons are orbital strikes that reach anywhere — "they're clustered far away, low risk" is named as a misread. Reaction gated to the seat that actually holds the weapon.</p></div>
+    <div class="card good"><h4>Contained split, native</h4><p class="dim">The reasoning-first thinker + moves-first mover are on by default (no env shim). <code>TABULA_V8_SINGLE=1</code> reverts to mover-only for an A/B.</p></div>
+  </div>
+</section>
+
+<section id="carried">
+  <h2><span class="num">04</span>What it carried forward (unchanged)</h2>
+  <p>v8 is a fork of the <i>feeding</i> layer, not a rewrite. The entire computation layer is imported from v7 verbatim:</p>
+  <div class="grid2">
+    <div class="card"><h4>From v7 (compute)</h4><p class="dim">Hint compilers (chains, probes, hot-drops, supersede), the move sanitizer, the orbit wishlist, memory, opponent-weapon inference, the recorder, the continuation finisher, the heuristic net, and the json-schema shape guarantee.</p></div>
+    <div class="card"><h4>From v6 / v5 (lineage)</h4><p class="dim">Moves-first output contract, grounded reflection, fog-gated hot-drops with a comb path, absorb-first-step anti-self-crush, state-triggered doctrine. Physics (RULES) re-exported byte-identical.</p></div>
+  </div>
+</section>
+
+<section id="validation">
+  <h2><span class="num">05</span>Did the fix work? — the reflection now names the collision</h2>
+  <p class="lead">The point of v8 is comprehension, so the validation is a comprehension test, not a scoreboard. In a fresh seed-42 arena all three agents piled onto the <i>day-1</i> bluesign hot-drop and mutually collided at (36,20). Here is v8's <b>day-2</b> thinker, verbatim — reading the collision it was previously blind to:</p>
+<pre><span class="c"># v8, day 2 — the reflection that used to say "banked 0 · thin seam"</span>
+Day 1 executed a hot drop (probe 34,18 &rarr; drop 36,20 &rarr; 6-step chain).
+<span class="s">The harvester collided at [36,20] with opponents p2 and p3, returning
+0 cargo.</span>
+...
+- (34,18) &mdash; this is the probe that collided with us yesterday.
+- Probe B at (34,23) is NEAR the contested zone. <span class="n">High risk of collision.</span>
+- <span class="b">Better to play safe and probe the frontier</span> at a different region.</pre>
+  <div class="callout big">
+    <div class="tag">The fix, demonstrated</div>
+    <p style="margin:0">It <b>names</b> the collision (cell + which opponents), classifies it as a <b>0-cargo loss</b> (not "held in hoard"), and — crucially — <b>changes the next move because of it</b>, steering away from the contested zone. That is the exact "once it understands what happened, it plays the board better" loop the whole release was built for. Before v8, this same event produced a confabulated "thin seam."</p>
+  </div>
+  <p>The redsign-poker doctrine shows up too: on the contested night v8's thinker dropped its second harvester <i>offset</i> — "<span class="mono">(1,10), offset from harvester_p1 to avoid friendly collision</span>" — instead of stacking both on the beacon.</p>
+</section>
+
+<section id="perf">
+  <h2><span class="num">06</span>On the scoreboard — and why one seed isn't the story</h2>
+  <p class="dim">Two runs of the identical seed-42 three-way arena (<code>scripts/run_versus.py</code>), same map, same seats — different outcomes:</p>
+  <table>
+    <thead><tr><th>Run</th><th class="mono">v8 (p1)</th><th class="mono">v7 (p2)</th><th class="mono">v6 (p3)</th><th>What decided it</th></tr></thead>
+    <tbody>
+      <tr><td>A (pre-fork shim)</td><td class="mono">3728</td><td class="mono">275</td><td class="mono">−100</td><td>v8 took the seam offset; others collided on the beacon</td></tr>
+      <tr><td>B (worldview fork)</td><td class="mono">433</td><td class="mono">554</td><td class="mono">2584</td><td>all three collided day 1; v6's orbit banked the recovery</td></tr>
+    </tbody>
+  </table>
+  <p>The swing is enormous <i>for every seat</i> (v6 alone went −100 → 2584). That is the honest headline: <b>a single 7-night, three-stochastic-agent season is dominated by variance</b> — one early three-way collision or one orbit-economy roll reorders the whole table. We do <b>not</b> claim v8 reliably out-scores v7/v6 from this; a proper A/B needs the full seed set (42 / 7 / 99 / 2024), repeated. What <i>is</i> robust across both runs is the mechanism above: v8 sees collisions and reasons about them, and no turn fell back (0 fallbacks all season, ~37–52s/turn — no truncation or latency regression from the restructure).</p>
+  <p class="dim">Digests: <code>reports/versus_s42_v8_v7_v6.md</code> (run A) · <code>reports/versus_s42_v8fork.md</code> (run B) · thinker CoT scan: <code>reports/thinker_scan_s42_v2.md</code>.</p>
+</section>
+
+<section id="aha">
+  <h2><span class="num">06</span>The "aha" moments</h2>
+  <div class="grid2">
+    <div class="card good"><h4>Recites-the-risk, dives-anyway</h4><p class="dim">The day-7 CoT proved the failure wasn't ignorance of the rule — it was ignorance of its own history. A perfect argument for fixing <i>data</i> before <i>depth</i>.</p></div>
+    <div class="card good"><h4>The bug was a dropped channel</h4><p class="dim">The collision was public and fog-safe the whole time. A slug-matching attribution filter silently discarded it. One missing channel, seasons of confabulated reflections.</p></div>
+    <div class="card good"><h4>"Held, not lost" became a hazard</h4><p class="dim">v6's helpful hoard-vs-shipped framing was <i>wrong</i> on a collision night — nothing entered the hoard. Grounded reflection must be grounded in <i>all</i> the outcomes, including the ones with no owner tag.</p></div>
+    <div class="card good"><h4>Doctrine scales with seats</h4><p class="dim">The honeypot gets deadlier with more opponents, so the offset/backup/second-harvester advice is worth <i>more</i> in a crowd — the opposite of "play it safe when contested".</p></div>
+  </div>
+</section>
+
+<section id="next">
+  <h2><span class="num">07</span>What's next — v9</h2>
+  <p>v8 fixed what the agent <b>knows</b>. v9 is the bet on making it <b>think</b>: swap the mover to a thinking-capable model (sonnet) and turn up the second dial from the containment fix — a bounded <code>reasoning.max_tokens</code> pass on the same contained inference path. The parked v7 split failed because the think was unbounded; here it's a hard sub-budget on a separate channel. v9 ships only if the reasoning trace <i>demonstrably changes the moves</i> and clears the wallclock/cost gates against v6/v7/v8.</p>
+</section>
+
+<div class="vpager">
+  <a href="v7.html">← v7 — Containment</a>
+  <a href="../agent_build_chronicle.html">overview →</a>
+</div>
+
+<footer>
+  Sea of Colours · agent build chronicle · v8 detail
+</footer>
+
+</div>
+</body>
+</html>

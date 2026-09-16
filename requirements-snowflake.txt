@@ -1,0 +1,13 @@
+# Optional — only needed for the BYO-Snowflake path (deploying the SOC_*
+# schema to your own account and/or running with SOC_BACKEND=snowflake).
+#
+# The zero-setup path (SOC_BACKEND=memory, playing vs RED_HARVEST /
+# RED_HARVEST_LITE, running the test suite) needs none of this — see
+# requirements.txt. The V12 agent's own turn-by-turn calls also
+# don't need this (they go over REST via `requests`, already in
+# requirements.txt); this is only for `scripts/deploy_soc_schema.py`
+# (schema creation) and for running the live app with
+# SOC_BACKEND=snowflake instead of SOC_BACKEND=memory.
+#
+# Install with: pip install -r requirements-snowflake.txt
+snowflake-snowpark-python>=1.19

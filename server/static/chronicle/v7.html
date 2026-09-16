@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>tabula v7 — Containment · Sea of Colours Chronicle</title>
+<link rel="stylesheet" href="chronicle.css" />
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">Agent detail · generation 7</div>
+  <h1>v7 — the containment fix</h1>
+  <p class="subtitle">Move the strategic surface off the opaque-budget Agents API onto the Cortex inference API. Hard answer cap, separate think channel, schema-guaranteed shape. The plan now finishes — <i>and</i> a real, bounded thinker becomes possible.</p>
+  <div class="meta">haiku-4-5 · Cortex Inference API · contained two-call split · 4/4 season wins</div>
+  <a class="backlink" href="../agent_build_chronicle.html">← back to the overview</a>
+</header>
+
+<div class="wrap">
+
+<section id="what">
+  <h2><span class="num">v7</span>What v7 is</h2>
+  <p class="lead">The release that fixed the root cause. Everything through v6 fought a language model that ran out of budget before it emitted a complete plan. v7 proved that was never a prompting problem — it was an <b>API-surface</b> problem — and switched surfaces.</p>
+  <p>The Cortex <b>Agents API</b> gives you exactly one budget control: a wallclock guillotine (close the socket at N seconds) over a think+answer budget the server divides, think-first. The Cortex <b>inference API</b> gives you three independent, server-honored dials: a hard <code>max_completion_tokens</code> answer ceiling, a separate <code>reasoning.max_tokens</code> think channel, and <code>response_format: json_schema</code> constrained decoding. v7 rebuilt the mover on the inference path — and then, crucially, rebuilt the <i>thinker</i> there too.</p>
+</section>
+
+<section id="changes">
+  <h2><span class="num">01</span>The two engineering changes</h2>
+  <div class="grid2">
+    <div class="card bad">
+      <span class="icon">✗ parked (Agents API)</span>
+      <h4>The two-call split, attempt 1</h4>
+      <p class="dim">A dedicated thinker commits a tiny DECISION directive; the mover executes it. Built + tested, kept behind a flag. <b>Parked as a negative result:</b> haiku thinks unbounded on the Agents API, so an 18s cap truncated the thinker every night (<code>[thinker=none]</code> 7/7) and a 50s cap broke the wall while landing a directive only ~2/7 nights — with a score regression (980 vs 1768).</p>
+    </div>
+    <div class="card good">
+      <span class="icon">✓ shipped (Inference API)</span>
+      <h4>The contained split</h4>
+      <p class="dim">Both passes move to <code>CortexChatInvoker</code>. The <b>reasoning-first thinker</b> emits one JSON object (reasoning FIRST, then a small directive) under a hard token cap; the <b>moves-first mover</b> emits a schema-guaranteed <code>moves</code> object. Separate budgets mean the think can't starve the answer, and constrained decoding means the answer is valid by construction.</p>
+    </div>
+  </div>
+  <p class="dim" style="margin-top:16px">The parked attempt is load-bearing: watching the thinker overrun its budget on the Agents API is what <i>isolated</i> the opaque-budget root cause and pointed at the inference API as the cure.</p>
+</section>
+
+<section id="mechanism">
+  <h2><span class="num">02</span>Why the contained split works</h2>
+  <table>
+    <thead><tr><th>Dial</th><th>What the server does</th><th>Measured (haiku)</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">max_completion_tokens</td><td>Hard ceiling on <b>answer tokens only</b>. The model self-budgets its output to fit; <code>finish_reason=="length"</code> is a true truncation signal.</td><td class="mono">complete plan, never runs away</td></tr>
+      <tr><td class="mono">reasoning-first schema</td><td>The thinker's <code>reasoning</code> field is the first property → chain-of-thought is generated <b>before</b> the decision, so the directive is conditioned on real deliberation, not post-hoc.</td><td class="mono">full CoT captured every night</td></tr>
+      <tr><td class="mono">response_format<br>(json_schema)</td><td>Constrained decoding masks the token distribution so only schema-valid tokens can be sampled — a well-formed object by construction.</td><td class="mono">0 malformed plans</td></tr>
+    </tbody>
+  </table>
+  <div class="callout big">
+    <div class="tag">The handoff</div>
+    <p style="margin:0">Thinker (Call 1) → a sanitized <code>DECISION</code> directive (posture · targets · chaff_react · avoid · note) → injected as a <b>STRATEGIST DIRECTIVE</b> block at the top of the mover prompt (Call 2). The mover executes the directive; the sanitizer + heuristic net still guarantee legality. Any thinker failure yields an empty directive and the mover runs exactly as single-call — so the split is <b>strictly ≥ single-call by construction</b>.</p>
+  </div>
+</section>
+
+<section id="truncation">
+  <h2><span class="num">03</span>The "aha" — CoT salvage beats a bigger cap</h2>
+  <p>Even contained, the reasoning-first thinker occasionally truncated its JSON on the densest multi-opponent nights (2/7 in an early scan). Two fixes, in order of importance:</p>
+  <ol>
+    <li><b>CoT salvage:</b> <code>_salvage_reasoning</code> extracts the <code>reasoning</code> text even from a truncated, unparseable object — so the chain-of-thought is <i>never</i> lost for audit/scan, even when the directive is.</li>
+    <li><b>Budget bump:</b> thinker cap 2500 → <b>3600</b> tokens, wallclock 30 → <b>40s</b>. After both, the seed-42 re-scan captured full reasoning + a directive on all 7 nights — the truncated nights disappeared.</li>
+  </ol>
+  <p class="dim">Lesson: don't just raise the cap; make the valuable byproduct (the reasoning) recoverable regardless of where the model stops.</p>
+</section>
+
+<section id="observability">
+  <h2><span class="num">04</span>Multi-agent observability</h2>
+  <p>With two Cortex calls per turn, a single audit row hides half the story. v7 writes <b>one <code>SOC_AGENT_INVOCATION</code> row per sub-agent</b>: the thinker's captured reasoning + directive get their own row (via <code>sub_invocations</code> in the dispatch envelope, persisted by <code>audit.write_invocation</code>) before the mover's row. Both reasoning passes are visible in the UI and scannable offline (<code>scripts/scan_thinker.py</code>) — the "does it actually reason?" audit.</p>
+</section>
+
+<section id="perf">
+  <h2><span class="num">05</span>Evidence — four seasons + head-to-head</h2>
+  <p class="dim">haiku on the inference path, 7 nights each, vs the deterministic RED_HARVEST heuristic. Same engine, four seeds.</p>
+  <table>
+    <thead><tr><th>Seed</th><th>v7 (inference)</th><th>heuristic</th><th>Winner</th><th>Fallbacks</th><th>Turn time</th></tr></thead>
+    <tbody>
+      <tr class="win"><td class="mono">42</td><td class="mono">3591</td><td class="mono">986</td><td>v7</td><td class="mono">0</td><td class="mono">~12s</td></tr>
+      <tr class="win"><td class="mono">7</td><td class="mono">1271</td><td class="mono">134</td><td>v7</td><td class="mono">0</td><td class="mono">~13s</td></tr>
+      <tr class="win"><td class="mono">99</td><td class="mono">610</td><td class="mono">26</td><td>v7</td><td class="mono">0</td><td class="mono">~13s</td></tr>
+      <tr class="win"><td class="mono">2024</td><td class="mono">1068</td><td class="mono">16</td><td>v7</td><td class="mono">0</td><td class="mono">~12s</td></tr>
+    </tbody>
+  </table>
+  <p><b>4/4 decisive wins, zero fallbacks, every plan complete.</b> vs the Agents-API baseline (~30–60s/turn, occasional truncation fallbacks), the containment fix is <b>2.5–5× faster and never drops a turn</b>. In the seed-42 three-way arena, v7 (single-call config) finished second to v8 at <span class="mono">~13–19s</span>/turn — solid, fast, but it stayed fixated on the advertised redsign beacon and collided there (see the v8 page).</p>
+</section>
+
+<div class="vpager">
+  <a href="v6.html">← v6 — Comprehension</a>
+  <a href="v8.html">v8 — Worldview →</a>
+</div>
+
+<footer>
+  Sea of Colours · agent build chronicle · v7 detail · companion: <code>CHANGES_TABULA_v6_v7.md</code>
+</footer>
+
+</div>
+</body>
+</html>

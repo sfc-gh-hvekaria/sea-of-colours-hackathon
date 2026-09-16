@@ -1,0 +1,661 @@
+/* Sea of Colours — landing page.
+ *
+ * v1.37 — rebuilt in the "industrial spec sheet" register: one acid
+ * accent on black, everything else measured out in monospace at 9-11px.
+ * The look is borrowed from technical print — crop marks, tick rulers,
+ * barcodes, part numbers — because the game is a machine-readable one
+ * and the page should promise that before you read a word of it.
+ *
+ * The previous version put a dense white circuit trace over a colour
+ * video and set the title in three saturated RGB words. Every element
+ * was competing at the same weight, so it read as noise. The rule here
+ * is one loud thing (the wordmark), one moving thing (the hero), and
+ * everything else quiet and aligned to an edge.
+ *
+ * To revert: `git checkout server/static/landing.{html,css,js} fx.js`.
+ */
+
+/* MARATYPE — Artyom Galinov (metamorphosiis), released freely with
+ * redistribution allowed; see fonts/Maratype.LICENCE.txt. It is a
+ * UNICASE display face: lowercase maps to the capital glyphs, so it is
+ * only ever used for display text, never for anything a reader has to
+ * read at length. Everything else on the page is JetBrains Mono. */
+@font-face {
+  font-family: "Maratype";
+  src: url("/static/fonts/Maratype.otf") format("opentype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* The page has ONE accent colour and it is always one of the game's
+ * three tile colours (v1.38). It used to be a fixed acid yellow, which
+ * was borrowed from the type specimen this look came from and had
+ * nothing to do with Sea of Colours; red → green → blue means the page
+ * is literally the thing it is named after.
+ *
+ * WHEN it changes is not on a clock here. `fx.js` sets `--acid` at the
+ * moment its pixelation reaches full coverage, so the hand-over happens
+ * on the one frame where the screen is a single flat field — the page
+ * is covered, the colour turns over, and it uncovers as a different
+ * colour. On its own timer the accent used to drift through a change
+ * while the video was showing, which read as the page quietly fading
+ * rather than as an event.
+ *
+ * `--acid` is REGISTERED so that hand-over can be a transition rather
+ * than a cut. An unregistered custom property is an untyped token and
+ * jumps between values; declaring the syntax is what makes the browser
+ * treat it as a colour and tween it. The name is kept despite no longer
+ * being acid: it is referenced 30-odd times here and in `fx.js`, and a
+ * rename buys nothing but churn. */
+@property --acid {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff2b2b;
+}
+
+:root {
+  --acid: #ff2b2b;
+  /* Derived, not duplicated, so they follow the accent for free.
+   * Written out as rgba() literals these would have stayed yellow while
+   * everything around them moved. Alphas are up across the board from
+   * the first pass (42/14/28) — the chrome was so faint against the
+   * footage that it read as smudges rather than instrument marks. */
+  --acid-dim: color-mix(in srgb, var(--acid) 62%, transparent);
+  --acid-ghost: color-mix(in srgb, var(--acid) 26%, transparent);
+  --hair: color-mix(in srgb, var(--acid) 46%, transparent);
+  --ink: #000;
+  --paper: #050505;
+  --white: #f4f4f4;
+  --grey: #9a9a9a;
+  /* The three tile colours. These stay put — they are the legend the
+   * accent is cycling THROUGH, so they have to be readable as fixed
+   * reference marks. Also used as the chromatic split on a glitch. */
+  --tile-r: #ff2b2b;
+  --tile-g: #00ff88;
+  --tile-b: #3b5bff;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+  --edge: 22px;          /* how far the chrome sits from the viewport */
+
+  /* Long enough to read as a turn rather than a cut, short enough to
+   * finish well inside the storm's hold so it is over before anything
+   * uncovers. `fx.js` samples the interpolated value for the canvas, so
+   * the pixel field turns over in step with the copy on top of it. */
+  transition: --acid 520ms ease;
+}
+
+/* The swatch legend lights whichever colour is in the chair. Keyed off
+ * the attribute `fx.js` sets alongside the colour, so the legend and
+ * the thing it reports cannot disagree. */
+.sw { opacity: 0.2; transition: opacity 520ms ease; }
+[data-accent="r"] .sw--r,
+[data-accent="g"] .sw--g,
+[data-accent="b"] .sw--b { opacity: 1; }
+/* Before fx.js has run at all — and under reduced motion, where it
+ * never will — the page is red and the legend should say so. */
+html:not([data-accent]) .sw--r { opacity: 1; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--paper);
+  color: var(--white);
+  font-family: var(--mono);
+  overflow: hidden;
+}
+
+/* ── hero ─────────────────────────────────────────────────────────── */
+
+.hero-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  /* Crushed to greyscale here and re-tinted by .hero-duotone, rather
+   * than hue-rotated in one filter. A hue rotation keeps the source's
+   * own colour relationships and the board is already red/green/blue,
+   * so it came out muddy; flattening first is what makes the tint one
+   * colour instead of six. */
+  /* Pushed harder and lifted (was contrast 1.35 / brightness 0.78). The
+   * footage needs to be MORE readable, not less — the way to get text
+   * contrast is a darker pool under the text (see .hero-overlay), not a
+   * dimmer video, because dimming costs both at once. */
+  filter: grayscale(1) contrast(1.7) brightness(0.95);
+}
+
+.hero-duotone {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--acid);
+  mix-blend-mode: multiply;
+  opacity: 0.46;
+}
+
+.hero-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* All the text contrast is bought here rather than by dimming the
+   * video, so the two can be turned up together. The pool under the
+   * copy is near-opaque at its centre and gone by 100%, which means the
+   * wordmark sits on black while the corners — where the board, the
+   * probe trails and the harvesters actually are — stay bright.
+   *
+   * The pool is TALLER than it is wide relative to the last pass (48% →
+   * 56%) because the copy block runs from the eyebrow down to the docs
+   * links, not just the wordmark. */
+  background:
+    radial-gradient(ellipse 62% 56% at 50% 50%,
+      rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.72) 48%,
+      rgba(0, 0, 0, 0.28) 78%, rgba(0, 0, 0, 0) 100%),
+    /* scanlines */
+    repeating-linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.32) 0 1px, rgba(0, 0, 0, 0) 1px 3px),
+    linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.06) 24%,
+      rgba(0, 0, 0, 0.06) 72%, rgba(0, 0, 0, 0.8) 100%);
+}
+
+#fx-cv {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* ── instrument chrome ────────────────────────────────────────────── */
+
+.chrome {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--acid-dim);
+  text-transform: uppercase;
+}
+
+.crop {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+}
+.crop::before, .crop::after {
+  content: "";
+  position: absolute;
+  background: var(--acid);
+}
+.crop::before { width: 26px; height: 1px; }
+.crop::after  { width: 1px;  height: 26px; }
+.crop--tl { top: var(--edge); left: var(--edge); }
+.crop--tl::before { top: 0; left: 0; }
+.crop--tl::after  { top: 0; left: 0; }
+.crop--tr { top: var(--edge); right: var(--edge); }
+.crop--tr::before { top: 0; right: 0; }
+.crop--tr::after  { top: 0; right: 0; }
+/* The bottom pair clear the spec band, which is full-bleed. */
+.crop--bl { bottom: calc(var(--edge) + 26px); left: var(--edge); }
+.crop--bl::before { bottom: 0; left: 0; }
+.crop--bl::after  { bottom: 0; left: 0; }
+.crop--br { bottom: calc(var(--edge) + 26px); right: var(--edge); }
+.crop--br::before { bottom: 0; right: 0; }
+.crop--br::after  { bottom: 0; right: 0; }
+
+/* Tick ruler. Two gradients: a minor tick every 12px and a major one
+ * every 96px, which reads as a measuring edge rather than a dotted
+ * line — the thing that makes print specs look surveyed. */
+.rule {
+  position: absolute;
+  left: calc(var(--edge) + 46px);
+  right: calc(var(--edge) + 46px);
+  height: 9px;
+  background-repeat: repeat-x;
+  background-image:
+    linear-gradient(to right, var(--acid) 1px, transparent 1px),
+    linear-gradient(to right, var(--acid-dim) 1px, transparent 1px);
+  background-size: 96px 9px, 12px 4px;
+  opacity: 0.75;
+}
+.rule--top    { top: var(--edge); background-position: 0 0, 0 0; }
+.rule--bottom { bottom: calc(var(--edge) + 26px); background-position: 0 100%, 0 100%; }
+
+/* Vertical side text. `writing-mode` rather than a rotation: a rotated
+ * flex row translates along its own rotated axes, so centring it means
+ * solving for the text's length, and the first cut of this ran off both
+ * edges of the screen. Vertical writing mode lays out in the box it is
+ * actually given. */
+.rail {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  max-height: 62vh;
+}
+.rail--left  { left: var(--edge); rotate: 180deg; }
+.rail--right { right: var(--edge); }
+.rail-txt { font-size: 9px; }
+/* The barcodes inside a vertical rail would be laid out on their side
+ * and lose the uneven bar rhythm that makes them read as a code. */
+.rail .barcode { display: none; }
+
+/* Barcodes, drawn as gradients with deliberately uneven bar widths so
+ * they scan as a code and not as a hatch pattern. */
+.barcode {
+  display: inline-block;
+  width: 92px;
+  height: 16px;
+  background-repeat: repeat-x;
+  background-image: repeating-linear-gradient(to right,
+    var(--acid) 0 1px, transparent 1px 3px,
+    var(--acid) 3px 5px, transparent 5px 6px,
+    var(--acid) 6px 7px, transparent 7px 10px,
+    var(--acid) 10px 13px, transparent 13px 14px);
+  opacity: 0.8;
+}
+.barcode--v { width: 74px; height: 13px; }
+
+/* The purity ladder. Replaces a decorative checkerboard that meant
+ * nothing — these are the same ░▒▓█ ramp the board draws a cell's tier
+ * with (`catTierGlyph` in app.js), so the mark on the landing page is
+ * the mark you meet in the game. Fixed width on the parts that change
+ * or the row twitches sideways every time it flicks. */
+.tier-blocks {
+  color: var(--acid);
+  font-size: 13px;
+  letter-spacing: -1px;
+  min-width: 62px;
+}
+.tier-name { min-width: 40px; }
+.tier-band { color: var(--acid-dim); min-width: 52px; }
+.tier-mult { color: var(--acid); }
+
+.stamp {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 9px;
+}
+.stamp--tl { top: calc(var(--edge) + 40px); left: var(--edge); flex-direction: column; align-items: flex-start; gap: 6px; }
+.stamp--tr { top: calc(var(--edge) + 40px); right: var(--edge); flex-direction: column; align-items: flex-end; gap: 6px; }
+.stamp--bl { bottom: calc(var(--edge) + 52px); left: var(--edge); }
+
+.swatches { display: inline-flex; gap: 4px; }
+.sw { width: 7px; height: 7px; display: block; }
+.sw--r { background: var(--tile-r); }
+.sw--g { background: var(--tile-g); }
+.sw--b { background: var(--tile-b); }
+
+/* ── the stage ────────────────────────────────────────────────────── */
+
+.landing {
+  position: relative;
+  z-index: 6;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: calc(var(--edge) + 54px) 6vw calc(var(--edge) + 66px);
+  text-align: center;
+}
+
+.landing-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* Generous, because the wordmark's 0.82 line-height means its box
+   * starts well above its cap height and a normal margin lets the tag
+   * sit on the letterforms. */
+  margin: 0 0 42px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+/* The one solid block of colour on the page, lifted from the font's own
+ * specimen card — it is what stops the top of the composition being
+ * three lines of grey text. */
+.tag {
+  background: var(--acid);
+  color: var(--ink);
+  padding: 4px 12px 3px;
+  font-weight: 800;
+}
+.landing-eyebrow-meta { color: var(--acid-dim); }
+
+.landing-title {
+  margin: 0;
+  font-family: "Maratype", var(--mono);
+  font-weight: 400;
+  /* Maratype is ultra-condensed, so it wants a size that would be
+   * absurd in anything else; clamp against viewport width because the
+   * wordmark is one unbreakable line. */
+  font-size: clamp(3.4rem, 13.5vw, 14rem);
+  line-height: 0.82;
+  letter-spacing: 0.005em;
+  color: var(--acid);
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* No stroke, no halo. Maratype is a display face with very fine
+   * counters at this size and any outline silts them up — it read as a
+   * badly-set drop shadow. An earlier cut of the FX storm needed one
+   * because the pixelation went bright and the wordmark had to survive
+   * being on acid; the storm now stays dark instead, which is the
+   * cheaper fix and leaves the letterforms alone. */
+}
+
+#title-content { transition: opacity 0.2s; }
+
+.glitch-word { color: var(--acid); }
+/* The three tile colours arrive as a chromatic split for the length of
+ * a glitch and then leave. Colour as an EVENT, not as a resting state —
+ * which is how the page keeps its "sea of colours" idea without three
+ * permanently clashing words. */
+.glitch-word.is-split {
+  text-shadow:
+    -0.035em 0 0 var(--tile-r),
+     0.035em 0 0 var(--tile-b),
+     0 0.02em 0 var(--tile-g);
+}
+
+.cursor-blink { animation: blink 1.05s steps(1) infinite; }
+@keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+.landing-tagline {
+  max-width: 62ch;
+  /* Clears the wordmark's descenders. Maratype's underscore hangs well
+   * below the 0.82 line box, so a margin measured off the box alone
+   * puts this line underneath the title's own trailing caret. */
+  margin: 42px 0 0;
+  min-height: 2.6em;
+  font-size: 11px;
+  line-height: 1.75;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a6a6a6;
+  /* The hero is line work, not a flat field, so small text over it sits
+   * on whatever happens to be behind it that second. The shadow is what
+   * keeps 11px legible when a vision border crosses underneath. */
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  transition: color 0.2s;
+}
+/* Was `.is-yellow`, back when the accent was fixed. It is whatever
+ * colour the cycle is on now, so the name had to stop describing one. */
+.landing-tagline.is-accent { color: var(--acid); }
+
+/* ── actions ──────────────────────────────────────────────────────── */
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 34px;
+}
+
+.landing-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 13px 22px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--hair);
+  color: var(--acid);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  /* One of these cards is an <a> (the Turn Lab, which is a page rather
+     than a game to start, and should middle-click into a new tab like
+     the link it is). Everything else here is a <button>, so the two
+     defaults an anchor brings have to be turned off to keep the row
+     looking like one row. */
+  text-decoration: none;
+  line-height: normal;
+}
+.landing-btn-idx {
+  font-size: 9px;
+  color: var(--acid-dim);
+  transition: color 0.12s;
+}
+.landing-btn-text { min-width: 9ch; text-align: left; }
+
+.landing-btn:hover,
+.landing-btn:focus-visible {
+  background: var(--acid);
+  border-color: var(--acid);
+  color: var(--ink);
+  outline: none;
+}
+.landing-btn:hover .landing-btn-idx,
+.landing-btn:focus-visible .landing-btn-idx { color: rgba(0, 0, 0, 0.55); }
+.landing-btn:disabled { opacity: 0.45; cursor: progress; }
+
+/* Corner ticks on the button, so it reads as a panel that has been
+ * placed rather than a rounded web control. */
+.landing-btn::before,
+.landing-btn::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--acid);
+  opacity: 0.9;
+}
+.landing-btn::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.landing-btn::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+.landing-hint {
+  min-height: 1.4em;
+  margin: 18px 0 0;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acid-dim);
+}
+.landing-hint.is-error { color: var(--tile-r); }
+
+.landing-docs {
+  margin: 26px 0 0;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+}
+.landing-docs a {
+  color: #9a9a9a;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+}
+.landing-docs a:hover { color: var(--acid); border-bottom-color: var(--acid); }
+.landing-docs span { margin: 0 8px; color: var(--acid-ghost); }
+
+/* ── tutorial chooser ─────────────────────────────────────────────── */
+
+.landing-tut {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+  position: relative;
+  z-index: 6;
+}
+
+.landing-tut-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 232px;
+  padding: 15px 16px;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid var(--hair);
+  color: var(--white);
+  font-family: var(--mono);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.landing-tut-card:hover,
+.landing-tut-card:focus-visible {
+  border-color: var(--acid);
+  background: rgba(200, 255, 0, 0.07);
+  outline: none;
+}
+.landing-tut-name {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--acid);
+}
+.landing-tut-blurb {
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  color: var(--grey);
+}
+
+/* ── running spec band ────────────────────────────────────────────── */
+
+.ticker {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+  border-top: 1px solid var(--acid-ghost);
+  border-bottom: 1px solid var(--acid-ghost);
+  background: rgba(0, 0, 0, 0.5);
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 46s linear infinite;
+}
+.ticker-run {
+  flex: none;
+  padding: 5px 0;
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--acid-dim);
+  white-space: pre;
+}
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── status badge ─────────────────────────────────────────────────── */
+
+.status-badge {
+  position: fixed;
+  right: var(--edge);
+  bottom: calc(var(--edge) + 44px);
+  z-index: 7;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid var(--hair);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--grey);
+}
+.status-badge[data-state="snowflake"] .status-dot { background: var(--tile-b); }
+.status-badge[data-state="local"] .status-dot { background: var(--acid); }
+.status-badge[data-state="memory"] .status-dot { background: var(--acid); }
+.status-badge[data-state="off"] .status-dot { background: var(--tile-r); }
+.status-tunnel { color: var(--acid); }
+
+/* ── smaller viewports ────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  :root { --edge: 12px; }
+  .rail, .stamp--bl { display: none; }
+  .landing-title { font-size: clamp(2.6rem, 16vw, 6rem); }
+  .landing-btn { padding: 11px 16px; font-size: 11px; }
+  .landing-btn-text { min-width: 0; }
+}
+
+@media (max-width: 560px) {
+  .chrome .rule { display: none; }
+  .landing-eyebrow { flex-direction: column; gap: 8px; }
+  .landing-tagline { font-size: 10px; }
+}
+
+/* ── while the pixelation is covering the screen ──────────────────── */
+/* `fx.js` adds this for the solid-field dwell (v1.38). The copy goes
+ * white for it, because nothing in the accent's own hue can be read on
+ * a field of that accent — a saturated colour tops out around a third
+ * of full luminance, so accent-on-accent lands near 2:1 no matter how
+ * the tone is set. White clears 4.5:1 against all three tiles.
+ *
+ * Set on BODY, not on :root, and that is load-bearing: `fx.js` reads
+ * `--acid` off the documentElement to colour the pixel field, so
+ * overriding here leaves the field on the accent while the copy over it
+ * turns white. Re-pointing the palette on :root would have turned the
+ * field white too and there would be nothing left to contrast with.
+ *
+ * The derived variables have to be restated rather than inherited: they
+ * are declared on :root as a color-mix of :root's own `--acid`, so they
+ * resolve there and arrive here already the accent colour. */
+body.fx-cover {
+  --acid: #ffffff;
+  --acid-dim: rgba(255, 255, 255, 0.74);
+  --acid-ghost: rgba(255, 255, 255, 0.34);
+  --hair: rgba(255, 255, 255, 0.58);
+  --grey: #f2f2f2;
+}
+body.fx-cover .landing-tagline,
+body.fx-cover .landing-docs,
+body.fx-cover .landing-docs a { color: #ffffff; }
+body.fx-cover .tag { background: #ffffff; color: var(--ink); }
+
+/* Long enough to read as the page changing state, short enough to be
+ * done before the front finishes closing over it. */
+.landing-title, .landing-tagline, .landing-docs, .landing-docs a,
+.landing-btn, .landing-btn-idx, .tag, .chrome, .chrome *, .ticker,
+.tier-blocks, .tier-name, .tier-band, .tier-mult {
+  transition: color 380ms ease, background-color 380ms ease,
+              border-color 380ms ease;
+}
+
+/* Motion is decoration here, all of it. Honour the preference by
+ * freezing the band and the caret; the page loses nothing it needs.
+ * `fx.js` skips the pixelation storm under the same query, so no
+ * `fx-cover` class is ever applied and none of the above can fire. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+  .cursor-blink { animation: none; }
+  .hero-bg { display: none; }
+}

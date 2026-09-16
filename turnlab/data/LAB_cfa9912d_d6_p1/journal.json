@@ -1,0 +1,432 @@
+{
+ "board": "LAB_cfa9912d_d6_p1",
+ "day": 6,
+ "frozen_at": "2026-09-04T14:03:15+00:00",
+ "seats": {
+  "p1": [],
+  "p2": [
+   {
+    "actual_banked": 92,
+    "compiler_notes": [],
+    "corrector_notes": [
+     "harvester_p2: absorbed first step \u2014 drop (2, 13)->(3, 13) to spare a probe (3 nights vision) without orphaning the chain",
+     "harvester_p2: skipped redundant first step (absorbed into drop)"
+    ],
+    "day": 1,
+    "enemy_seen": "H01 p1 launched a probe (35,13) (public) | H01 p3 launched a probe (8,18) (public) | H02 p1 launched a probe (3,17) (public)",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 0
+    },
+    "happened": "banked red +92 (4 parcel(s))",
+    "intent": "Execute a blind blue-sign hot drop at (2,13) with a tight 5-cell sweep to sample the known-blue cluster, then place a second probe at (35,12) to extend vision across the opposite flank. This maximizes setup-night harvest opportunity while spreading probes across different quadran",
+    "live_redsigns": [],
+    "memory_note": "# THINK PASS\n\n**Last Night Reflection:**\nNo prior orders exist \u2014 this is setup night (day 1 of 7). No baseline to reflect on yet. The session record shows zero banked parcels, which is expected for a ",
+    "moves_executed": 7,
+    "moves_summary": "probe@[2, 13], drop@[3, 13], step->[4, 13], step->[5, 13], step->[6, 13], pickup(harvester_p2), probe@[35, 12]",
+    "plan_ids": [
+     "HD2T",
+     "PR2"
+    ],
+    "plan_this_turn": "aggressive: HD2T, PR2",
+    "planned_cells": [
+     "HD2T->(2,13)",
+     "PR2->(35,12)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "high",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "Setup night mandates: (1) attempt at least one hot drop (don't just probe), (2) spread probes across different quadrants. HD2T targets the blue_sign cluster at ~(2,12)/(2,16) \u2014 a known-blue region is safer than blind fog for a first harvest. The sweep variant (5 cells) balances a",
+    "reflection": "Day 1 executed as planned: blind hot drop at (2,13) banked +92 red safely. The synthetic-green wake is now a hazard, but my two probes at (2,13) and (35,12) are positioned for tonight's real harvest. No collision occurred; outcome matched expectation."
+   },
+   {
+    "actual_banked": 674,
+    "compiler_notes": [],
+    "corrector_notes": [],
+    "day": 2,
+    "enemy_seen": "H01 p1 dropped a harvester seen (33,11) (in your vision) | H01 p3 launched a probe (31,9) (public) | H02 p3 dropped a harvester seen (33,11) (in your vision)",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 674
+    },
+    "happened": "banked red +674 (6 parcel(s))",
+    "intent": "Bank the guaranteed +674 red from the CH1 juice chain (5,11 seam) with zero probe cost and low collision risk, then deploy both probes into fresh fog (PR2 and PR3) to extend vision across seam extensions with high edge_promise (~400+) for tomorrow's harvest opportunities.",
+    "live_redsigns": [],
+    "memory_note": "# THINK PASS\n\n**Last Night Reflection:**\nDay 1 executed as planned: blind hot drop at (2,13) banked +92 red across 4 parcels (1 vein p82, 2 trace). The walk hit synthetic-green cells (3,13)-(6,13) whi",
+    "moves_executed": 9,
+    "moves_summary": "drop@[5, 11], step->[4, 11], step->[4, 10], step->[3, 10], step->[2, 10], step->[2, 9], pickup(harvester_p2), probe@[5, 5], probe@[7, 6]",
+    "plan_ids": [
+     "CH1",
+     "PR2",
+     "PR3"
+    ],
+    "plan_this_turn": "aggressive: CH1, PR2, PR3",
+    "planned_cells": [
+     "CH1->(5,11)",
+     "PR2->(5,5)",
+     "PR3->(7,6)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "medium",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "CH1 is the safest high-value play: +674 red, known ground, LOW collision risk, zero probe cost. GRAB1 is contested (HIGH risk on mass 33,11 under enemy vision) and not worth the exposure. HD1T costs a probe for +202 red + 402 blue\u2014blue is secondary and the probe is better spent o",
+    "reflection": "Day 2 executed perfectly: banked +674 red as planned, no collisions, no crashes. The synthetic-green wake is now a hazard, but my probes are positioned correctly. Outcome matched expectation; ready to escalate tonight.\""
+   },
+   {
+    "actual_banked": 0,
+    "compiler_notes": [
+     "EMP resequenced to hour 1 \u2014 a cloud is worth what it denies over the next 8 hours, and one fired late denies nothing. Your relative order for everything else is unchanged.",
+     "you set chaff_react (you expect a jam tonight). NOTHING was shortened on your behalf \u2014 route length is your call, so pick a SHORT option if you want the fleet lifting early.",
+     "EMP salvo away at hour 1: [[27, 11], [29, 15], [30, 11]] -> 37 cells dark until hour 9. That hour is spent; the seat does nothing else in it.",
+     "harvester_p2 holds the hole at [28, 13] \u2014 clear of your own cloud, and no rival can reach it while the cloud stands. Its walk is held until hour 9; the hours until then are free for your other plays.",
+     "cut seam wave 1: no harvester left (fleet sized)",
+     "4 hour(s) of WAIT before harvester_p2 walks: the cloud stands until hour 9 and you gave the night nothing else to do with those hours. Pick another chain or a probe and they fill themselves \u2014 the walk is unaffected."
+    ],
+    "corrector_notes": [],
+    "day": 3,
+    "enemy_seen": "BOARD: the REDSIGN near ~(28,13) WENT DARK \u2014 a beacon retires only when its LAST pure is taken, so somebody banked it last night. That seam is spent; stop pricing options against it. | H01 p1 flared chaff | H04 p1 fired ",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 0
+    },
+    "happened": "banked red +0 (0 parcel(s)); 7 FAILED move(s)",
+    "intent": "Secure my own pure(255) at (2,8) with WALKIN_GRAB (H01\u2013H03, ~+903 red guaranteed), then execute BLIND_SCORCH to deny the rival's redsign at (28,13) and position myself on the seam for post-cloud harvest. Blind p3's finder probe (SS1) to deny their next landing. This stacks denial",
+    "live_redsigns": [
+     [
+      28,
+      13
+     ],
+     [
+      3,
+      8
+     ]
+    ],
+    "memory_note": "# THINK PASS\n\n**Last night reflection:** Day 2 executed perfectly \u2014 banked +674 red as planned, no collisions, no crashes. The synthetic-green wake is now a hazard corridor, but the two probes at (2,1",
+    "moves_executed": 15,
+    "moves_summary": "emp_launch, probe@[32, 13], drop@[28, 13], probe@[31, 9], wait, wait, wait, wait, step->[29, 13], step->[29, 12], step->[29, 11], step->[30, 11], step->[30, 12], step->[30, 13], pickup(harvester_p2)",
+    "plan_ids": [
+     "WALKIN_GRAB",
+     "BLIND_SCORCH",
+     "SS1"
+    ],
+    "plan_this_turn": "aggressive: WALKIN_GRAB, BLIND_SCORCH, SS1",
+    "planned_cells": [
+     "WALKIN_GRAB->(2,7)",
+     "BLIND_SCORCH->(32,13)",
+     "SS1->(31,9)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "high",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "I hold the inside track on my own redsign (3,8) with 3 probes vs rivals' 0. The pure at (2,8) is mine to take. WALKIN_GRAB is the certain play: drop on live frontier (2,7), walk one step onto the pure, pick up by H03. This banks ~+903 red (the pure itself ~+765) with minimal expo",
+    "reflection": "Last night's chaff jammed H01\u2013H03, cancelling the drop itself before the harvester left orbit. The lesson: chaff denies the LANDING, not just the pickup. Tonight I drop EARLY (H01) and lift FAST (H02) to clear the jam window before chaff can fire. The pure is mine; speed and redu"
+   },
+   {
+    "actual_banked": 903,
+    "compiler_notes": [
+     "you set chaff_react (you expect a jam tonight). NOTHING was shortened on your behalf \u2014 route length is your call, so pick a SHORT option if you want the fleet lifting early.",
+     "walk enters known stripped/GREEN at [2, 9] (-100 each). KEPT \u2014 your route, your call; pick a SHORT variant or `avoid` these cells to shed them."
+    ],
+    "corrector_notes": [
+     "harvester_p2_2: truncated chain at step->(2, 9) (green/hazard); banking from (2, 8)",
+     "harvester_p2_2: dropped redundant pickup after chain end"
+    ],
+    "day": 4,
+    "enemy_seen": "BOARD: the REDSIGN near ~(3,8) WENT DARK \u2014 a beacon retires only when its LAST pure is taken, so somebody banked it last night. That seam is spent; stop pricing options against it. | H01 p1 launched a probe (5,5) (public",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 1760
+    },
+    "happened": "banked red +903 (2 parcel(s)); 6 FAILED move(s)",
+    "intent": "Race my own pure(255) at (2,8) with WALKIN_GRAB (H01\u2013H02, ~+903 red guaranteed), banking the jackpot before chaff can jam a later pickup. Follow with WALKIN_SECURE (H04+) to re-walk the pure as EMP insurance, then reach into the mass ring. Deny the leader's freshest probe (SS1) t",
+    "live_redsigns": [
+     [
+      3,
+      8
+     ]
+    ],
+    "memory_note": "# THINK PASS\n\n**Last night's failure:** Chaff jammed my actions at H01-H03, cancelling the entire WALKIN_GRAB chain before it started. The harvester never left orbit because the drop itself was queued",
+    "moves_executed": 11,
+    "moves_summary": "drop@[2, 7], step->[2, 8], pickup(harvester_p2), drop@[2, 6], step->[1, 6], step->[1, 7], step->[1, 8], step->[2, 8], pickup(harvester_p2_2), probe@[8, 16], probe@[28, 10]",
+    "plan_ids": [
+     "WALKIN_GRAB",
+     "WALKIN_SECURE",
+     "PR2",
+     "SS1"
+    ],
+    "plan_this_turn": "aggressive: WALKIN_GRAB, WALKIN_SECURE, PR2, SS1",
+    "planned_cells": [
+     "WALKIN_GRAB->(2,7)",
+     "WALKIN_SECURE->(2,6)",
+     "PR2->(8,16)",
+     "SS1->(28,10)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "high",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "Mine=true, players=3, chaff+EMP both active. The pure at (2,8) is certain and worth ~765 base. WALKIN_GRAB lands on (2,7) at H01 (before chaff window), walks to (2,8), picks up H02\u2014two hours, minimal exposure. WALKIN_SECURE re-walks from (2,6) at H04 as redundancy (if wave-1 cras",
+    "reflection": "Last night's second harvester failed to drop because (2,6) lacked live-vision coverage\u2014no probe disk reached it. The lesson: verify every drop cell is inside an active probe disk before queuing. The pure(255) grab succeeded (+903 pts), so the core play worked; I simply queued a d"
+   },
+   {
+    "actual_banked": 0,
+    "compiler_notes": [
+     "you set chaff_react (you expect a jam tonight). NOTHING was shortened on your behalf \u2014 route length is your call, so pick a SHORT option if you want the fleet lifting early."
+    ],
+    "corrector_notes": [],
+    "day": 5,
+    "enemy_seen": "H01 p1 launched a probe (29,22) (public) | H01 p3 dropped a harvester seen (30,11) (in your vision) | H02 p1 launched a probe (20,22) (public)",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 305
+    },
+    "happened": "banked red +0 (0 parcel(s)); 1 FAILED move(s)",
+    "intent": "Bank the guaranteed vein chain at (30,10) with CH1 (~305 pts, no probe cost, fast pickup to dodge EMP), then blind the leader's freshest probe at (5,5) with SS1 to deny their next landing and vision for 2 nights. Follow with PR1 to extend frontier vision into the high-promise mas",
+    "live_redsigns": [],
+    "memory_note": "# THINK PASS\n\n**Last night's failure:** The drop at (2,6) was rejected because it lacked live-vision coverage\u2014no probe disk reached it. I queued moves assuming a probe would be active, but my probes w",
+    "moves_executed": 6,
+    "moves_summary": "drop@[30, 10], step->[30, 11], step->[31, 11], pickup(harvester_p2), probe@[5, 5], probe@[0, 5]",
+    "plan_ids": [
+     "CH1",
+     "SS1",
+     "PR1"
+    ],
+    "plan_this_turn": "defensive: CH1, SS1, PR1",
+    "planned_cells": [
+     "CH1->(30,10)",
+     "SS1->(5,5)",
+     "PR1->(0,5)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "medium",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "I am trailing (1669 pts vs. leader ~2308). The visible red near (30,10) is modest but guaranteed (CH1, ~305 pts, no probe cost). The blue at (8,16) is rich but would crush my own probe and waste 2 nights of vision\u2014not worth it. The best denial play is SS1: blinding the leader's f",
+    "reflection": "Last night's H03 step to (31,11) failed due to a collision with p3's harvester at (30,11)\u2014I queued a blind step into contested ground without checking OPPONENT INTEL. The lesson: even visible cells can be occupied by rival units. Tonight I'm avoiding that exact cell and its green"
+   }
+  ],
+  "p3": [
+   {
+    "actual_banked": 0,
+    "compiler_notes": [],
+    "corrector_notes": [
+     "harvester_p3: absorbed first step \u2014 drop (35, 12)->(34, 12) to spare a probe (3 nights vision) without orphaning the chain",
+     "harvester_p3: skipped redundant first step (absorbed into drop)"
+    ],
+    "day": 1,
+    "enemy_seen": "H01 p1 launched a probe (35,13) (public) | H01 p2 launched a probe (2,13) (public) | H02 p1 launched a probe (3,17) (public)",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 0
+    },
+    "happened": "banked red +0 (0 parcel(s))",
+    "intent": "Execute setup-night mandate: hot drop on bluesign at (35,12) with stretch walk to maximize blind intel and area_gain, paired with a probe at (8,18) on the opposite flank to spread vision across quadrants and open tomorrow's left-side harvest.",
+    "live_redsigns": [],
+    "memory_note": "# THINK PASS\n\n**Last Night Reflection:**\nNo prior orders exist \u2014 this is night 1 of 7. No baseline to reflect on yet.\n\n**Redsign Status:**\nNo redsign block present. No pure(255) cell has been discover",
+    "moves_executed": 8,
+    "moves_summary": "probe@[8, 18], probe@[35, 12], drop@[34, 12], step->[33, 12], step->[33, 13], step->[32, 13], step->[31, 13], pickup(harvester_p3)",
+    "plan_ids": [
+     "PR1",
+     "HD2L"
+    ],
+    "plan_this_turn": "aggressive: PR1, HD2L",
+    "planned_cells": [
+     "PR1->(8,18)",
+     "HD2L->(35,12)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "high",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "Setup night is the ONE night with full probe stock and no better use for hours. The advisory mandates at least one hot drop on a bluesign and spread probes across quadrants. HD2L (35,12 stretch) is the longest walk on the right flank, maximizing blind area_gain and intel for tomo",
+    "reflection": "Day 1 setup banked zero red as expected, but the probe at (35,12) was superseded by p2 at H07\u2014a deliberate denial, not a collision. The lesson: contested bluesigns attract counter-probes. Tonight I avoid that trap by hitting a known echo (exact cell, no search needed) with a shor"
+   },
+   {
+    "actual_banked": 0,
+    "compiler_notes": [
+     "you set chaff_react (you expect a jam tonight). NOTHING was shortened on your behalf \u2014 route length is your call, so pick a SHORT option if you want the fleet lifting early.",
+     "cut probe: no stock left"
+    ],
+    "corrector_notes": [],
+    "day": 2,
+    "enemy_seen": "H03 p1 launched a probe (28,10) (public) | H08 p2 launched a probe (5,5) (public) | H09 p2 launched a probe (7,6) (public)",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 369
+    },
+    "happened": "banked red +93 (2 parcel(s)); 1 green",
+    "intent": "Race the echo-mass at (33,11) with a fast 3-cell sample grab [HD3Q] to bank ~369 pts before rivals strip it or chaff jams the pickup. Then deploy both probes [PR2] and [PR3] to extend the seam eastward and westward, setting up tomorrow's multi-wave harvest on the high-edge-promis",
+    "live_redsigns": [],
+    "memory_note": "# THINK PASS\n\n**Last Night Reflection:**\nDay 1 was a setup night with zero red banked\u2014expected. The probe at (35,12) was superseded by p2 at H07, destroying my vision of that disk. This was not a coll",
+    "moves_executed": 6,
+    "moves_summary": "probe@[31, 9], drop@[33, 11], step->[32, 11], step->[32, 12], pickup(harvester_p3), probe@[33, 7]",
+    "plan_ids": [
+     "HD3Q",
+     "PR2",
+     "PR3"
+    ],
+    "plan_this_turn": "aggressive: HD3Q, PR2, PR3",
+    "planned_cells": [
+     "HD3Q->(33,11)",
+     "PR2->(33,7)",
+     "PR3->(30,10)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "high",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "The echo-mass at (33,11) is 1 night old, under rival vision, and worth ~369 pts on the SAMPLE variant. It is contested but short (3 cells, pickup by hour 4), which dodges the chaff window (hours 6\u20139) and limits EMP exposure. HD3Q is the fastest way to secure this value before a r",
+    "reflection": "Last night I trusted a stale echo at (33,11) and dropped on GREEN, banking only 93 red + a -100 penalty instead of ~369. Root cause: the cell was already harvested by a rival. Tonight I avoid echoes and attack only live vision (GRAB1) or known-red walks (CH1), both zero-probe pla"
+   },
+   {
+    "actual_banked": 168,
+    "compiler_notes": [
+     "you set chaff_react (you expect a jam tonight). NOTHING was shortened on your behalf \u2014 route length is your call, so pick a SHORT option if you want the fleet lifting early."
+    ],
+    "corrector_notes": [],
+    "day": 3,
+    "enemy_seen": "BOARD: the REDSIGN near ~(28,13) WENT DARK \u2014 a beacon retires only when its LAST pure is taken, so somebody banked it last night. That seam is spent; stop pricing options against it. | H01 p1 flared chaff | H04 p1 fired ",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 669
+    },
+    "happened": "banked red +168 (6 parcel(s)); 4 FAILED move(s)",
+    "intent": "Bank the live mass at (31,12) with GRAB1 to secure ~500 pts on a contested redsign, then deploy the second harvester on the safe juice chain CH1 (36,5) for guaranteed ~168 pts with zero collision risk. Both harvesters out, both banks locked in before weapons fire.",
+    "live_redsigns": [
+     [
+      28,
+      13
+     ],
+     [
+      3,
+      8
+     ]
+    ],
+    "memory_note": "# THINK PASS\n\n**Last night's failure:** I dropped on (33,11) expecting mass but hit GREEN\u2014a harvested cell from a prior night. The echo was stale. I banked only 93 red + a -100 green penalty instead o",
+    "moves_executed": 14,
+    "moves_summary": "drop@[31, 12], step->[30, 12], step->[29, 12], step->[28, 12], step->[27, 12], step->[26, 12], pickup(harvester_p3), drop@[36, 5], step->[35, 5], step->[35, 6], step->[36, 6], step->[36, 7], step->[37, 7], pickup(harvester_p3_2)",
+    "plan_ids": [
+     "GRAB1",
+     "CH1"
+    ],
+    "plan_this_turn": "defensive: GRAB1, CH1",
+    "planned_cells": [
+     "GRAB1->(31,12)",
+     "CH1->(36,5)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "medium",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "I have 0 probes and 2 harvesters. All hot-drop options are unaffordable. The live redsign at (28,13) is a rival's (CASE 2); the pure is probably already banked. GRAB1 is the live mass I can see and bank safely (~500 pts, low collision risk on my own side). WALK_TO_CONTEST is a bl",
+    "reflection": "Last night chaff jammed hours 1-3, cancelling my drop at (31,12)\u2014the harvester never landed, so subsequent steps failed. Root cause: I committed one harvester to a contested redsign without a backup wave. Tonight I avoid that trap by running a short, fast grab (pickup by hour 4, "
+   },
+   {
+    "actual_banked": 579,
+    "compiler_notes": [
+     "you set chaff_react (you expect a jam tonight). NOTHING was shortened on your behalf \u2014 route length is your call, so pick a SHORT option if you want the fleet lifting early."
+    ],
+    "corrector_notes": [],
+    "day": 4,
+    "enemy_seen": "BOARD: the REDSIGN near ~(3,8) WENT DARK \u2014 a beacon retires only when its LAST pure is taken, so somebody banked it last night. That seam is spent; stop pricing options against it. | H01 p1 launched a probe (5,5) (public",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 578
+    },
+    "happened": "banked red +578 (4 parcel(s))",
+    "intent": "Race the echo-mass at (31,12) with HD1Q (quick 3-cell grab, pickup by hour 4 to dodge the chaff window), then deploy the second harvester on CH1 (safe vein at (33,10)) for guaranteed ~78 pts. Spend PR3 to extend the contested redsign from a less-watched angle and set up tomorrow'",
+    "live_redsigns": [
+     [
+      3,
+      8
+     ]
+    ],
+    "memory_note": "# THINK PASS\n\n**Last night's failure:** Chaff jammed hours 1-3, cancelling my drop at (31,12). The harvester never landed\u2014it stayed in orbit. My subsequent steps failed because the unit wasn't on the ",
+    "moves_executed": 8,
+    "moves_summary": "probe@[29, 14], drop@[31, 12], step->[30, 12], step->[29, 12], pickup(harvester_p3), drop@[33, 10], pickup(harvester_p3_2), probe@[4, 9]",
+    "plan_ids": [
+     "HD1Q",
+     "CH1",
+     "PR3"
+    ],
+    "plan_this_turn": "aggressive: HD1Q, CH1, PR3",
+    "planned_cells": [
+     "HD1Q->(31,12)",
+     "CH1->(33,10)",
+     "PR3->(4,9)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "high",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "The rival redsign at ~(3,8) is 2 nights old and likely stripped; the pure is only ~12% likely still on the board. My best confirmed target is the echo-mass at (31,12)\u2014exact cell, under enemy vision but known value. HD1Q banks ~500 pts in 3 cells, pickup by hour 4 (before chaff pr",
+    "reflection": "Last night executed perfectly: banked +578 red (1 mass, 3 vein) with zero failures. The quick grab (HD1Q) + safe vein (CH1) plan worked as intended. No crash, no jam, no collision. The redsign near (3,8) went dark (rival took the pure), confirming that seam is spent and tonight I"
+   },
+   {
+    "actual_banked": 720,
+    "compiler_notes": [
+     "reordered runs so a probe crush does not blind a later drop: CH2 -> CH1S",
+     "you set chaff_react (you expect a jam tonight). NOTHING was shortened on your behalf \u2014 route length is your call, so pick a SHORT option if you want the fleet lifting early."
+    ],
+    "corrector_notes": [],
+    "day": 5,
+    "enemy_seen": "H01 p1 launched a probe (29,22) (public) | H02 p1 launched a probe (20,22) (public) | H02 p2 moved a harvester seen (30,11) (in your vision)",
+    "expected_yield": {
+     "blue_fissile": 0,
+     "green_penalty": 0,
+     "red_pts": 920
+    },
+    "happened": "banked red +720 (3 parcel(s)); 1 FAILED move(s)",
+    "intent": "Bank the visible mass/vein seam at (30,14)\u2192(29,14)\u2192(29,15) with CH1S (short, safe, ~720 red), then deploy the second harvester on CH2 (30,11)\u2192(31,11) for ~200 red. Spend PR2 and PR3 to extend frontier vision on high-promise seams, and SS1 to blind the leader's probe (5,5) and den",
+    "live_redsigns": [],
+    "memory_note": "# THINK PASS\n\n**Last night reflection:** I executed perfectly\u2014banked +578 red across 4 parcels (1 mass, 3 vein) with zero failures. The plan (HD1Q quick grab + CH1 safe vein) worked as intended. No cr",
+    "moves_executed": 10,
+    "moves_summary": "drop@[30, 11], step->[31, 11], pickup(harvester_p3), drop@[30, 14], step->[29, 14], step->[29, 15], pickup(harvester_p3_2), probe@[4, 4], probe@[26, 9], probe@[5, 5]",
+    "plan_ids": [
+     "CH1S",
+     "CH2",
+     "PR2",
+     "PR3",
+     "SS1"
+    ],
+    "plan_this_turn": "defensive: CH1S, CH2, PR2, PR3, SS1",
+    "planned_cells": [
+     "CH1S->(30,14)",
+     "CH2->(30,11)",
+     "PR2->(4,4)",
+     "PR3->(26,9)",
+     "SS1->(5,5)"
+    ],
+    "predicted_outcome": {
+     "banked_pts_estimate": "medium",
+     "what_could_go_wrong": "chain could be cut short by a green cell, a crush, or the 6-parcel hold filling before the richest cells"
+    },
+    "probe_crushes": [],
+    "rationale": "No live redsign tonight (rivals own the beacons). I am playing for seam value and frontier vision. CH1S crushes my own probe (29,14), but that probe is already being consumed by this outing\u2014no waste. Both chains are short (pickup by hour 3-4), chaff-safe, and disjoint (>=2 cells ",
+    "reflection": "Last night's H02 step to (31,11) collided with a rival harvester (p2), costing me a vein parcel worth ~110 red. Root cause: I did not account for active enemy trails visible in WORLD VIEW. Tonight I avoid contested cells and stick to known-red walks with no probe needed, finishin"
+   }
+  ]
+ },
+ "source": "cfa9912d81764414b05b21f2d18910a7"
+}

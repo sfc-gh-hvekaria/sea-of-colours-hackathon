@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Sea of Colours</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/static/landing.css" />
+</head>
+<body>
+  <!-- Full-bleed looping hero, greyscaled by CSS and tinted acid by the
+       duotone layer below it. Shot by backstage/films/make_hero_reel.py. -->
+  <video
+    id="hero-bg"
+    class="hero-bg"
+    autoplay
+    muted
+    loop
+    playsinline
+    webkit-playsinline
+    preload="auto"
+    poster="/static/media/hero-poster.jpg"
+  >
+    <source src="/static/media/hero.webm" type="video/webm" />
+    <source src="/static/media/hero.mp4" type="video/mp4" />
+  </video>
+  <div class="hero-duotone" aria-hidden="true"></div>
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <!-- ═══ MACHINE-READ FX OVERLAY — to revert, comment out this block ═══ -->
+  <canvas id="fx-cv" aria-hidden="true"></canvas>
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+
+  <!-- ═══ INSTRUMENT CHROME ═════════════════════════════════════════════
+       Every mark below is decorative: crop marks, tick rulers, barcodes
+       and spec labels. It is all aria-hidden and none of it is
+       interactive, so a screen reader hears the page as title, tagline,
+       four buttons and two links — exactly as it did before the chrome
+       existed. -->
+  <div class="chrome" aria-hidden="true">
+    <span class="crop crop--tl"></span>
+    <span class="crop crop--tr"></span>
+    <span class="crop crop--bl"></span>
+    <span class="crop crop--br"></span>
+    <div class="rule rule--top"></div>
+    <div class="rule rule--bottom"></div>
+    <div class="rail rail--left">
+      <span class="rail-txt">SOC&nbsp;//&nbsp;RED_HARVEST&nbsp;//&nbsp;SECTOR_00</span>
+      <span class="barcode barcode--v"></span>
+    </div>
+    <div class="rail rail--right">
+      <span class="barcode barcode--v"></span>
+      <span class="rail-txt">21H&nbsp;NIGHT&nbsp;CYCLE&nbsp;//&nbsp;FOG&nbsp;LIVE·ECHO</span>
+    </div>
+    <div class="stamp stamp--tl">
+      <span class="barcode"></span>
+      <span>[SOC&#8209;TX0137]</span>
+    </div>
+    <div class="stamp stamp--tr">
+      <span id="clock-utc">--:--:--</span>
+      <span class="swatches">
+        <i class="sw sw--r"></i><i class="sw sw--g"></i><i class="sw sw--b"></i>
+      </span>
+    </div>
+    <!-- The purity ladder, flicking through the four RED tiers in the
+         board's own block glyphs. Filled by landing.js; the markup only
+         carries a first frame so there is no layout jump. -->
+    <div class="stamp stamp--bl">
+      <span class="tier-blocks" id="tier-blocks">░░░░░░░░</span>
+      <span class="tier-name" id="tier-name">TRACE</span>
+      <span class="tier-band" id="tier-band">001–050</span>
+      <span class="tier-mult" id="tier-mult">×0.75</span>
+    </div>
+  </div>
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+
+  <main class="landing">
+    <p class="landing-eyebrow">
+      <span class="tag">CUSTOM&nbsp;STRATEGY&nbsp;ENGINE_</span>
+      <span class="landing-eyebrow-meta">V1.37 · TURN-BASED · FOG OF WAR</span>
+    </p>
+
+    <h1 class="landing-title">
+      <span id="title-content" style="opacity: 0;"><span class="glitch-word" data-word="sea">sea</span>_<span class="glitch-word" data-word="of">of</span>_<span class="glitch-word" data-word="colours">colours</span><span class="cursor-blink">_</span></span>
+    </h1>
+
+    <p class="landing-tagline" id="tagline">an agentic game of strategy and subterfuge also playable by algorithms and humans</p>
+
+    <nav class="landing-actions">
+      <!-- v1.32 — was "Quick game", which spawned a full-rules 40x28
+           season with no explanation of any of it. Quick game still
+           exists; it is now the third card behind this button, where it
+           reads as "I already know how to play" rather than as the only
+           way in. -->
+      <button id="btn-quick" type="button" class="landing-btn">
+        <span class="landing-btn-idx">01</span>
+        <span class="landing-btn-text">Tutorial</span>
+      </button>
+      <button id="btn-play" type="button" class="landing-btn">
+        <span class="landing-btn-idx">02</span>
+        <span class="landing-btn-text">Play</span>
+      </button>
+      <button id="btn-multiplayer" type="button" class="landing-btn">
+        <span class="landing-btn-idx">03</span>
+        <span class="landing-btn-text">Multiplayer</span>
+      </button>
+      <button id="btn-replay" type="button" class="landing-btn">
+        <span class="landing-btn-idx">04</span>
+        <span class="landing-btn-text">Replay</span>
+      </button>
+      <!-- v1.42 — the front door for anyone here to build an agent
+           rather than to play one. The other four cards all start a
+           game; this one opens a frozen turn from a real season, so a
+           fork can be tried against the same night as everyone else's
+           without playing five days first. An anchor rather than a
+           button because it genuinely is a different page, and it
+           should middle-click into a new tab like a link. -->
+      <a id="btn-lab" href="/lab" class="landing-btn">
+        <span class="landing-btn-idx">05</span>
+        <span class="landing-btn-text">Turn Lab</span>
+      </a>
+    </nav>
+
+    <p id="landing-hint" class="landing-hint" role="status" aria-live="polite"></p>
+
+    <!-- Reader-facing docs, served by the app so a shared URL (including
+         a tunnel origin) carries them too. -->
+    <p class="landing-docs">
+      <a href="/guide/">guide</a>
+      <span aria-hidden="true">/</span>
+      <a href="/manual/">manual</a>
+      <span aria-hidden="true">/</span>
+      <a href="/manual/agent.html">agent &amp; harness</a>
+      <span aria-hidden="true">/</span>
+      <a href="/guide/leader.html"
+         title="Running a team? The day in order, with a checkpoint per stage"
+         >team leader</a>
+    </p>
+  </main>
+
+  <!-- Running spec band. Duplicated once because a marquee needs two
+       copies to loop without a gap; the copy is aria-hidden so the strip
+       is not read out twice. -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span class="ticker-run"></span>
+      <span class="ticker-run"></span>
+    </div>
+  </div>
+
+  <!-- Bottom-right server-status badge (polls /api/meta/status). -->
+  <div id="status-badge" class="status-badge" title="Server status">
+    <span class="status-dot" id="status-dot"></span>
+    <span class="status-label" id="status-label">&hellip;</span>
+  </div>
+
+  <script src="/static/landing.js"></script>
+  <!-- ═══ MACHINE-READ FX OVERLAY — to revert, comment out this line ═══ -->
+  <script src="/static/fx.js"></script>
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+</body>
+</html>

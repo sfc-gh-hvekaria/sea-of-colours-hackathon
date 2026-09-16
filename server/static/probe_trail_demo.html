@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Probe Trail Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0e16;
+    color: #c8c0a8;
+    font-family: monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 16px;
+  }
+  canvas { image-rendering: pixelated; border: 1px solid #2a3040; cursor: crosshair; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    padding: 5px 16px;
+    background: transparent;
+    border: 1px solid #3a4555;
+    color: #c8c0a8;
+    font-family: monospace;
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+  }
+  .btn:hover  { border-color: #aaa; }
+  .btn.active { border-color: #ff4400; color: #ff4400; }
+  .hint { font-size: 11px; color: rgba(200,192,168,0.28); letter-spacing: 0.08em; }
+  .slider-row {
+    display: flex; gap: 14px; align-items: center;
+    font-size: 11px; color: rgba(200,192,168,0.5);
+    flex-wrap: wrap; justify-content: center;
+  }
+  input[type=range] { width: 90px; accent-color: #ff8800; }
+</style>
+</head>
+<body>
+
+<canvas id="c" width="336" height="336"></canvas>
+
+<div class="controls">
+  <button class="btn" onclick="fire(0,0,11,11,'#ffffff')">[ ↘ probe ]</button>
+  <button class="btn" onclick="fire(11,0,0,11,'#ffffff')">[ ↙ probe ]</button>
+  <button class="btn" onclick="fire(0,11,11,0,'#ffffff')">[ ↗ probe ]</button>
+  <button class="btn" onclick="fire(0,0,11,11,'#00ffff')">[ ↘ EMP ]</button>
+  <button class="btn" id="auto-btn" onclick="toggleAuto()">[ AUTO ]</button>
+</div>
+
+<div class="slider-row">
+  <label>ms / cell</label>
+  <input type="range" id="spd" min="20" max="150" value="55">
+  <label>fade start ms</label>
+  <input type="range" id="fds" min="0" max="2000" value="200">
+  <label>fade spread ms</label>
+  <input type="range" id="fsp" min="100" max="3000" value="1400">
+</div>
+
+<p class="hint">white = probe · cyan = EMP · click grid to fire from nearest corner</p>
+
+<script>
+const CELL = 28, COLS = 12, ROWS = 12;
+const W = CELL * COLS, H = CELL * ROWS; // 336 x 336
+
+// Per-pixel trail entry: { x, y, r, g, b, startFadeAt, fadeDuration, alpha }
+let trailPixels = [];
+// Active probe heads: { fromX, fromY, toX, toY, startT, stepMs, r, g, b, prevX, prevY, landed, ownTrail[] }
+let probes = [];
+// Landing flashes: { cx, cy, startT }
+let flashes = [];
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+}
+
+// Bresenham — yields every pixel on the line from (x0,y0) to (x1,y1)
+function* bresenham(x0, y0, x1, y1) {
+  const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+  const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let err = dx - dy;
+  while (true) {
+    yield [x0, y0];
+    if (x0 === x1 && y0 === y1) break;
+    const e2 = err * 2;
+    if (e2 > -dy) { err -= dy; x0 += sx; }
+    if (e2 <  dx) { err += dx; y0 += sy; }
+  }
+}
+
+function qbez(t, p0, cp, p1) {
+  const u = 1 - t;
+  return u * u * p0 + 2 * u * t * cp + t * t * p1;
+}
+
+function fire(fromGx, fromGy, toGx, toGy, color) {
+  const cells = Math.max(Math.abs(toGx - fromGx), Math.abs(toGy - fromGy));
+  const [r, g, b] = hexToRgb(color);
+  const fromX = fromGx * CELL + CELL / 2;
+  const fromY = fromGy * CELL + CELL / 2;
+  const toX   = toGx   * CELL + CELL / 2;
+  const toY   = toGy   * CELL + CELL / 2;
+  // Control point: midpoint offset perpendicular to the trajectory
+  const dx = toX - fromX, dy = toY - fromY;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const perpX = -dy / len, perpY = dx / len;
+  const curve = (Math.random() < 0.5 ? 1 : -1) * (0.4 + Math.random() * 0.5) * CELL;
+  probes.push({
+    fromX, fromY, toX, toY,
+    cpX: (fromX + toX) / 2 + perpX * curve,
+    cpY: (fromY + toY) / 2 + perpY * curve,
+    startT: performance.now(),
+    stepMs: +document.getElementById('spd').value,
+    cells,
+    r, g, b,
+    prevX: null, prevY: null,
+    landed: false,
+    ownTrail: [],
+  });
+}
+
+let _autoTimer = null;
+function toggleAuto() {
+  const btn = document.getElementById('auto-btn');
+  if (_autoTimer) {
+    clearInterval(_autoTimer); _autoTimer = null;
+    btn.classList.remove('active'); btn.textContent = '[ AUTO ]';
+  } else {
+    const seq = [
+      () => fire(0,0,11,11,'#ffffff'),
+      () => fire(11,0,0,11,'#ffffff'),
+      () => fire(0,11,11,0,'#ffffff'),
+      () => fire(11,11,0,0,'#ffffff'),
+      () => fire(0,0,11,11,'#00ffff'),
+    ];
+    let i = 0;
+    seq[0]();
+    _autoTimer = setInterval(() => seq[++i % seq.length](), 1000);
+    btn.classList.add('active'); btn.textContent = '[ STOP ]';
+  }
+}
+
+document.getElementById('c').addEventListener('click', e => {
+  const r   = e.target.getBoundingClientRect();
+  const mx  = e.clientX - r.left, my = e.clientY - r.top;
+  const fgx = mx < W / 2 ? 0 : 11;
+  const fgy = my < H / 2 ? 0 : 11;
+  fire(fgx, fgy, 11 - fgx, 11 - fgy, '#ffffff');
+});
+
+// ── Main loop ─────────────────────────────────────────────────────────────────
+
+function loop(now) {
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth   = 1;
+  for (let x = 0; x <= W; x += CELL) { ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += CELL) { ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(W,y+.5); ctx.stroke(); }
+
+  // ── Trail pixels (direct ImageData write — 1 px per point) ────────────────
+  const img = ctx.getImageData(0, 0, W, H);
+  const d   = img.data;
+  const fadeStart  = +document.getElementById('fds').value;
+  const fadeSpread = +document.getElementById('fsp').value;
+
+  const nextTrail = [];
+  for (const tp of trailPixels) {
+    let alpha;
+    if (now < tp.startFadeAt) {
+      alpha = 1;
+    } else {
+      alpha = Math.max(0, 1 - (now - tp.startFadeAt) / tp.fadeDuration);
+    }
+    if (alpha <= 0) continue;
+    tp.alpha = alpha;
+    nextTrail.push(tp);
+
+    const px = tp.x, py = tp.y;
+    if (px < 0 || px >= W || py < 0 || py >= H) continue;
+    const i = (py * W + px) * 4;
+    // additive blend over whatever is already in the buffer
+    d[i]     = Math.min(255, d[i]     + (tp.r * alpha) | 0);
+    d[i + 1] = Math.min(255, d[i + 1] + (tp.g * alpha) | 0);
+    d[i + 2] = Math.min(255, d[i + 2] + (tp.b * alpha) | 0);
+    d[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  trailPixels = nextTrail;
+
+  // ── Probe heads ───────────────────────────────────────────────────────────
+  const nextProbes = [];
+  for (const p of probes) {
+    const duration = p.cells * p.stepMs;
+    const t  = Math.min(1, (now - p.startT) / duration);
+    const cx = Math.round(qbez(t, p.fromX, p.cpX, p.toX));
+    const cy = Math.round(qbez(t, p.fromY, p.cpY, p.toY));
+
+    // Stamp trail pixels for every pixel moved since last frame
+    if (p.prevX !== null) {
+      for (const [px, py] of bresenham(p.prevX, p.prevY, cx, cy)) {
+        if (px === p.prevX && py === p.prevY) continue; // don't re-stamp last frame's endpoint
+        const tp = { x: px, y: py, r: p.r, g: p.g, b: p.b, startFadeAt: Infinity, fadeDuration: 1, alpha: 1 };
+        trailPixels.push(tp);
+        p.ownTrail.push(tp);
+      }
+    } else {
+      // First frame: stamp the starting pixel
+      const tp = { x: cx, y: cy, r: p.r, g: p.g, b: p.b, startFadeAt: Infinity, fadeDuration: 1, alpha: 1 };
+      trailPixels.push(tp);
+      p.ownTrail.push(tp);
+    }
+    p.prevX = cx; p.prevY = cy;
+
+    if (t >= 1 && !p.landed) {
+      p.landed = true;
+      // Trigger random per-pixel fade for this probe's trail
+      for (const tp of p.ownTrail) {
+        tp.startFadeAt  = now + fadeStart + Math.random() * fadeSpread;
+        tp.fadeDuration = 200 + Math.random() * 800;
+      }
+      flashes.push({ cx, cy, startT: now });
+    }
+
+    // Draw probe head: 3×3 bright pixel
+    ctx.fillStyle   = `rgb(${p.r},${p.g},${p.b})`;
+    ctx.globalAlpha = 1;
+    ctx.fillRect(cx - 1, cy - 1, 3, 3);
+
+    if (!p.landed) nextProbes.push(p);
+  }
+  probes = nextProbes;
+
+  // ── Landing flash ─────────────────────────────────────────────────────────
+  const nextFlashes = [];
+  for (const f of flashes) {
+    const ft = (now - f.startT) / 220;
+    if (ft >= 1) continue;
+    nextFlashes.push(f);
+    const size = CELL * (0.5 + ft * 0.6);
+    ctx.fillStyle   = '#ffffff';
+    ctx.globalAlpha = (1 - ft) * 0.95;
+    ctx.fillRect(f.cx - size / 2, f.cy - size / 2, size, size);
+  }
+  ctx.globalAlpha = 1;
+  flashes = nextFlashes;
+
+  requestAnimationFrame(loop);
+}
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

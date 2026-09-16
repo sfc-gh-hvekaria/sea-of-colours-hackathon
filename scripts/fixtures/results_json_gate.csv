@@ -1,0 +1,19 @@
+label,agent,fixture,run_idx,ok,ms,resp_chars,ramble_count,preamble_count,first_cand,final_cand,stable_choice,tool_called,wallclock_capped,plan_chosen,json_parseable,valid_seat,valid_phase,valid_choice,decision_choice,model_tool_called
+V3_JSON_GATE_D3,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,28594,3566,3,0,,,False,False,True,harvest_mixed,False,False,False,False,,False
+V3_JSON_GATE_D3,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,27206,3566,1,0,"at (20,14)",,False,False,False,,False,False,False,False,,False
+V3_JSON_GATE_D3,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,24526,3566,5,0,"at (22,16)",EMP0,False,False,True,,False,False,False,False,,False
+V3_JSON_GATE_D3_POST,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,22247,3065,0,0,P1,,False,False,False,,False,False,False,False,,False
+V3_JSON_GATE_D3_POST,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,23460,3066,0,0,,,False,False,True,,False,False,False,False,,False
+V3_JSON_GATE_D3_POST,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,22075,3066,0,0,"at (22,16)",,False,False,True,,True,False,True,True,recommended_policy,False
+V3_JSON_GATE_D3_PARSE,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,23045,3066,0,0,"at (22,16)",,False,False,True,,False,False,False,False,,False
+V3_JSON_GATE_D3_PARSE,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,21558,3065,0,1,"at (30,10)",,False,False,False,,False,False,False,False,,False
+V3_JSON_GATE_D3_PARSE,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,21621,3066,0,0,"at (30,10)",,False,False,True,,False,False,False,False,,False
+V3_JSON_GATE_D3_COMPACT,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,22029,3065,0,0,"at (29,3)",EMP0,False,False,True,,False,False,False,False,,False
+V3_JSON_GATE_D3_COMPACT,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,18251,3066,0,0,"at (29,3)","at (29,3)",False,False,False,,True,True,False,False,,False
+V3_JSON_GATE_D3_COMPACT,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,18782,3065,2,0,"at (28,7)",,False,False,False,,True,True,False,False,,False
+V3_JSON_GATE_D3_SCHEMA,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,18009,2579,0,0,"at (22,16)",,False,False,True,,True,True,True,True,recommended_policy,False
+V3_JSON_GATE_D3_SCHEMA,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,18088,2582,1,0,"at (10,7)",,False,False,True,,True,True,True,True,recommended_policy,False
+V3_JSON_GATE_D3_SCHEMA,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,19477,3066,2,0,,,False,False,False,,False,False,False,False,,False
+V3_JSON_GATE_D3_MIN,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,0,True,22008,3066,0,0,P1,H18,False,False,True,,False,False,False,False,,False
+V3_JSON_GATE_D3_MIN,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,1,True,18310,2567,0,0,"at (20,14)",,False,False,True,,True,True,True,True,recommended_policy,False
+V3_JSON_GATE_D3_MIN,SOC_RED_REAPER_STRATEGIC+SOC_RED_REAPER_TACTICAL,d3s9_night_ramble.txt,2,True,19622,3065,2,0,,,False,False,True,harvest_mixed,False,False,False,False,,False

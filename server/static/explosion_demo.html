@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Explosion Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0e16;
+    color: #c8c0a8;
+    font-family: monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 16px;
+  }
+  canvas { image-rendering: pixelated; border: 1px solid #2a3040; cursor: crosshair; }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    padding: 5px 16px;
+    background: transparent;
+    border: 1px solid #3a4555;
+    color: #c8c0a8;
+    font-family: monospace;
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+  }
+  .btn:hover  { border-color: #aaa; }
+  .btn.active { border-color: #ff4400; color: #ff4400; }
+
+  /* Player toggle chips */
+  .players-row { display: flex; gap: 10px; align-items: center; }
+  .player-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    opacity: 0.35;
+    transition: opacity 80ms, border-color 80ms;
+    background: rgba(255,255,255,0.03);
+  }
+  .player-chip.on { opacity: 1; }
+  .player-chip .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .slider-row {
+    display: flex; gap: 14px; align-items: center;
+    font-size: 11px; color: rgba(200,192,168,0.5);
+    flex-wrap: wrap; justify-content: center;
+  }
+  input[type=range] { width: 90px; accent-color: #ff8800; }
+  .hint { font-size: 11px; color: rgba(200,192,168,0.28); letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<canvas id="c" width="336" height="336"></canvas>
+
+<div class="controls">
+  <button class="btn" onclick="explodeCenter()">[ CENTRE ]</button>
+  <button class="btn" id="auto-btn" onclick="toggleAuto()">[ AUTO ]</button>
+</div>
+
+<!-- Player toggles — click to include/exclude from collision -->
+<div class="players-row" id="players-row">
+  <div class="player-chip on"  data-seat="p1" style="border-color:#f8f8f8;" onclick="togglePlayer(this)">
+    <span class="dot" style="background:#f8f8f8;"></span>P1
+  </div>
+  <div class="player-chip on"  data-seat="p2" style="border-color:#ffdc5a;" onclick="togglePlayer(this)">
+    <span class="dot" style="background:#ffdc5a;"></span>P2
+  </div>
+  <div class="player-chip" data-seat="p3" style="border-color:#ff5fd7;" onclick="togglePlayer(this)">
+    <span class="dot" style="background:#ff5fd7;"></span>P3
+  </div>
+  <div class="player-chip" data-seat="p4" style="border-color:#5fd7ff;" onclick="togglePlayer(this)">
+    <span class="dot" style="background:#5fd7ff;"></span>P4
+  </div>
+</div>
+
+<div class="slider-row">
+  <label># px size</label>
+  <input type="range" id="px-size"  min="4" max="14" value="7"  oninput="CFG.pxSize=+this.value">
+  <label># ms/frame</label>
+  <input type="range" id="frame-ms" min="40" max="160" value="75" oninput="CFG.frameMs=+this.value">
+  <label># radius</label>
+  <input type="range" id="radius"   min="2" max="8"  value="4"  oninput="CFG.radius=+this.value">
+</div>
+<p class="hint">click grid to trigger · toggle players to change collision participants</p>
+
+<script>
+const CELL = 28;
+let CFG = { pxSize: 7, frameMs: 75, radius: 4 };
+
+// Exact colours from the game's OWNER_COLOR map
+const SEAT_COLORS = {
+  p1: "#f8f8f8",
+  p2: "#ffdc5a",
+  p3: "#ff5fd7",
+  p4: "#5fd7ff",
+};
+
+// Which players are currently active (at least 1 always)
+let activePlayers = ["p1", "p2"];
+
+// Density by Manhattan ring — falls off sharply so outer rings shatter into pixels
+function ringDensity(d) {
+  const table = [1.0, 1.0, 0.95, 0.85, 0.70, 0.55, 0.40, 0.25];
+  return table[Math.min(d, table.length - 1)];
+}
+
+// Opacity at age (frames since this ring was first lit)
+// age 0 = white flash, age 1..N = owner colour cooling
+// Pixels are fully on for 2 frames then gone — no fading
+const PIXEL_LIFE = 2;
+
+const active = [];
+
+function spawnExplosion(cx, cy) {
+  const R       = CFG.radius;
+  const palette = activePlayers.map(s => SEAT_COLORS[s]);
+
+  // Pre-compute which pixels survive, with random owner assignment
+  const pixels = [];
+  for (let dy = -R; dy <= R; dy++) {
+    for (let dx = -R; dx <= R; dx++) {
+      const d = Math.abs(dx) + Math.abs(dy);
+      if (d > R) continue;
+      if (d === 0 || Math.random() < ringDensity(d)) {
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        pixels.push({ dx, dy, d, color });
+      }
+    }
+  }
+
+  // Sparse sparks at ring R+1, also owner-coloured
+  const sparks = [];
+  for (let dy = -(R + 1); dy <= R + 1; dy++) {
+    for (let dx = -(R + 1); dx <= R + 1; dx++) {
+      if (Math.abs(dx) + Math.abs(dy) !== R + 1) continue;
+      if (Math.random() < 0.60) {
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        sparks.push({ dx, dy, color });
+      }
+    }
+  }
+
+  const exp = { cx, cy, frame: 0, pixels, sparks, timer: null };
+  active.push(exp);
+
+  exp.timer = setInterval(() => {
+    exp.frame++;
+    if (exp.frame > R + PIXEL_LIFE + 1) {
+      clearInterval(exp.timer);
+      active.splice(active.indexOf(exp), 1);
+    }
+    redraw();
+  }, CFG.frameMs);
+
+  redraw();
+}
+
+function drawExplosion(ctx, exp) {
+  const { cx, cy, frame, pixels, sparks } = exp;
+  const P    = CFG.pxSize;
+  const G    = 0;
+  const half = Math.floor(P / 2);
+  const R    = CFG.radius;
+
+  for (const { dx, dy, d, color } of pixels) {
+    const age = frame - d;
+    if (age < 0 || age >= PIXEL_LIFE) continue;
+    // Wavefront (age 0) white, next frame owner colour — both fully opaque
+    ctx.fillStyle = (age === 0) ? "#ffffff" : color;
+    ctx.fillRect(cx + dx * P - half, cy + dy * P - half, P, P);
+  }
+
+  // Outer sparks — on for 2 frames then gone
+  const si = frame - (R - 1);
+  if (si >= 0 && si < PIXEL_LIFE) {
+    for (const { dx, dy, color } of sparks) {
+      ctx.fillStyle = (si === 0) ? "#ffffff" : color;
+      ctx.fillRect(cx + dx * P - half, cy + dy * P - half, P, P);
+    }
+  }
+
+  }
+
+function redraw() {
+  const canvas = document.getElementById("c");
+  const ctx    = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.lineWidth   = 1;
+  for (let x = 0; x <= canvas.width; x += CELL) {
+    ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y <= canvas.height; y += CELL) {
+    ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(canvas.width, y + 0.5); ctx.stroke();
+  }
+
+  for (const exp of active) drawExplosion(ctx, exp);
+}
+
+// ── Controls ─────────────────────────────────────────────────────────────────
+
+function explodeCenter() {
+  const c = document.getElementById("c");
+  spawnExplosion(c.width / 2, c.height / 2);
+}
+
+document.getElementById("c").addEventListener("click", e => {
+  const r  = e.target.getBoundingClientRect();
+  const cx = Math.round((e.clientX - r.left) / CELL) * CELL;
+  const cy = Math.round((e.clientY - r.top)  / CELL) * CELL;
+  spawnExplosion(cx, cy);
+});
+
+let autoTimer = null;
+function toggleAuto() {
+  const btn = document.getElementById("auto-btn");
+  if (autoTimer) {
+    clearInterval(autoTimer); autoTimer = null;
+    btn.classList.remove("active"); btn.textContent = "[ AUTO ]";
+  } else {
+    explodeCenter();
+    autoTimer = setInterval(explodeCenter, 900);
+    btn.classList.add("active"); btn.textContent = "[ STOP ]";
+  }
+}
+
+function togglePlayer(el) {
+  const seat = el.dataset.seat;
+  const isOn = el.classList.contains("on");
+  // Must keep at least one player active
+  if (isOn && activePlayers.length === 1) return;
+  el.classList.toggle("on", !isOn);
+  if (isOn) {
+    activePlayers = activePlayers.filter(s => s !== seat);
+  } else {
+    activePlayers.push(seat);
+  }
+}
+</script>
+</body>
+</html>

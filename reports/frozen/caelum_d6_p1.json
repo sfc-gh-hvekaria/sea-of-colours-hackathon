@@ -1,0 +1,8531 @@
+{
+ "meta": {
+  "season": "Caelum_Compass",
+  "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+  "day": 7,
+  "phase": "orbit",
+  "player": "p1",
+  "players": [
+   "p1",
+   "p2"
+  ],
+  "agents": {
+   "p1": "human",
+   "p2": "red_harvest_lite"
+  },
+  "visibility_mode": "hidden",
+  "policy_actions_used": 0,
+  "policy_actions_max": 21,
+  "policy_actions_left": 21,
+  "policy_budget_note": "21 policy actions per night across your fleet (e.g. 3 harvesters \u00d7 (drop + 5 step + pickup)). Each drop / step / pickup / probe is one action. Per-harvester step limit is 5 (separate from this fleet-wide cap).",
+  "rules": {
+   "drop_mode": "live_only",
+   "probe_radius": 4,
+   "probe_lifetime_nights": 3
+  }
+ },
+ "hud": {
+  "day": 7,
+  "phase": "orbit",
+  "player": "p1",
+  "max_moves": 21,
+  "hoard": {
+   "count": 13,
+   "used": 13,
+   "capacity": 15,
+   "max": 15,
+   "free": 2,
+   "pct_full": 0.867,
+   "red_value": 1489,
+   "by_tier": {
+    "GREEN": {
+     "count": 0,
+     "purity_min": null,
+     "purity_max": null,
+     "value": 0
+    },
+    "RED": {
+     "count": 12,
+     "purity_min": 2,
+     "purity_max": 255,
+     "value": 1489
+    },
+    "BLUE": {
+     "count": 1,
+     "purity_min": 36,
+     "purity_max": 36,
+     "value": 0
+    }
+   },
+   "warning": "vault 87% full (13/15) \u2014 next overflow will jettison BLUE first (tier ladder GREEN > RED > BLUE)"
+  },
+  "shipped": {
+   "count": 20,
+   "used": 20,
+   "capacity": null,
+   "max": null,
+   "free": null,
+   "pct_full": 0.0,
+   "uncapped": true,
+   "by_tier": {
+    "GREEN": {
+     "count": 1,
+     "purity_min": 255,
+     "purity_max": 255,
+     "value": 0
+    },
+    "RED": {
+     "count": 19,
+     "purity_min": 0,
+     "purity_max": 255,
+     "value": 2135
+    },
+    "BLUE": {
+     "count": 0,
+     "purity_min": null,
+     "purity_max": null,
+     "value": 0
+    }
+   },
+   "warning": null
+  },
+  "score": 2035,
+  "scores": {
+   "p1": 2035,
+   "p2": 239
+  },
+  "season_name": "Caelum_Compass",
+  "season_day_cap": 7,
+  "is_season_complete": false
+ },
+ "last_night": {
+  "day_ended": 6,
+  "my_orders": [
+   {
+    "idx": 0,
+    "text": "[H17] p1 hoard 2/15; harvester_p1 banked +1 squares",
+    "outcome": "ok"
+   },
+   {
+    "idx": 1,
+    "text": "[H18] p1 hoard 8/15; harvester_p1_2 banked +6 squares",
+    "outcome": "ok"
+   },
+   {
+    "idx": 2,
+    "text": "[H19] p1 hoard 13/15; harvester_p1_3 banked +5 squares",
+    "outcome": "ok"
+   }
+  ],
+  "my_assets_destroyed": [
+   {
+    "id": "probe_p1_4",
+    "kind": "probe",
+    "at": [
+     21,
+     23
+    ],
+    "reason": "probe_expired"
+   },
+   {
+    "id": "probe_p1_5",
+    "kind": "probe",
+    "at": [
+     35,
+     9
+    ],
+    "reason": "crushed_by_harvester@(35,9)"
+   }
+  ],
+  "my_parcels_banked": [
+   {
+    "harvester_id": "harvester_p1",
+    "from": [
+     14,
+     23
+    ],
+    "tile": "RED",
+    "purity": 255,
+    "value": 255,
+    "square_id": "87497a6621e30a3d",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_2",
+    "from": [
+     15,
+     21
+    ],
+    "tile": "RED",
+    "purity": 76,
+    "value": 76,
+    "square_id": "3f14bab00d122a4d",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_2",
+    "from": [
+     16,
+     21
+    ],
+    "tile": "RED",
+    "purity": 93,
+    "value": 93,
+    "square_id": "526e8ed14d81829f",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_2",
+    "from": [
+     17,
+     21
+    ],
+    "tile": "RED",
+    "purity": 146,
+    "value": 146,
+    "square_id": "b25a900a101d551b",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_2",
+    "from": [
+     18,
+     21
+    ],
+    "tile": "RED",
+    "purity": 122,
+    "value": 122,
+    "square_id": "103fb70aa49b800f",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_2",
+    "from": [
+     19,
+     21
+    ],
+    "tile": "RED",
+    "purity": 15,
+    "value": 15,
+    "square_id": "40f77489abc33c22",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_2",
+    "from": [
+     19,
+     20
+    ],
+    "tile": "RED",
+    "purity": 76,
+    "value": 76,
+    "square_id": "a556ca4df0145824",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_3",
+    "from": [
+     35,
+     9
+    ],
+    "tile": "RED",
+    "purity": 58,
+    "value": 58,
+    "square_id": "76dba09209000a85",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_3",
+    "from": [
+     35,
+     10
+    ],
+    "tile": "RED",
+    "purity": 58,
+    "value": 58,
+    "square_id": "eb6b1e75ace2af2d",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_3",
+    "from": [
+     36,
+     10
+    ],
+    "tile": "RED",
+    "purity": 64,
+    "value": 64,
+    "square_id": "da8c3050a8a050b0",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_3",
+    "from": [
+     37,
+     10
+    ],
+    "tile": "RED",
+    "purity": 24,
+    "value": 24,
+    "square_id": "1299995042721ef0",
+    "lineage": "natural"
+   },
+   {
+    "harvester_id": "harvester_p1_3",
+    "from": [
+     36,
+     9
+    ],
+    "tile": "RED",
+    "purity": 2,
+    "value": 2,
+    "square_id": "e6d2fcde63be60cd",
+    "lineage": "natural"
+   }
+  ],
+  "combat_events": [
+   {
+    "day": 6,
+    "hours": [
+     2,
+     3,
+     4
+    ],
+    "owner": "p1",
+    "type": "chaff"
+   },
+   {
+    "by": [
+     "p1"
+    ],
+    "day": 6,
+    "hours": [
+     3,
+     4
+    ],
+    "type": "chaff_jam",
+    "units": [],
+    "victim": "p1"
+   }
+  ],
+  "my_collisions": [],
+  "incoming_attacks": [
+   {
+    "type": "chaff_jam",
+    "by": [
+     "p1"
+    ],
+    "units": [],
+    "hours": [
+     3,
+     4
+    ],
+    "consequence": "your action slots in those hours were CANCELLED (nothing you queued that hour happened)"
+   }
+  ],
+  "my_denials": [],
+  "emp_scars": []
+ },
+ "competitor_intel": {
+  "new_this_day": [
+   {
+    "kind": "enemy_probe_launch",
+    "owner": "p2",
+    "probe_id": "probe_p2_11",
+    "at": [
+     24,
+     19
+    ],
+    "day_seen": 6
+   },
+   {
+    "kind": "enemy_probe_launch",
+    "owner": "p2",
+    "probe_id": "probe_p2_12",
+    "at": [
+     3,
+     5
+    ],
+    "day_seen": 6
+   },
+   {
+    "kind": "enemy_harvester_trail",
+    "owner": "p2",
+    "harvester_id": "harvester_p2_2",
+    "at": [
+     19,
+     26
+    ],
+    "day_seen": 6
+   },
+   {
+    "kind": "enemy_harvester_trail",
+    "owner": "p2",
+    "harvester_id": "harvester_p2_2",
+    "at": [
+     20,
+     25
+    ],
+    "day_seen": 6
+   },
+   {
+    "kind": "enemy_harvester_trail",
+    "owner": "p2",
+    "harvester_id": "harvester_p2_2",
+    "at": [
+     20,
+     26
+    ],
+    "day_seen": 6
+   }
+  ],
+  "persistent_echoes": [
+   {
+    "kind": "enemy_probe",
+    "owner": "p2",
+    "at": [
+     13,
+     3
+    ],
+    "last_seen_day": 5
+   },
+   {
+    "kind": "enemy_probe",
+    "owner": "p2",
+    "at": [
+     19,
+     23
+    ],
+    "last_seen_day": 6
+   },
+   {
+    "kind": "enemy_harvester",
+    "owner": "p2",
+    "at": [
+     21,
+     11
+    ],
+    "last_seen_day": 2
+   },
+   {
+    "kind": "enemy_probe",
+    "owner": "p2",
+    "at": [
+     24,
+     19
+    ],
+    "last_seen_day": 6
+   },
+   {
+    "kind": "enemy_probe",
+    "owner": "p2",
+    "at": [
+     3,
+     5
+    ],
+    "last_seen_day": 6
+   }
+  ]
+ },
+ "station_intel": {
+  "self": {
+   "seat": "p1",
+   "fullness": {
+    "grade": "high",
+    "count": 13,
+    "capacity": 15
+   },
+   "blue": {
+    "grade": "low",
+    "band": 0,
+    "total": 36
+   },
+   "green": {
+    "grade": "none",
+    "estimate": "0",
+    "total": 0,
+    "count": 0
+   },
+   "activity": {
+    "abandoned": 0,
+    "abandoned_emped": 0,
+    "chaff": 1,
+    "damaged": 0,
+    "dropped": 3,
+    "emped": 0,
+    "emps": 0,
+    "mines": 0,
+    "picked_up": 3,
+    "picked_up_damaged": 0,
+    "probes": 0,
+    "recovered": 3,
+    "recovered_carrying": 3,
+    "recovered_damaged": 0
+   }
+  },
+  "opponents": [
+   {
+    "seat": "p2",
+    "fullness": {
+     "grade": "half"
+    },
+    "blue": {
+     "grade": "high",
+     "band": 3
+    },
+    "green": {
+     "grade": "none",
+     "estimate": "0"
+    },
+    "activity": {
+     "abandoned": 0,
+     "abandoned_emped": 0,
+     "chaff": 0,
+     "damaged": 0,
+     "dropped": 2,
+     "emped": 0,
+     "emps": 0,
+     "mines": 0,
+     "picked_up": 2,
+     "picked_up_damaged": 0,
+     "probes": 2,
+     "recovered": 2,
+     "recovered_carrying": 1,
+     "recovered_damaged": 0
+    }
+   }
+  ],
+  "night_day": 6
+ },
+ "world": {
+  "width": 40,
+  "height": 28,
+  "live": [
+   {
+    "x": 13,
+    "y": 15,
+    "tile": "RED",
+    "purity": 3,
+    "value": 3,
+    "square_id": "fd898e1cd9a83869",
+    "vedge": "new"
+   },
+   {
+    "x": 11,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "0ef03320022b54a8",
+    "vedge": "nw"
+   },
+   {
+    "x": 12,
+    "y": 16,
+    "tile": "RED",
+    "purity": 4,
+    "value": 4,
+    "square_id": "5ee0a915405c5706",
+    "vedge": "n"
+   },
+   {
+    "x": 13,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "48b42e3797fce7aa"
+   },
+   {
+    "x": 14,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "1f249b2035732450",
+    "vedge": "n"
+   },
+   {
+    "x": 15,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "dc57f8e5c644a7fc",
+    "vedge": "ne"
+   },
+   {
+    "x": 10,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "2ce20bc8e41bb17e",
+    "vedge": "nw"
+   },
+   {
+    "x": 11,
+    "y": 17,
+    "tile": "RED",
+    "purity": 2,
+    "value": 2,
+    "square_id": "4e92b8e69c36b0a2"
+   },
+   {
+    "x": 12,
+    "y": 17,
+    "tile": "RED",
+    "purity": 42,
+    "value": 42,
+    "square_id": "130fb45481ead657"
+   },
+   {
+    "x": 13,
+    "y": 17,
+    "tile": "RED",
+    "purity": 71,
+    "value": 71,
+    "square_id": "ddee0f5838dcedc3"
+   },
+   {
+    "x": 14,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "043459f6cea0c36e"
+   },
+   {
+    "x": 15,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "e7f2826848d6928c"
+   },
+   {
+    "x": 16,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "fa406153a5dccba3",
+    "vedge": "ne"
+   },
+   {
+    "x": 10,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "1757a006e4f06663",
+    "vedge": "w"
+   },
+   {
+    "x": 11,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "7d2bb89866971fd1"
+   },
+   {
+    "x": 12,
+    "y": 18,
+    "tile": "RED",
+    "purity": 70,
+    "value": 70,
+    "square_id": "03eeb0e23e882ba9"
+   },
+   {
+    "x": 13,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "fd46f8f832e65f32"
+   },
+   {
+    "x": 14,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "599050c40db3f253"
+   },
+   {
+    "x": 15,
+    "y": 18,
+    "tile": "RED",
+    "purity": 2,
+    "value": 2,
+    "square_id": "6ecfbc3369bc4090"
+   },
+   {
+    "x": 16,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "c6b4eb1e02498321",
+    "vedge": "e"
+   },
+   {
+    "x": 9,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "76dfb295e84ba32c",
+    "vedge": "nsw"
+   },
+   {
+    "x": 10,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "9f0f0cd4ad50216d"
+   },
+   {
+    "x": 11,
+    "y": 19,
+    "tile": "RED",
+    "purity": 24,
+    "value": 24,
+    "square_id": "fdc74810e22db35b"
+   },
+   {
+    "x": 12,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "6258498152881130"
+   },
+   {
+    "x": 13,
+    "y": 19,
+    "tile": "BLUE",
+    "purity": 255,
+    "value": 255,
+    "square_id": "6d58301a4e45330a",
+    "entity": {
+     "id": "probe_p1_6",
+     "kind": "probe",
+     "owner": "p1"
+    }
+   },
+   {
+    "x": 14,
+    "y": 19,
+    "tile": "RED",
+    "purity": 0,
+    "value": 0,
+    "square_id": "39985f295676c9f1"
+   },
+   {
+    "x": 15,
+    "y": 19,
+    "tile": "RED",
+    "purity": 1,
+    "value": 1,
+    "square_id": "f2c0e85a8bafa75a"
+   },
+   {
+    "x": 16,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "afdd6b97ec8c23fd"
+   },
+   {
+    "x": 17,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "ca00b690beb00303",
+    "vedge": "nes"
+   },
+   {
+    "x": 10,
+    "y": 20,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "4cc14cd14aebea0b",
+    "vedge": "w"
+   },
+   {
+    "x": 11,
+    "y": 20,
+    "tile": "RED",
+    "purity": 50,
+    "value": 50,
+    "square_id": "ea683fc77bfd0fd9"
+   },
+   {
+    "x": 12,
+    "y": 20,
+    "tile": "RED",
+    "purity": 11,
+    "value": 11,
+    "square_id": "f84209e6e40d29f4"
+   },
+   {
+    "x": 13,
+    "y": 20,
+    "tile": "RED",
+    "purity": 21,
+    "value": 21,
+    "square_id": "8563437f03df245c"
+   },
+   {
+    "x": 14,
+    "y": 20,
+    "tile": "BLUE",
+    "purity": 147,
+    "value": 147,
+    "square_id": "ad39f765cef26533"
+   },
+   {
+    "x": 15,
+    "y": 20,
+    "tile": "RED",
+    "purity": 54,
+    "value": 54,
+    "square_id": "ccd25a123ce31b4d"
+   },
+   {
+    "x": 16,
+    "y": 20,
+    "tile": "RED",
+    "purity": 1,
+    "value": 1,
+    "square_id": "7aebe531a0a82619",
+    "vedge": "e"
+   },
+   {
+    "x": 9,
+    "y": 21,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "fad8498da6439d83",
+    "vedge": "nsw"
+   },
+   {
+    "x": 10,
+    "y": 21,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "6ef4e0d3e6e732ea"
+   },
+   {
+    "x": 11,
+    "y": 21,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "ab2a673e25cf46a1"
+   },
+   {
+    "x": 12,
+    "y": 21,
+    "tile": "RED",
+    "purity": 21,
+    "value": 21,
+    "square_id": "d7c4759311a31043"
+   },
+   {
+    "x": 13,
+    "y": 21,
+    "tile": "RED",
+    "purity": 1,
+    "value": 1,
+    "square_id": "8e506dfe2aa4d52d",
+    "entity": {
+     "id": "probe_p1_7",
+     "kind": "probe",
+     "owner": "p1"
+    }
+   },
+   {
+    "x": 14,
+    "y": 21,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "958d728d19e43c81"
+   },
+   {
+    "x": 15,
+    "y": 21,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "square_id": "64378d53155018dd",
+    "lineage": "synthetic",
+    "parent_square_id": "3f14bab00d122a4d",
+    "trail": {
+     "n": 1,
+     "tier": 1,
+     "fresh_visits": [
+      {
+       "owner": "p1",
+       "h": "harvester_p1_2",
+       "day": 6,
+       "n": 1
+      }
+     ],
+     "harvested": true
+    }
+   },
+   {
+    "x": 16,
+    "y": 21,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "square_id": "229178c615432524",
+    "lineage": "synthetic",
+    "parent_square_id": "526e8ed14d81829f",
+    "trail": {
+     "n": 1,
+     "tier": 1,
+     "fresh_visits": [
+      {
+       "owner": "p1",
+       "h": "harvester_p1_2",
+       "day": 6,
+       "n": 1
+      }
+     ],
+     "harvested": true
+    }
+   },
+   {
+    "x": 17,
+    "y": 21,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "square_id": "831fde2cc27e2dbb",
+    "lineage": "synthetic",
+    "parent_square_id": "b25a900a101d551b",
+    "vedge": "nes",
+    "trail": {
+     "n": 1,
+     "tier": 1,
+     "fresh_visits": [
+      {
+       "owner": "p1",
+       "h": "harvester_p1_2",
+       "day": 6,
+       "n": 1
+      }
+     ],
+     "harvested": true
+    }
+   },
+   {
+    "x": 10,
+    "y": 22,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "31a96ff4349b374d",
+    "vedge": "w"
+   },
+   {
+    "x": 11,
+    "y": 22,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "fe1c5e1e84505cbb"
+   },
+   {
+    "x": 12,
+    "y": 22,
+    "tile": "RED",
+    "purity": 42,
+    "value": 42,
+    "square_id": "87c6cdeff260b155"
+   },
+   {
+    "x": 13,
+    "y": 22,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "square_id": "a71165e3c4e8273b",
+    "lineage": "synthetic",
+    "parent_square_id": "a2fc2298526755e9",
+    "trail": {
+     "n": 1,
+     "tier": 1,
+     "fresh_visits": [],
+     "harvested": true
+    }
+   },
+   {
+    "x": 14,
+    "y": 22,
+    "tile": "RED",
+    "purity": 13,
+    "value": 13,
+    "square_id": "04f346f56f65c833"
+   },
+   {
+    "x": 15,
+    "y": 22,
+    "tile": "RED",
+    "purity": 18,
+    "value": 18,
+    "square_id": "1c8e4975e44dad81"
+   },
+   {
+    "x": 16,
+    "y": 22,
+    "tile": "RED",
+    "purity": 54,
+    "value": 54,
+    "square_id": "a0df3336ffb94511",
+    "vedge": "e"
+   },
+   {
+    "x": 10,
+    "y": 23,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "e021c69744c640f1",
+    "vedge": "sw"
+   },
+   {
+    "x": 11,
+    "y": 23,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "0532958ef5b751a9"
+   },
+   {
+    "x": 12,
+    "y": 23,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "square_id": "efa37ad07d5dab19",
+    "lineage": "synthetic",
+    "parent_square_id": "977ae282c6a3b679",
+    "trail": {
+     "n": 1,
+     "tier": 1,
+     "fresh_visits": [],
+     "harvested": true
+    }
+   },
+   {
+    "x": 13,
+    "y": 23,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "square_id": "7779997cfa951ecb",
+    "lineage": "synthetic",
+    "parent_square_id": "3a659a79d0403f83",
+    "trail": {
+     "n": 1,
+     "tier": 1,
+     "fresh_visits": [],
+     "harvested": true
+    }
+   },
+   {
+    "x": 14,
+    "y": 23,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "square_id": "2fea52b9753c2222",
+    "lineage": "synthetic",
+    "parent_square_id": "87497a6621e30a3d",
+    "trail": {
+     "n": 1,
+     "tier": 1,
+     "fresh_visits": [
+      {
+       "owner": "p1",
+       "h": "harvester_p1",
+       "day": 6,
+       "n": 1
+      }
+     ],
+     "harvested": true
+    }
+   },
+   {
+    "x": 15,
+    "y": 23,
+    "tile": "RED",
+    "purity": 31,
+    "value": 31,
+    "square_id": "64c0e24b123523bf"
+   },
+   {
+    "x": 16,
+    "y": 23,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "18741e3a23a776f9",
+    "vedge": "es"
+   },
+   {
+    "x": 11,
+    "y": 24,
+    "tile": "RED",
+    "purity": 9,
+    "value": 9,
+    "square_id": "4ef4d4b66033bef4",
+    "vedge": "sw"
+   },
+   {
+    "x": 12,
+    "y": 24,
+    "tile": "RED",
+    "purity": 4,
+    "value": 4,
+    "square_id": "d63f139c6dd98a91",
+    "vedge": "s"
+   },
+   {
+    "x": 13,
+    "y": 24,
+    "tile": "RED",
+    "purity": 22,
+    "value": 22,
+    "square_id": "616d4a429453a3d7"
+   },
+   {
+    "x": 14,
+    "y": 24,
+    "tile": "RED",
+    "purity": 5,
+    "value": 5,
+    "square_id": "c51e2366bd6a5a5c",
+    "vedge": "s"
+   },
+   {
+    "x": 15,
+    "y": 24,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "square_id": "f45ad7965763d5fe",
+    "vedge": "es"
+   },
+   {
+    "x": 13,
+    "y": 25,
+    "tile": "RED",
+    "purity": 8,
+    "value": 8,
+    "square_id": "8a1299604880afeb",
+    "vedge": "esw"
+   }
+  ],
+  "echo": [
+   {
+    "x": 13,
+    "y": 3,
+    "via": "probe_launch",
+    "occupants": [
+     {
+      "id": "probe_p2_10",
+      "idx": 10,
+      "label": "Probe `probe_p2_10` (p2) \u00b7 tile 13,3",
+      "nights_remaining": 3,
+      "owner": "p2",
+      "type": "probe"
+     }
+    ],
+    "fog": true,
+    "last_seen_day": 5
+   },
+   {
+    "x": 24,
+    "y": 4,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 3,
+    "y": 5,
+    "via": "probe_launch",
+    "occupants": [
+     {
+      "id": "probe_p2_12",
+      "idx": 12,
+      "label": "Probe `probe_p2_12` (p2) \u00b7 tile 3,5",
+      "nights_remaining": 3,
+      "owner": "p2",
+      "type": "probe"
+     }
+    ],
+    "fog": true,
+    "last_seen_day": 6
+   },
+   {
+    "x": 22,
+    "y": 5,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 23,
+    "y": 5,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 5,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 25,
+    "y": 5,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 5,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 35,
+    "y": 5,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 6,
+    "tile": "RED",
+    "purity": 13,
+    "value": 13,
+    "last_seen_day": 3
+   },
+   {
+    "x": 22,
+    "y": 6,
+    "tile": "RED",
+    "purity": 19,
+    "value": 19,
+    "last_seen_day": 3
+   },
+   {
+    "x": 23,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 25,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 27,
+    "y": 6,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 33,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 34,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 35,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 36,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 37,
+    "y": 6,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 22,
+    "y": 7,
+    "tile": "RED",
+    "purity": 17,
+    "value": 17,
+    "last_seen_day": 3
+   },
+   {
+    "x": 23,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 25,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 27,
+    "y": 7,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 32,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 33,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 34,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 35,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 36,
+    "y": 7,
+    "tile": "RED",
+    "purity": 15,
+    "value": 15,
+    "last_seen_day": 6
+   },
+   {
+    "x": 37,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 38,
+    "y": 7,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 20,
+    "y": 8,
+    "tile": "RED",
+    "purity": 14,
+    "value": 14,
+    "last_seen_day": 3
+   },
+   {
+    "x": 21,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 23,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 25,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 27,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 28,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 32,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 33,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 34,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 35,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 36,
+    "y": 8,
+    "tile": "RED",
+    "purity": 8,
+    "value": 8,
+    "last_seen_day": 6
+   },
+   {
+    "x": 37,
+    "y": 8,
+    "tile": "RED",
+    "purity": 7,
+    "value": 7,
+    "last_seen_day": 6
+   },
+   {
+    "x": 38,
+    "y": 8,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 20,
+    "y": 9,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 2,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 21,
+    "y": 9,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 23,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 25,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 9,
+    "tile": "RED",
+    "purity": 19,
+    "value": 19,
+    "last_seen_day": 3
+   },
+   {
+    "x": 27,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 31,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 32,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 33,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 34,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 35,
+    "y": 9,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_3",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 36,
+    "y": 9,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_3",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 37,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_3",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 38,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 39,
+    "y": 9,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 8,
+    "y": 10,
+    "tile": "BLUE",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3
+   },
+   {
+    "x": 9,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 10,
+    "y": 10,
+    "tile": "RED",
+    "purity": 46,
+    "value": 46,
+    "last_seen_day": 3
+   },
+   {
+    "x": 11,
+    "y": 10,
+    "tile": "RED",
+    "purity": 42,
+    "value": 42,
+    "last_seen_day": 3
+   },
+   {
+    "x": 12,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 13,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 20,
+    "y": 10,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 2,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 21,
+    "y": 10,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 10,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 23,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 25,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 10,
+    "tile": "RED",
+    "purity": 10,
+    "value": 10,
+    "last_seen_day": 3
+   },
+   {
+    "x": 27,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 32,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 33,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 34,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 35,
+    "y": 10,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_3",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 36,
+    "y": 10,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_3",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 37,
+    "y": 10,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_3",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 38,
+    "y": 10,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 6,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 7,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 8,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 9,
+    "y": 11,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 10,
+    "y": 11,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 11,
+    "y": 11,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 12,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 13,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 14,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 21,
+    "y": 11,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 2,
+    "occupants": [
+     {
+      "damaged": false,
+      "id": "harvester_p2",
+      "idx": 1,
+      "label": "Harvester `harvester_p2` (p2) \u00b7 tile 21,11 \u00b7 cargo squares \u00d74",
+      "owner": "p2",
+      "type": "harvester"
+     }
+    ],
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 2,
+       "h": "harvester_p2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 23,
+    "y": 11,
+    "tile": "RED",
+    "purity": 23,
+    "value": 23,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 11,
+    "tile": "RED",
+    "purity": 22,
+    "value": 22,
+    "last_seen_day": 3
+   },
+   {
+    "x": 25,
+    "y": 11,
+    "tile": "RED",
+    "purity": 38,
+    "value": 38,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 32,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 33,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 34,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 35,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 36,
+    "y": 11,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 37,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 38,
+    "y": 11,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 5,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 6,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 7,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 8,
+    "y": 12,
+    "tile": "BLUE",
+    "purity": 40,
+    "value": 40,
+    "last_seen_day": 3
+   },
+   {
+    "x": 9,
+    "y": 12,
+    "tile": "BLUE",
+    "purity": 40,
+    "value": 40,
+    "last_seen_day": 3
+   },
+   {
+    "x": 10,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 11,
+    "y": 12,
+    "tile": "RED",
+    "purity": 6,
+    "value": 6,
+    "last_seen_day": 3
+   },
+   {
+    "x": 12,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 13,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 24,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 33,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 34,
+    "y": 12,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 35,
+    "y": 12,
+    "tile": "RED",
+    "purity": 14,
+    "value": 14,
+    "last_seen_day": 6
+   },
+   {
+    "x": 36,
+    "y": 12,
+    "tile": "RED",
+    "purity": 22,
+    "value": 22,
+    "last_seen_day": 6
+   },
+   {
+    "x": 37,
+    "y": 12,
+    "tile": "RED",
+    "purity": 9,
+    "value": 9,
+    "last_seen_day": 6
+   },
+   {
+    "x": 5,
+    "y": 13,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 6,
+    "y": 13,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 7,
+    "y": 13,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 8,
+    "y": 13,
+    "tile": "BLUE",
+    "purity": 40,
+    "value": 40,
+    "last_seen_day": 3
+   },
+   {
+    "x": 9,
+    "y": 13,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 10,
+    "y": 13,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 11,
+    "y": 13,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 29,
+    "y": 13,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 35,
+    "y": 13,
+    "tile": "RED",
+    "purity": 38,
+    "value": 38,
+    "last_seen_day": 6
+   },
+   {
+    "x": 4,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 5,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 6,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 7,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 8,
+    "y": 14,
+    "tile": "BLUE",
+    "purity": 40,
+    "value": 40,
+    "last_seen_day": 3
+   },
+   {
+    "x": 9,
+    "y": 14,
+    "tile": "BLUE",
+    "purity": 40,
+    "value": 40,
+    "last_seen_day": 3
+   },
+   {
+    "x": 10,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 11,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 12,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 27,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 28,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 29,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 30,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 31,
+    "y": 14,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 5,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 6,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 7,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 8,
+    "y": 15,
+    "tile": "BLUE",
+    "purity": 40,
+    "value": 40,
+    "last_seen_day": 3
+   },
+   {
+    "x": 9,
+    "y": 15,
+    "tile": "BLUE",
+    "purity": 40,
+    "value": 40,
+    "last_seen_day": 3
+   },
+   {
+    "x": 10,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 11,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 26,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 27,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 28,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 29,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 30,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 31,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 32,
+    "y": 15,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 5,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 6,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 7,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 8,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 9,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 10,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 21,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 26,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 27,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 28,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 29,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 30,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 31,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 32,
+    "y": 16,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 6,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 7,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 8,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 9,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 20,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 21,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 4,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 25,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 26,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 27,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 28,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 29,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 30,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 31,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 32,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 33,
+    "y": 17,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 8,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 20,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 21,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 4,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 26,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 27,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 28,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 29,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 30,
+    "y": 18,
+    "tile": "RED",
+    "purity": 9,
+    "value": 9,
+    "last_seen_day": 4
+   },
+   {
+    "x": 31,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 32,
+    "y": 18,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 19,
+    "y": 19,
+    "tile": "RED",
+    "purity": 11,
+    "value": 11,
+    "last_seen_day": 6
+   },
+   {
+    "x": 20,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 21,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 19,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 4
+   },
+   {
+    "x": 24,
+    "y": 19,
+    "via": "probe_launch",
+    "occupants": [
+     {
+      "id": "probe_p2_11",
+      "idx": 11,
+      "label": "Probe `probe_p2_11` (p2) \u00b7 tile 24,19",
+      "nights_remaining": 3,
+      "owner": "p2",
+      "type": "probe"
+     }
+    ],
+    "fog": true,
+    "last_seen_day": 6
+   },
+   {
+    "x": 26,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 27,
+    "y": 19,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 28,
+    "y": 19,
+    "tile": "RED",
+    "purity": 34,
+    "value": 34,
+    "last_seen_day": 4
+   },
+   {
+    "x": 29,
+    "y": 19,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 4,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 30,
+    "y": 19,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 4,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 31,
+    "y": 19,
+    "tile": "RED",
+    "purity": 5,
+    "value": 5,
+    "last_seen_day": 4
+   },
+   {
+    "x": 32,
+    "y": 19,
+    "tile": "RED",
+    "purity": 17,
+    "value": 17,
+    "last_seen_day": 4
+   },
+   {
+    "x": 17,
+    "y": 20,
+    "tile": "RED",
+    "purity": 2,
+    "value": 2,
+    "last_seen_day": 6
+   },
+   {
+    "x": 18,
+    "y": 20,
+    "tile": "RED",
+    "purity": 3,
+    "value": 3,
+    "last_seen_day": 6
+   },
+   {
+    "x": 19,
+    "y": 20,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 20,
+    "y": 20,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 20,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 20,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 23,
+    "y": 20,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 27,
+    "y": 20,
+    "tile": "RED",
+    "purity": 4,
+    "value": 4,
+    "last_seen_day": 4
+   },
+   {
+    "x": 28,
+    "y": 20,
+    "tile": "RED",
+    "purity": 6,
+    "value": 6,
+    "last_seen_day": 4
+   },
+   {
+    "x": 29,
+    "y": 20,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 4,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 30,
+    "y": 20,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 4,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 31,
+    "y": 20,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 18,
+    "y": 21,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 19,
+    "y": 21,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 20,
+    "y": 21,
+    "tile": "RED",
+    "purity": 37,
+    "value": 37,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 21,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 21,
+    "tile": "RED",
+    "purity": 81,
+    "value": 81,
+    "last_seen_day": 6
+   },
+   {
+    "x": 23,
+    "y": 21,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 24,
+    "y": 21,
+    "tile": "RED",
+    "purity": 3,
+    "value": 3,
+    "last_seen_day": 6
+   },
+   {
+    "x": 29,
+    "y": 21,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 4
+   },
+   {
+    "x": 30,
+    "y": 21,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 31,
+    "y": 21,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 17,
+    "y": 22,
+    "tile": "RED",
+    "purity": 72,
+    "value": 72,
+    "last_seen_day": 6
+   },
+   {
+    "x": 18,
+    "y": 22,
+    "tile": "RED",
+    "purity": 44,
+    "value": 44,
+    "last_seen_day": 6
+   },
+   {
+    "x": 19,
+    "y": 22,
+    "tile": "RED",
+    "purity": 19,
+    "value": 19,
+    "last_seen_day": 6
+   },
+   {
+    "x": 20,
+    "y": 22,
+    "tile": "RED",
+    "purity": 6,
+    "value": 6,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 22,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 22,
+    "tile": "RED",
+    "purity": 3,
+    "value": 3,
+    "last_seen_day": 6
+   },
+   {
+    "x": 23,
+    "y": 22,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 24,
+    "y": 22,
+    "tile": "RED",
+    "purity": 11,
+    "value": 11,
+    "last_seen_day": 6
+   },
+   {
+    "x": 29,
+    "y": 22,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 30,
+    "y": 22,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 3,
+       "h": "harvester_p1",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 31,
+    "y": 22,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 17,
+    "y": 23,
+    "tile": "RED",
+    "purity": 36,
+    "value": 36,
+    "last_seen_day": 6
+   },
+   {
+    "x": 18,
+    "y": 23,
+    "tile": "RED",
+    "purity": 2,
+    "value": 2,
+    "last_seen_day": 6
+   },
+   {
+    "x": 19,
+    "y": 23,
+    "tile": "RED",
+    "purity": 31,
+    "value": 31,
+    "last_seen_day": 6,
+    "occupants": [
+     {
+      "id": "probe_p2_9",
+      "idx": 9,
+      "label": "Probe `probe_p2_9` (p2) \u00b7 tile 19,23",
+      "nights_remaining": 2,
+      "owner": "p2",
+      "type": "probe"
+     }
+    ]
+   },
+   {
+    "x": 20,
+    "y": 23,
+    "tile": "RED",
+    "purity": 31,
+    "value": 31,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 23,
+    "tile": "RED",
+    "purity": 36,
+    "value": 36,
+    "last_seen_day": 6
+   },
+   {
+    "x": 22,
+    "y": 23,
+    "tile": "RED",
+    "purity": 11,
+    "value": 11,
+    "last_seen_day": 6
+   },
+   {
+    "x": 23,
+    "y": 23,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 24,
+    "y": 23,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 25,
+    "y": 23,
+    "tile": "RED",
+    "purity": 11,
+    "value": 11,
+    "last_seen_day": 6
+   },
+   {
+    "x": 30,
+    "y": 23,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 3
+   },
+   {
+    "x": 18,
+    "y": 24,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 19,
+    "y": 24,
+    "tile": "EMPTY",
+    "purity": 0,
+    "value": 0,
+    "last_seen_day": 6
+   },
+   {
+    "x": 20,
+    "y": 24,
+    "tile": "RED",
+    "purity": 4,
+    "value": 4,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 24,
+    "tile": "RED",
+    "purity": 2,
+    "value": 2,
+    "last_seen_day": 6
+   },
+   {
+    "x": 22,
+    "y": 24,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 5,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 23,
+    "y": 24,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 24,
+    "y": 24,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 18,
+    "y": 25,
+    "tile": "RED",
+    "purity": 35,
+    "value": 35,
+    "last_seen_day": 6
+   },
+   {
+    "x": 19,
+    "y": 25,
+    "tile": "RED",
+    "purity": 9,
+    "value": 9,
+    "last_seen_day": 6
+   },
+   {
+    "x": 20,
+    "y": 25,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p2_2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 21,
+    "y": 25,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 5,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 22,
+    "y": 25,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 5,
+       "h": "harvester_p1_2",
+       "n": 1,
+       "owner": "p1"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 23,
+    "y": 25,
+    "tile": "RED",
+    "purity": 27,
+    "value": 27,
+    "last_seen_day": 6
+   },
+   {
+    "x": 24,
+    "y": 25,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6
+   },
+   {
+    "x": 19,
+    "y": 26,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p2_2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 20,
+    "y": 26,
+    "tile": "GREEN",
+    "purity": 255,
+    "value": 255,
+    "last_seen_day": 6,
+    "trail": {
+     "fresh_visits": [
+      {
+       "day": 6,
+       "h": "harvester_p2_2",
+       "n": 1,
+       "owner": "p2"
+      }
+     ],
+     "harvested": true,
+     "n": 1,
+     "tier": 1
+    }
+   },
+   {
+    "x": 21,
+    "y": 26,
+    "tile": "RED",
+    "purity": 49,
+    "value": 49,
+    "last_seen_day": 6
+   },
+   {
+    "x": 22,
+    "y": 26,
+    "tile": "RED",
+    "purity": 9,
+    "value": 9,
+    "last_seen_day": 6
+   },
+   {
+    "x": 23,
+    "y": 26,
+    "tile": "RED",
+    "purity": 8,
+    "value": 8,
+    "last_seen_day": 6
+   },
+   {
+    "x": 21,
+    "y": 27,
+    "tile": "RED",
+    "purity": 5,
+    "value": 5,
+    "last_seen_day": 6
+   }
+  ],
+  "fog_count": 779
+ },
+ "navigation": {
+  "best_red_visible": [
+   {
+    "x": 13,
+    "y": 17,
+    "purity": 71,
+    "tier": "vein",
+    "value": 71,
+    "freshness": "fresh",
+    "square_id": "ddee0f5838dcedc3"
+   },
+   {
+    "x": 12,
+    "y": 18,
+    "purity": 70,
+    "tier": "vein",
+    "value": 70,
+    "freshness": "fresh",
+    "square_id": "03eeb0e23e882ba9"
+   },
+   {
+    "x": 15,
+    "y": 20,
+    "purity": 54,
+    "tier": "vein",
+    "value": 54,
+    "freshness": "fresh",
+    "square_id": "ccd25a123ce31b4d"
+   },
+   {
+    "x": 16,
+    "y": 22,
+    "purity": 54,
+    "tier": "vein",
+    "value": 54,
+    "freshness": "fresh",
+    "square_id": "a0df3336ffb94511"
+   },
+   {
+    "x": 11,
+    "y": 20,
+    "purity": 50,
+    "tier": "trace",
+    "value": 50,
+    "freshness": "fresh",
+    "square_id": "ea683fc77bfd0fd9"
+   },
+   {
+    "x": 12,
+    "y": 17,
+    "purity": 42,
+    "tier": "trace",
+    "value": 42,
+    "freshness": "fresh",
+    "square_id": "130fb45481ead657"
+   },
+   {
+    "x": 12,
+    "y": 22,
+    "purity": 42,
+    "tier": "trace",
+    "value": 42,
+    "freshness": "fresh",
+    "square_id": "87c6cdeff260b155"
+   },
+   {
+    "x": 15,
+    "y": 23,
+    "purity": 31,
+    "tier": "trace",
+    "value": 31,
+    "freshness": "fresh",
+    "square_id": "64c0e24b123523bf"
+   },
+   {
+    "x": 11,
+    "y": 19,
+    "purity": 24,
+    "tier": "trace",
+    "value": 24,
+    "freshness": "fresh",
+    "square_id": "fdc74810e22db35b"
+   },
+   {
+    "x": 13,
+    "y": 24,
+    "purity": 22,
+    "tier": "trace",
+    "value": 22,
+    "freshness": "fresh",
+    "square_id": "616d4a429453a3d7"
+   },
+   {
+    "x": 13,
+    "y": 20,
+    "purity": 21,
+    "tier": "trace",
+    "value": 21,
+    "freshness": "fresh",
+    "square_id": "8563437f03df245c"
+   },
+   {
+    "x": 12,
+    "y": 21,
+    "purity": 21,
+    "tier": "trace",
+    "value": 21,
+    "freshness": "fresh",
+    "square_id": "d7c4759311a31043"
+   },
+   {
+    "x": 15,
+    "y": 22,
+    "purity": 18,
+    "tier": "trace",
+    "value": 18,
+    "freshness": "fresh",
+    "square_id": "1c8e4975e44dad81"
+   },
+   {
+    "x": 14,
+    "y": 22,
+    "purity": 13,
+    "tier": "trace",
+    "value": 13,
+    "freshness": "fresh",
+    "square_id": "04f346f56f65c833"
+   },
+   {
+    "x": 12,
+    "y": 20,
+    "purity": 11,
+    "tier": "trace",
+    "value": 11,
+    "freshness": "fresh",
+    "square_id": "f84209e6e40d29f4"
+   },
+   {
+    "x": 11,
+    "y": 24,
+    "purity": 9,
+    "tier": "trace",
+    "value": 9,
+    "freshness": "fresh",
+    "square_id": "4ef4d4b66033bef4"
+   },
+   {
+    "x": 13,
+    "y": 25,
+    "purity": 8,
+    "tier": "trace",
+    "value": 8,
+    "freshness": "fresh",
+    "square_id": "8a1299604880afeb"
+   },
+   {
+    "x": 14,
+    "y": 24,
+    "purity": 5,
+    "tier": "trace",
+    "value": 5,
+    "freshness": "fresh",
+    "square_id": "c51e2366bd6a5a5c"
+   },
+   {
+    "x": 12,
+    "y": 16,
+    "purity": 4,
+    "tier": "trace",
+    "value": 4,
+    "freshness": "fresh",
+    "square_id": "5ee0a915405c5706"
+   },
+   {
+    "x": 12,
+    "y": 24,
+    "purity": 4,
+    "tier": "trace",
+    "value": 4,
+    "freshness": "fresh",
+    "square_id": "d63f139c6dd98a91"
+   },
+   {
+    "x": 13,
+    "y": 15,
+    "purity": 3,
+    "tier": "trace",
+    "value": 3,
+    "freshness": "fresh",
+    "square_id": "fd898e1cd9a83869"
+   },
+   {
+    "x": 11,
+    "y": 17,
+    "purity": 2,
+    "tier": "trace",
+    "value": 2,
+    "freshness": "fresh",
+    "square_id": "4e92b8e69c36b0a2"
+   },
+   {
+    "x": 15,
+    "y": 18,
+    "purity": 2,
+    "tier": "trace",
+    "value": 2,
+    "freshness": "fresh",
+    "square_id": "6ecfbc3369bc4090"
+   },
+   {
+    "x": 15,
+    "y": 19,
+    "purity": 1,
+    "tier": "trace",
+    "value": 1,
+    "freshness": "fresh",
+    "square_id": "f2c0e85a8bafa75a"
+   },
+   {
+    "x": 16,
+    "y": 20,
+    "purity": 1,
+    "tier": "trace",
+    "value": 1,
+    "freshness": "fresh",
+    "square_id": "7aebe531a0a82619"
+   },
+   {
+    "x": 13,
+    "y": 21,
+    "purity": 1,
+    "tier": "trace",
+    "value": 1,
+    "freshness": "fresh",
+    "square_id": "8e506dfe2aa4d52d"
+   },
+   {
+    "x": 14,
+    "y": 19,
+    "purity": 0,
+    "tier": "trace",
+    "value": 0,
+    "freshness": "fresh",
+    "square_id": "39985f295676c9f1"
+   }
+  ],
+  "best_red_echo": [
+   {
+    "x": 22,
+    "y": 21,
+    "purity": 81,
+    "tier": "vein",
+    "value": 81,
+    "freshness": "stale",
+    "square_id": "51a661cf6a6a1db5"
+   },
+   {
+    "x": 17,
+    "y": 22,
+    "purity": 72,
+    "tier": "vein",
+    "value": 72,
+    "freshness": "stale",
+    "square_id": "f481e3d9ae4252bc"
+   },
+   {
+    "x": 21,
+    "y": 26,
+    "purity": 49,
+    "tier": "trace",
+    "value": 49,
+    "freshness": "stale",
+    "square_id": "1f835607c159d2b8"
+   },
+   {
+    "x": 10,
+    "y": 10,
+    "purity": 46,
+    "tier": "trace",
+    "value": 46,
+    "freshness": "stale",
+    "square_id": "4de66b6ea63f8fc3"
+   },
+   {
+    "x": 18,
+    "y": 22,
+    "purity": 44,
+    "tier": "trace",
+    "value": 44,
+    "freshness": "stale",
+    "square_id": "8aca0dfc0d9b3168"
+   },
+   {
+    "x": 11,
+    "y": 10,
+    "purity": 42,
+    "tier": "trace",
+    "value": 42,
+    "freshness": "stale",
+    "square_id": "ca57aeead39fc034"
+   },
+   {
+    "x": 25,
+    "y": 11,
+    "purity": 38,
+    "tier": "trace",
+    "value": 38,
+    "freshness": "stale",
+    "square_id": "75dd52f5dfc4d52f"
+   },
+   {
+    "x": 35,
+    "y": 13,
+    "purity": 38,
+    "tier": "trace",
+    "value": 38,
+    "freshness": "stale",
+    "square_id": "2efdc13c1014024c"
+   },
+   {
+    "x": 20,
+    "y": 21,
+    "purity": 37,
+    "tier": "trace",
+    "value": 37,
+    "freshness": "stale",
+    "square_id": "0751889d8249c43b"
+   },
+   {
+    "x": 17,
+    "y": 23,
+    "purity": 36,
+    "tier": "trace",
+    "value": 36,
+    "freshness": "stale",
+    "square_id": "a00cc7eb5a93bf7f"
+   },
+   {
+    "x": 21,
+    "y": 23,
+    "purity": 36,
+    "tier": "trace",
+    "value": 36,
+    "freshness": "stale",
+    "square_id": "7e8252dfbebdb250"
+   },
+   {
+    "x": 18,
+    "y": 25,
+    "purity": 35,
+    "tier": "trace",
+    "value": 35,
+    "freshness": "stale",
+    "square_id": "b8af13d76db53433"
+   },
+   {
+    "x": 28,
+    "y": 19,
+    "purity": 34,
+    "tier": "trace",
+    "value": 34,
+    "freshness": "stale",
+    "square_id": "bb9e276783b86ccd"
+   },
+   {
+    "x": 19,
+    "y": 23,
+    "purity": 31,
+    "tier": "trace",
+    "value": 31,
+    "freshness": "stale",
+    "square_id": "3bc6e36565ab5e2b"
+   },
+   {
+    "x": 20,
+    "y": 23,
+    "purity": 31,
+    "tier": "trace",
+    "value": 31,
+    "freshness": "stale",
+    "square_id": "b76a2d148d0caf6c"
+   },
+   {
+    "x": 23,
+    "y": 25,
+    "purity": 27,
+    "tier": "trace",
+    "value": 27,
+    "freshness": "stale",
+    "square_id": "e505048f0a5c9b90"
+   },
+   {
+    "x": 23,
+    "y": 11,
+    "purity": 23,
+    "tier": "trace",
+    "value": 23,
+    "freshness": "stale",
+    "square_id": "9f28e4bae482df58"
+   },
+   {
+    "x": 24,
+    "y": 11,
+    "purity": 22,
+    "tier": "trace",
+    "value": 22,
+    "freshness": "stale",
+    "square_id": "91ae889db72251e6"
+   },
+   {
+    "x": 36,
+    "y": 12,
+    "purity": 22,
+    "tier": "trace",
+    "value": 22,
+    "freshness": "stale",
+    "square_id": "a7fbd9517e197d9e"
+   },
+   {
+    "x": 19,
+    "y": 22,
+    "purity": 19,
+    "tier": "trace",
+    "value": 19,
+    "freshness": "stale",
+    "square_id": "f5b45b5f06422183"
+   },
+   {
+    "x": 22,
+    "y": 6,
+    "purity": 19,
+    "tier": "trace",
+    "value": 19,
+    "freshness": "stale",
+    "square_id": "c5363e57aedcc59a"
+   },
+   {
+    "x": 26,
+    "y": 9,
+    "purity": 19,
+    "tier": "trace",
+    "value": 19,
+    "freshness": "stale",
+    "square_id": "7e2f17c6077af1bb"
+   },
+   {
+    "x": 22,
+    "y": 7,
+    "purity": 17,
+    "tier": "trace",
+    "value": 17,
+    "freshness": "stale",
+    "square_id": "a731ee8f68535544"
+   },
+   {
+    "x": 32,
+    "y": 19,
+    "purity": 17,
+    "tier": "trace",
+    "value": 17,
+    "freshness": "stale",
+    "square_id": "21d7b24805927e57"
+   },
+   {
+    "x": 36,
+    "y": 7,
+    "purity": 15,
+    "tier": "trace",
+    "value": 15,
+    "freshness": "stale",
+    "square_id": "8d02d4008f811d35"
+   },
+   {
+    "x": 20,
+    "y": 8,
+    "purity": 14,
+    "tier": "trace",
+    "value": 14,
+    "freshness": "stale",
+    "square_id": "5539632fb7739831"
+   },
+   {
+    "x": 35,
+    "y": 12,
+    "purity": 14,
+    "tier": "trace",
+    "value": 14,
+    "freshness": "stale",
+    "square_id": "1b120b76f5fbc439"
+   },
+   {
+    "x": 21,
+    "y": 6,
+    "purity": 13,
+    "tier": "trace",
+    "value": 13,
+    "freshness": "stale",
+    "square_id": "c2a07280c964d9d0"
+   },
+   {
+    "x": 19,
+    "y": 19,
+    "purity": 11,
+    "tier": "trace",
+    "value": 11,
+    "freshness": "stale",
+    "square_id": "82e51cc37fff1830"
+   },
+   {
+    "x": 22,
+    "y": 23,
+    "purity": 11,
+    "tier": "trace",
+    "value": 11,
+    "freshness": "stale",
+    "square_id": "e824e06ecf837003"
+   },
+   {
+    "x": 24,
+    "y": 22,
+    "purity": 11,
+    "tier": "trace",
+    "value": 11,
+    "freshness": "stale",
+    "square_id": "739a3741835227a8"
+   },
+   {
+    "x": 25,
+    "y": 23,
+    "purity": 11,
+    "tier": "trace",
+    "value": 11,
+    "freshness": "stale",
+    "square_id": "624789bb102280d8"
+   },
+   {
+    "x": 26,
+    "y": 10,
+    "purity": 10,
+    "tier": "trace",
+    "value": 10,
+    "freshness": "stale",
+    "square_id": "0baeb2e236739f26"
+   },
+   {
+    "x": 19,
+    "y": 25,
+    "purity": 9,
+    "tier": "trace",
+    "value": 9,
+    "freshness": "stale",
+    "square_id": "6de03bd912d17437"
+   },
+   {
+    "x": 22,
+    "y": 26,
+    "purity": 9,
+    "tier": "trace",
+    "value": 9,
+    "freshness": "stale",
+    "square_id": "bce99f8a3edbdfd5"
+   },
+   {
+    "x": 30,
+    "y": 18,
+    "purity": 9,
+    "tier": "trace",
+    "value": 9,
+    "freshness": "stale",
+    "square_id": "e91ece76efe4e39d"
+   },
+   {
+    "x": 37,
+    "y": 12,
+    "purity": 9,
+    "tier": "trace",
+    "value": 9,
+    "freshness": "stale",
+    "square_id": "b49573957246b745"
+   },
+   {
+    "x": 23,
+    "y": 26,
+    "purity": 8,
+    "tier": "trace",
+    "value": 8,
+    "freshness": "stale",
+    "square_id": "330c31d9dda71027"
+   },
+   {
+    "x": 36,
+    "y": 8,
+    "purity": 8,
+    "tier": "trace",
+    "value": 8,
+    "freshness": "stale",
+    "square_id": "746f5aa7ade57a7d"
+   },
+   {
+    "x": 37,
+    "y": 8,
+    "purity": 7,
+    "tier": "trace",
+    "value": 7,
+    "freshness": "stale",
+    "square_id": "9e35a3f53d259784"
+   },
+   {
+    "x": 11,
+    "y": 12,
+    "purity": 6,
+    "tier": "trace",
+    "value": 6,
+    "freshness": "stale",
+    "square_id": "2b8b6d2cad89c7fb"
+   },
+   {
+    "x": 20,
+    "y": 22,
+    "purity": 6,
+    "tier": "trace",
+    "value": 6,
+    "freshness": "stale",
+    "square_id": "a12e6fb6688b2ec0"
+   },
+   {
+    "x": 28,
+    "y": 20,
+    "purity": 6,
+    "tier": "trace",
+    "value": 6,
+    "freshness": "stale",
+    "square_id": "edd16bc43ca56ded"
+   },
+   {
+    "x": 21,
+    "y": 27,
+    "purity": 5,
+    "tier": "trace",
+    "value": 5,
+    "freshness": "stale",
+    "square_id": "b60a127728c765ba"
+   },
+   {
+    "x": 31,
+    "y": 19,
+    "purity": 5,
+    "tier": "trace",
+    "value": 5,
+    "freshness": "stale",
+    "square_id": "472007e32e29592c"
+   },
+   {
+    "x": 20,
+    "y": 24,
+    "purity": 4,
+    "tier": "trace",
+    "value": 4,
+    "freshness": "stale",
+    "square_id": "6d61d47b0b84f9e7"
+   },
+   {
+    "x": 27,
+    "y": 20,
+    "purity": 4,
+    "tier": "trace",
+    "value": 4,
+    "freshness": "stale",
+    "square_id": "c78e0bbe9d07a36a"
+   },
+   {
+    "x": 18,
+    "y": 20,
+    "purity": 3,
+    "tier": "trace",
+    "value": 3,
+    "freshness": "stale",
+    "square_id": "873de83605b49a37"
+   },
+   {
+    "x": 22,
+    "y": 22,
+    "purity": 3,
+    "tier": "trace",
+    "value": 3,
+    "freshness": "stale",
+    "square_id": "580c7e2fbaeb6dce"
+   },
+   {
+    "x": 24,
+    "y": 21,
+    "purity": 3,
+    "tier": "trace",
+    "value": 3,
+    "freshness": "stale",
+    "square_id": "3b4050c1d807c016"
+   },
+   {
+    "x": 17,
+    "y": 20,
+    "purity": 2,
+    "tier": "trace",
+    "value": 2,
+    "freshness": "stale",
+    "square_id": "c03fafb61cd2d4e1"
+   },
+   {
+    "x": 18,
+    "y": 23,
+    "purity": 2,
+    "tier": "trace",
+    "value": 2,
+    "freshness": "stale",
+    "square_id": "d4800c291a51ab35"
+   },
+   {
+    "x": 21,
+    "y": 24,
+    "purity": 2,
+    "tier": "trace",
+    "value": 2,
+    "freshness": "stale",
+    "square_id": "39c88c7ee4e92920"
+   }
+  ],
+  "best_green": [
+   {
+    "x": 15,
+    "y": 21,
+    "purity": 255,
+    "square_id": "64378d53155018dd",
+    "lineage": "synthetic",
+    "harvested": true
+   },
+   {
+    "x": 16,
+    "y": 21,
+    "purity": 255,
+    "square_id": "229178c615432524",
+    "lineage": "synthetic",
+    "harvested": true
+   },
+   {
+    "x": 17,
+    "y": 21,
+    "purity": 255,
+    "square_id": "831fde2cc27e2dbb",
+    "lineage": "synthetic",
+    "harvested": true
+   },
+   {
+    "x": 13,
+    "y": 22,
+    "purity": 255,
+    "square_id": "a71165e3c4e8273b",
+    "lineage": "synthetic",
+    "harvested": true
+   },
+   {
+    "x": 12,
+    "y": 23,
+    "purity": 255,
+    "square_id": "efa37ad07d5dab19",
+    "lineage": "synthetic",
+    "harvested": true
+   },
+   {
+    "x": 13,
+    "y": 23,
+    "purity": 255,
+    "square_id": "7779997cfa951ecb",
+    "lineage": "synthetic",
+    "harvested": true
+   },
+   {
+    "x": 14,
+    "y": 23,
+    "purity": 255,
+    "square_id": "2fea52b9753c2222",
+    "lineage": "synthetic",
+    "harvested": true
+   }
+  ],
+  "best_blue": [
+   {
+    "x": 13,
+    "y": 19,
+    "purity": 255,
+    "value": 255,
+    "freshness": "fresh",
+    "square_id": "6d58301a4e45330a"
+   },
+   {
+    "x": 14,
+    "y": 20,
+    "purity": 147,
+    "value": 147,
+    "freshness": "fresh",
+    "square_id": "ad39f765cef26533"
+   }
+  ],
+  "fog_clusters": [
+   {
+    "centroid": [
+     18,
+     12
+    ],
+    "size": 774,
+    "nearest_visible_edge": [
+     15,
+     16
+    ]
+   },
+   {
+    "centroid": [
+     12,
+     15
+    ],
+    "size": 1,
+    "nearest_visible_edge": [
+     13,
+     15
+    ]
+   },
+   {
+    "centroid": [
+     9,
+     18
+    ],
+    "size": 1,
+    "nearest_visible_edge": [
+     10,
+     18
+    ]
+   }
+  ]
+ },
+ "my_assets": [
+  {
+   "id": "harvester_p1",
+   "kind": "harvester",
+   "owner": "p1",
+   "state": "orbit",
+   "at": null,
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 1,
+    "first_deployed_day": 2,
+    "days_on_surface": 0,
+    "red_harvested": 17,
+    "destroyed_on_day": null,
+    "destroyed_reason": null
+   }
+  },
+  {
+   "id": "orblift_p1",
+   "kind": "orblift",
+   "owner": "p1",
+   "state": "orbit",
+   "at": null,
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 1,
+    "first_deployed_day": null,
+    "days_on_surface": 0,
+    "red_harvested": 0,
+    "destroyed_on_day": null,
+    "destroyed_reason": null
+   }
+  },
+  {
+   "id": "probe_p1_1",
+   "kind": "probe",
+   "owner": "p1",
+   "state": "destroyed",
+   "at": [
+    24,
+    8
+   ],
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 1,
+    "first_deployed_day": 1,
+    "days_on_surface": 3,
+    "red_harvested": 0,
+    "destroyed_on_day": 3,
+    "destroyed_reason": "probe_expired"
+   }
+  },
+  {
+   "id": "probe_p1_2",
+   "kind": "probe",
+   "owner": "p1",
+   "state": "destroyed",
+   "at": [
+    8,
+    14
+   ],
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 1,
+    "first_deployed_day": 1,
+    "days_on_surface": 3,
+    "red_harvested": 0,
+    "destroyed_on_day": 3,
+    "destroyed_reason": "probe_expired"
+   }
+  },
+  {
+   "id": "probe_p1_3",
+   "kind": "probe",
+   "owner": "p1",
+   "state": "destroyed",
+   "at": [
+    29,
+    17
+   ],
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 2,
+    "first_deployed_day": 2,
+    "days_on_surface": 3,
+    "red_harvested": 0,
+    "destroyed_on_day": 4,
+    "destroyed_reason": "probe_expired"
+   }
+  },
+  {
+   "id": "harvester_p1_2",
+   "kind": "harvester",
+   "owner": "p1",
+   "state": "orbit",
+   "at": null,
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 3,
+    "first_deployed_day": 3,
+    "days_on_surface": 0,
+    "red_harvested": 14,
+    "destroyed_on_day": null,
+    "destroyed_reason": null
+   }
+  },
+  {
+   "id": "probe_p1_4",
+   "kind": "probe",
+   "owner": "p1",
+   "state": "destroyed",
+   "at": [
+    21,
+    23
+   ],
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 4,
+    "first_deployed_day": 4,
+    "days_on_surface": 3,
+    "red_harvested": 0,
+    "destroyed_on_day": 6,
+    "destroyed_reason": "probe_expired"
+   }
+  },
+  {
+   "id": "probe_p1_5",
+   "kind": "probe",
+   "owner": "p1",
+   "state": "destroyed",
+   "at": [
+    35,
+    9
+   ],
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 4,
+    "first_deployed_day": 4,
+    "days_on_surface": 2,
+    "red_harvested": 0,
+    "destroyed_on_day": 6,
+    "destroyed_reason": "crushed_by_harvester@(35,9)"
+   }
+  },
+  {
+   "id": "probe_p1_6",
+   "kind": "probe",
+   "owner": "p1",
+   "state": "deployed",
+   "at": [
+    13,
+    19
+   ],
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 5,
+    "first_deployed_day": 5,
+    "days_on_surface": 2,
+    "red_harvested": 0,
+    "destroyed_on_day": null,
+    "destroyed_reason": null
+   },
+   "nights_remaining": 1
+  },
+  {
+   "id": "probe_p1_7",
+   "kind": "probe",
+   "owner": "p1",
+   "state": "deployed",
+   "at": [
+    13,
+    21
+   ],
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 5,
+    "first_deployed_day": 5,
+    "days_on_surface": 2,
+    "red_harvested": 0,
+    "destroyed_on_day": null,
+    "destroyed_reason": null
+   },
+   "nights_remaining": 1
+  },
+  {
+   "id": "harvester_p1_3",
+   "kind": "harvester",
+   "owner": "p1",
+   "state": "orbit",
+   "at": null,
+   "carrying": 0,
+   "lifetime": {
+    "created_on_day": 6,
+    "first_deployed_day": 6,
+    "days_on_surface": 0,
+    "red_harvested": 5,
+    "destroyed_on_day": null,
+    "destroyed_reason": null
+   }
+  }
+ ],
+ "orbit": {
+  "phase_active": true,
+  "final_orbit": false,
+  "credits": 1250,
+  "credits_all": {
+   "p1": 1250,
+   "p2": 1500
+  },
+  "probe_stock": 0,
+  "weapon_stock": {
+   "emp": 0,
+   "mine": 0,
+   "chaff": 0
+  },
+  "weapon_prices": {
+   "emp": {
+    "blue": 200,
+    "credits": 250
+   },
+   "mine": {
+    "blue": 100,
+    "credits": 100
+   },
+   "chaff": {
+    "blue": 255,
+    "credits": 0
+   }
+  },
+  "weapon_specs": {
+   "emp": {
+    "radius": 2,
+    "missiles_per_launch": 3,
+    "cloud_hours": 8,
+    "destroys": [
+     "probe",
+     "mine"
+    ]
+   },
+   "mine": {
+    "batch_shape": "plus"
+   },
+   "chaff": {
+    "duration_hours": 3
+   }
+  },
+  "harvester_cap_used": 3,
+  "harvester_cap_max": 3,
+  "green_owned_count": 0,
+  "green_owned_purity_total": 0,
+  "actions_max": null,
+  "tier_counts": {
+   "trace": 3,
+   "vein": 8,
+   "mass": 0,
+   "pure": 1
+  },
+  "blue_tier_counts": {
+   "trace": 1,
+   "vein": 0,
+   "mass": 0,
+   "pure": 0
+  },
+  "blue_purity_total": 36,
+  "assets": [
+   {
+    "id": "harvester_p1",
+    "type": "harvester",
+    "carrying_red": false,
+    "orbital_cargo_red": false,
+    "cargo_squares": 0,
+    "lost_last_night": false,
+    "damaged": false,
+    "pos": null,
+    "orbit": true,
+    "label": "Harvester `harvester_p1` (p1) \u00b7 orbit"
+   },
+   {
+    "id": "harvester_p1_2",
+    "type": "harvester",
+    "carrying_red": false,
+    "orbital_cargo_red": false,
+    "cargo_squares": 0,
+    "lost_last_night": false,
+    "damaged": false,
+    "pos": null,
+    "orbit": true,
+    "label": "Harvester `harvester_p1_2` (p1) \u00b7 orbit"
+   },
+   {
+    "id": "harvester_p1_3",
+    "type": "harvester",
+    "carrying_red": false,
+    "orbital_cargo_red": false,
+    "cargo_squares": 0,
+    "lost_last_night": false,
+    "damaged": false,
+    "pos": null,
+    "orbit": true,
+    "label": "Harvester `harvester_p1_3` (p1) \u00b7 orbit"
+   },
+   {
+    "id": "orblift_p1",
+    "type": "orblift",
+    "carrying_red": false,
+    "orbital_cargo_red": false,
+    "pos": null,
+    "orbit": true,
+    "label": "Orbital lifter `orblift_p1` (p1) \u00b7 orbit"
+   },
+   {
+    "id": "probe_p1_6",
+    "type": "probe",
+    "carrying_red": false,
+    "orbital_cargo_red": false,
+    "pos": [
+     13,
+     19
+    ],
+    "label": "Probe `probe_p1_6` (p1) \u00b7 tile 13,19"
+   },
+   {
+    "id": "probe_p1_7",
+    "type": "probe",
+    "carrying_red": false,
+    "orbital_cargo_red": false,
+    "pos": [
+     13,
+     21
+    ],
+    "label": "Probe `probe_p1_7` (p1) \u00b7 tile 13,21"
+   }
+  ],
+  "hoard_parcels": [
+   {
+    "square_id": "residual-pure-7830d3-0003",
+    "colour": "BLUE",
+    "purity": 36,
+    "tier": "",
+    "score": 0
+   },
+   {
+    "square_id": "87497a6621e30a3d",
+    "colour": "RED",
+    "purity": 255,
+    "tier": "pure",
+    "score": 765
+   },
+   {
+    "square_id": "3f14bab00d122a4d",
+    "colour": "RED",
+    "purity": 76,
+    "tier": "vein",
+    "score": 76
+   },
+   {
+    "square_id": "526e8ed14d81829f",
+    "colour": "RED",
+    "purity": 93,
+    "tier": "vein",
+    "score": 93
+   },
+   {
+    "square_id": "b25a900a101d551b",
+    "colour": "RED",
+    "purity": 146,
+    "tier": "vein",
+    "score": 146
+   },
+   {
+    "square_id": "103fb70aa49b800f",
+    "colour": "RED",
+    "purity": 122,
+    "tier": "vein",
+    "score": 122
+   },
+   {
+    "square_id": "40f77489abc33c22",
+    "colour": "RED",
+    "purity": 15,
+    "tier": "trace",
+    "score": 11
+   },
+   {
+    "square_id": "a556ca4df0145824",
+    "colour": "RED",
+    "purity": 76,
+    "tier": "vein",
+    "score": 76
+   },
+   {
+    "square_id": "76dba09209000a85",
+    "colour": "RED",
+    "purity": 58,
+    "tier": "vein",
+    "score": 58
+   },
+   {
+    "square_id": "eb6b1e75ace2af2d",
+    "colour": "RED",
+    "purity": 58,
+    "tier": "vein",
+    "score": 58
+   },
+   {
+    "square_id": "da8c3050a8a050b0",
+    "colour": "RED",
+    "purity": 64,
+    "tier": "vein",
+    "score": 64
+   },
+   {
+    "square_id": "1299995042721ef0",
+    "colour": "RED",
+    "purity": 24,
+    "tier": "trace",
+    "score": 18
+   },
+   {
+    "square_id": "e6d2fcde63be60cd",
+    "colour": "RED",
+    "purity": 2,
+    "tier": "trace",
+    "score": 2
+   }
+  ],
+  "ship_prices": {
+   "harvester_build": 1500,
+   "probe_build": 250,
+   "repair": 500,
+   "quality_mult": {
+    "trace": 0.75,
+    "vein": 1.0,
+    "mass": 1.5,
+    "pure": 3.0
+   }
+  },
+  "settlement": {
+   "auto": true,
+   "red": "every RED parcel ships at settlement; score = purity \u00d7 tier multiplier",
+   "green": "every GREEN parcel is disposed of at settlement for -100 each",
+   "green_penalty": 100
+  },
+  "last_catapult_results": {
+   "catapult": {
+    "auto": true,
+    "inventory": {
+     "color_counts": {
+      "blue": 0,
+      "green": 0,
+      "red": 8
+     },
+     "count": 8,
+     "tier_counts": {
+      "mass": 0,
+      "pure": 2,
+      "trace": 3,
+      "vein": 3
+     },
+     "total_purity": 787
+    },
+    "parcels_shipped": 8,
+    "score_shipped": 1797,
+    "seats": {
+     "p1": {
+      "awarded": 6,
+      "inventory": {
+       "color_counts": {
+        "blue": 0,
+        "green": 0,
+        "red": 6
+       },
+       "count": 6,
+       "tier_counts": {
+        "mass": 0,
+        "pure": 2,
+        "trace": 1,
+        "vein": 3
+       },
+       "total_purity": 768
+      },
+      "score_shipped": 1782.75,
+      "shipped_parcels": [
+       {
+        "effective_purity": 255,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p1",
+        "lineage": "natural",
+        "minted_synthetic_id": "a71165e3c4e8273b",
+        "paint": {
+         "bg": "rgb(255,0,0)",
+         "ch": "  "
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 255,
+        "score_tier": "pure",
+        "shipped_day": 6,
+        "site_id": "a2fc2298526755e9",
+        "square_id": "a2fc2298526755e9",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 13,
+        "y": 22
+       },
+       {
+        "effective_purity": 255,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p1",
+        "lineage": "natural",
+        "minted_synthetic_id": "7779997cfa951ecb",
+        "paint": {
+         "bg": "rgb(255,0,0)",
+         "ch": "  "
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 255,
+        "score_tier": "pure",
+        "shipped_day": 6,
+        "site_id": "3a659a79d0403f83",
+        "square_id": "3a659a79d0403f83",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 13,
+        "y": 23
+       },
+       {
+        "effective_purity": 58,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p1",
+        "lineage": "natural",
+        "minted_synthetic_id": "efa37ad07d5dab19",
+        "paint": {
+         "bg": "rgb(14,11,22)",
+         "ch": "\u2592\u2592",
+         "fg": "rgb(255,0,0)"
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 58,
+        "score_tier": "vein",
+        "shipped_day": 6,
+        "site_id": "977ae282c6a3b679",
+        "square_id": "977ae282c6a3b679",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 12,
+        "y": 23
+       },
+       {
+        "effective_purity": 67,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p1_2",
+        "lineage": "natural",
+        "minted_synthetic_id": "eb7e417027e20083",
+        "paint": {
+         "bg": "rgb(14,11,22)",
+         "ch": "\u2592\u2592",
+         "fg": "rgb(255,0,0)"
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 67,
+        "score_tier": "vein",
+        "shipped_day": 6,
+        "site_id": "32f46c77fecf3bfa",
+        "square_id": "32f46c77fecf3bfa",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 22,
+        "y": 24
+       },
+       {
+        "effective_purity": 21,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p1_2",
+        "lineage": "natural",
+        "minted_synthetic_id": "187655ad225d3ab5",
+        "paint": {
+         "bg": "rgb(14,11,22)",
+         "ch": "\u2591\u2591",
+         "fg": "rgb(255,0,0)"
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 21,
+        "score_tier": "trace",
+        "shipped_day": 6,
+        "site_id": "aa64e23d177382cb",
+        "square_id": "aa64e23d177382cb",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 22,
+        "y": 25
+       },
+       {
+        "effective_purity": 112,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p1_2",
+        "lineage": "natural",
+        "minted_synthetic_id": "c576d790e53376c2",
+        "paint": {
+         "bg": "rgb(14,11,22)",
+         "ch": "\u2592\u2592",
+         "fg": "rgb(255,0,0)"
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 112,
+        "score_tier": "vein",
+        "shipped_day": 6,
+        "site_id": "93cca8bb40f061ad",
+        "square_id": "93cca8bb40f061ad",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 21,
+        "y": 25
+       }
+      ]
+     },
+     "p2": {
+      "awarded": 2,
+      "inventory": {
+       "color_counts": {
+        "blue": 0,
+        "green": 0,
+        "red": 2
+       },
+       "count": 2,
+       "tier_counts": {
+        "mass": 0,
+        "pure": 0,
+        "trace": 2,
+        "vein": 0
+       },
+       "total_purity": 19
+      },
+      "score_shipped": 14.25,
+      "shipped_parcels": [
+       {
+        "effective_purity": 9,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p2",
+        "lineage": "natural",
+        "minted_synthetic_id": "f5e73f82f1f40edd",
+        "paint": {
+         "bg": "rgb(14,11,22)",
+         "ch": "\u2591\u2591",
+         "fg": "rgb(255,0,0)"
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 9,
+        "score_tier": "trace",
+        "shipped_day": 6,
+        "site_id": "b7debb5805b6d46d",
+        "square_id": "b7debb5805b6d46d",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 7,
+        "y": 8
+       },
+       {
+        "effective_purity": 10,
+        "harvested_on_planning_day": 5,
+        "harvester_id": "harvester_p2",
+        "lineage": "natural",
+        "minted_synthetic_id": "8d1c805359c1d035",
+        "paint": {
+         "bg": "rgb(14,11,22)",
+         "ch": "\u2591\u2591",
+         "fg": "rgb(255,0,0)"
+        },
+        "parent_square_id": null,
+        "purity_at_harvest": 10,
+        "score_tier": "trace",
+        "shipped_day": 6,
+        "site_id": "245bf1dc1a9823be",
+        "square_id": "245bf1dc1a9823be",
+        "stored_received_planning_day": 5,
+        "tile_at_harvest": 2,
+        "x": 7,
+        "y": 7
+       }
+      ]
+     }
+    },
+    "slot_assignments": [
+     {
+      "disposition": "shipped",
+      "effective_purity": 255,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p1",
+       "lineage": "natural",
+       "minted_synthetic_id": "a71165e3c4e8273b",
+       "paint": {
+        "bg": "rgb(255,0,0)",
+        "ch": "  "
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 255,
+       "site_id": "a2fc2298526755e9",
+       "square_id": "a2fc2298526755e9",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 13,
+       "y": 22
+      },
+      "score": 765,
+      "seat": "p1",
+      "shipped": true,
+      "tier": "pure",
+      "tier_multiplier": 3
+     },
+     {
+      "disposition": "shipped",
+      "effective_purity": 255,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p1",
+       "lineage": "natural",
+       "minted_synthetic_id": "7779997cfa951ecb",
+       "paint": {
+        "bg": "rgb(255,0,0)",
+        "ch": "  "
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 255,
+       "site_id": "3a659a79d0403f83",
+       "square_id": "3a659a79d0403f83",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 13,
+       "y": 23
+      },
+      "score": 765,
+      "seat": "p1",
+      "shipped": true,
+      "tier": "pure",
+      "tier_multiplier": 3
+     },
+     {
+      "disposition": "shipped",
+      "effective_purity": 58,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p1",
+       "lineage": "natural",
+       "minted_synthetic_id": "efa37ad07d5dab19",
+       "paint": {
+        "bg": "rgb(14,11,22)",
+        "ch": "\u2592\u2592",
+        "fg": "rgb(255,0,0)"
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 58,
+       "site_id": "977ae282c6a3b679",
+       "square_id": "977ae282c6a3b679",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 12,
+       "y": 23
+      },
+      "score": 58,
+      "seat": "p1",
+      "shipped": true,
+      "tier": "vein",
+      "tier_multiplier": 1
+     },
+     {
+      "disposition": "shipped",
+      "effective_purity": 67,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p1_2",
+       "lineage": "natural",
+       "minted_synthetic_id": "eb7e417027e20083",
+       "paint": {
+        "bg": "rgb(14,11,22)",
+        "ch": "\u2592\u2592",
+        "fg": "rgb(255,0,0)"
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 67,
+       "site_id": "32f46c77fecf3bfa",
+       "square_id": "32f46c77fecf3bfa",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 22,
+       "y": 24
+      },
+      "score": 67,
+      "seat": "p1",
+      "shipped": true,
+      "tier": "vein",
+      "tier_multiplier": 1
+     },
+     {
+      "disposition": "shipped",
+      "effective_purity": 21,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p1_2",
+       "lineage": "natural",
+       "minted_synthetic_id": "187655ad225d3ab5",
+       "paint": {
+        "bg": "rgb(14,11,22)",
+        "ch": "\u2591\u2591",
+        "fg": "rgb(255,0,0)"
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 21,
+       "site_id": "aa64e23d177382cb",
+       "square_id": "aa64e23d177382cb",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 22,
+       "y": 25
+      },
+      "score": 15.75,
+      "seat": "p1",
+      "shipped": true,
+      "tier": "trace",
+      "tier_multiplier": 0.75
+     },
+     {
+      "disposition": "shipped",
+      "effective_purity": 112,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p1_2",
+       "lineage": "natural",
+       "minted_synthetic_id": "c576d790e53376c2",
+       "paint": {
+        "bg": "rgb(14,11,22)",
+        "ch": "\u2592\u2592",
+        "fg": "rgb(255,0,0)"
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 112,
+       "site_id": "93cca8bb40f061ad",
+       "square_id": "93cca8bb40f061ad",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 21,
+       "y": 25
+      },
+      "score": 112,
+      "seat": "p1",
+      "shipped": true,
+      "tier": "vein",
+      "tier_multiplier": 1
+     },
+     {
+      "disposition": "shipped",
+      "effective_purity": 9,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p2",
+       "lineage": "natural",
+       "minted_synthetic_id": "f5e73f82f1f40edd",
+       "paint": {
+        "bg": "rgb(14,11,22)",
+        "ch": "\u2591\u2591",
+        "fg": "rgb(255,0,0)"
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 9,
+       "site_id": "b7debb5805b6d46d",
+       "square_id": "b7debb5805b6d46d",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 7,
+       "y": 8
+      },
+      "score": 6.75,
+      "seat": "p2",
+      "shipped": true,
+      "tier": "trace",
+      "tier_multiplier": 0.75
+     },
+     {
+      "disposition": "shipped",
+      "effective_purity": 10,
+      "parcel": {
+       "harvested_on_planning_day": 5,
+       "harvester_id": "harvester_p2",
+       "lineage": "natural",
+       "minted_synthetic_id": "8d1c805359c1d035",
+       "paint": {
+        "bg": "rgb(14,11,22)",
+        "ch": "\u2591\u2591",
+        "fg": "rgb(255,0,0)"
+       },
+       "parent_square_id": null,
+       "purity_at_harvest": 10,
+       "site_id": "245bf1dc1a9823be",
+       "square_id": "245bf1dc1a9823be",
+       "stored_received_planning_day": 5,
+       "tile_at_harvest": 2,
+       "x": 7,
+       "y": 7
+      },
+      "score": 7.5,
+      "seat": "p2",
+      "shipped": true,
+      "tier": "trace",
+      "tier_multiplier": 0.75
+     }
+    ]
+   },
+   "day": 6,
+   "jettison": {
+    "auto": true,
+    "inventory": {
+     "color_counts": {
+      "blue": 0,
+      "green": 0,
+      "red": 0
+     },
+     "count": 0,
+     "tier_counts": {
+      "mass": 0,
+      "pure": 0,
+      "trace": 0,
+      "vein": 0
+     },
+     "total_purity": 0
+    },
+    "parcels_disposed": 0,
+    "penalty_total": 0,
+    "seats": {
+     "p1": {
+      "awarded": 0,
+      "inventory": {
+       "color_counts": {
+        "blue": 0,
+        "green": 0,
+        "red": 0
+       },
+       "count": 0,
+       "tier_counts": {
+        "mass": 0,
+        "pure": 0,
+        "trace": 0,
+        "vein": 0
+       },
+       "total_purity": 0
+      },
+      "jettisoned_parcels": [],
+      "penalty": 0
+     },
+     "p2": {
+      "awarded": 0,
+      "inventory": {
+       "color_counts": {
+        "blue": 0,
+        "green": 0,
+        "red": 0
+       },
+       "count": 0,
+       "tier_counts": {
+        "mass": 0,
+        "pure": 0,
+        "trace": 0,
+        "vein": 0
+       },
+       "total_purity": 0
+      },
+      "jettisoned_parcels": [],
+      "penalty": 0
+     }
+    },
+    "slot_assignments": []
+   }
+  }
+ },
+ "last_catapult_summary": {
+  "day": 6,
+  "catapult": {
+   "color_counts": {
+    "blue": 0,
+    "green": 0,
+    "red": 8
+   },
+   "count": 8,
+   "tier_counts": {
+    "mass": 0,
+    "pure": 2,
+    "trace": 3,
+    "vein": 3
+   },
+   "total_purity": 787
+  },
+  "jettison": {
+   "color_counts": {
+    "blue": 0,
+    "green": 0,
+    "red": 0
+   },
+   "count": 0,
+   "tier_counts": {
+    "mass": 0,
+    "pure": 0,
+    "trace": 0,
+    "vein": 0
+   },
+   "total_purity": 0
+  }
+ },
+ "season_name": "Caelum_Compass",
+ "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+ "grid_ascii": "legend: fog=. stale=, empty=_ green=g red=R blue=b mine_harvester=X mine_probe=o mine_orblift=L enemy_harvester=x enemy_probe=:\n........................................\n........................................\n........................................\n.............,..........................\n........................,...............\n...,..................,,,,,........,....\n.....................,,,,,,,.....,,,,,..\n.....................,,,,,,,....,,,,,,,.\n....................,,,,,,,,,...,,,,,,,.\n....................,,,,,,,,...,,,,,,,,,\n........,,,,,,......,,,,,,,,....,,,,,,,.\n......,,,,,,,,,......,,,,,,.....,,,,,,,.\n.....,,,,,,,,,..........,........,,,,,..\n.....,,,,,,,.................,.....,....\n....,,,,,,,,,..............,,,,,........\n.....,,,,,,,.R............,,,,,,,.......\n.....,,,,,,_R___.....,....,,,,,,,.......\n......,,,,_RRR___...,,,..,,,,,,,,,......\n........,.__R__R_...,,,...,,,,,,,.......\n.........__R_oRR__.,,,,.,.,,,,,,,.......\n.........._RRRbRR,,,,,,,...,,,,,........\n.........___Ro_ggg,,,,,,,....,,,........\n..........__RgRRR,,,,,,,,....,,,........\n..........__gggR_,,,,,,,,,....,.........\n...........RRRR_..,,,,,,,...............\n.............R....,,,,,,,...............\n...................,,,,,................\n.....................,..................",
+ "grid": {
+  "width": 40,
+  "height": 28,
+  "cell_counts": {
+   "fog": 776,
+   "stale": 279,
+   "fresh": 65
+  },
+  "tile_counts_visible": {
+   "RED": 27,
+   "GREEN": 7,
+   "EMPTY": 29,
+   "BLUE": 2
+  }
+ },
+ "red_tiles": [
+  {
+   "x": 13,
+   "y": 17,
+   "purity": 71,
+   "tier": "vein",
+   "value": 71,
+   "freshness": "fresh",
+   "square_id": "ddee0f5838dcedc3"
+  },
+  {
+   "x": 12,
+   "y": 18,
+   "purity": 70,
+   "tier": "vein",
+   "value": 70,
+   "freshness": "fresh",
+   "square_id": "03eeb0e23e882ba9"
+  },
+  {
+   "x": 15,
+   "y": 20,
+   "purity": 54,
+   "tier": "vein",
+   "value": 54,
+   "freshness": "fresh",
+   "square_id": "ccd25a123ce31b4d"
+  },
+  {
+   "x": 16,
+   "y": 22,
+   "purity": 54,
+   "tier": "vein",
+   "value": 54,
+   "freshness": "fresh",
+   "square_id": "a0df3336ffb94511"
+  },
+  {
+   "x": 11,
+   "y": 20,
+   "purity": 50,
+   "tier": "trace",
+   "value": 50,
+   "freshness": "fresh",
+   "square_id": "ea683fc77bfd0fd9"
+  },
+  {
+   "x": 12,
+   "y": 17,
+   "purity": 42,
+   "tier": "trace",
+   "value": 42,
+   "freshness": "fresh",
+   "square_id": "130fb45481ead657"
+  },
+  {
+   "x": 12,
+   "y": 22,
+   "purity": 42,
+   "tier": "trace",
+   "value": 42,
+   "freshness": "fresh",
+   "square_id": "87c6cdeff260b155"
+  },
+  {
+   "x": 15,
+   "y": 23,
+   "purity": 31,
+   "tier": "trace",
+   "value": 31,
+   "freshness": "fresh",
+   "square_id": "64c0e24b123523bf"
+  },
+  {
+   "x": 11,
+   "y": 19,
+   "purity": 24,
+   "tier": "trace",
+   "value": 24,
+   "freshness": "fresh",
+   "square_id": "fdc74810e22db35b"
+  },
+  {
+   "x": 13,
+   "y": 24,
+   "purity": 22,
+   "tier": "trace",
+   "value": 22,
+   "freshness": "fresh",
+   "square_id": "616d4a429453a3d7"
+  },
+  {
+   "x": 13,
+   "y": 20,
+   "purity": 21,
+   "tier": "trace",
+   "value": 21,
+   "freshness": "fresh",
+   "square_id": "8563437f03df245c"
+  },
+  {
+   "x": 12,
+   "y": 21,
+   "purity": 21,
+   "tier": "trace",
+   "value": 21,
+   "freshness": "fresh",
+   "square_id": "d7c4759311a31043"
+  },
+  {
+   "x": 15,
+   "y": 22,
+   "purity": 18,
+   "tier": "trace",
+   "value": 18,
+   "freshness": "fresh",
+   "square_id": "1c8e4975e44dad81"
+  },
+  {
+   "x": 14,
+   "y": 22,
+   "purity": 13,
+   "tier": "trace",
+   "value": 13,
+   "freshness": "fresh",
+   "square_id": "04f346f56f65c833"
+  },
+  {
+   "x": 12,
+   "y": 20,
+   "purity": 11,
+   "tier": "trace",
+   "value": 11,
+   "freshness": "fresh",
+   "square_id": "f84209e6e40d29f4"
+  },
+  {
+   "x": 11,
+   "y": 24,
+   "purity": 9,
+   "tier": "trace",
+   "value": 9,
+   "freshness": "fresh",
+   "square_id": "4ef4d4b66033bef4"
+  },
+  {
+   "x": 13,
+   "y": 25,
+   "purity": 8,
+   "tier": "trace",
+   "value": 8,
+   "freshness": "fresh",
+   "square_id": "8a1299604880afeb"
+  },
+  {
+   "x": 14,
+   "y": 24,
+   "purity": 5,
+   "tier": "trace",
+   "value": 5,
+   "freshness": "fresh",
+   "square_id": "c51e2366bd6a5a5c"
+  },
+  {
+   "x": 12,
+   "y": 16,
+   "purity": 4,
+   "tier": "trace",
+   "value": 4,
+   "freshness": "fresh",
+   "square_id": "5ee0a915405c5706"
+  },
+  {
+   "x": 12,
+   "y": 24,
+   "purity": 4,
+   "tier": "trace",
+   "value": 4,
+   "freshness": "fresh",
+   "square_id": "d63f139c6dd98a91"
+  },
+  {
+   "x": 13,
+   "y": 15,
+   "purity": 3,
+   "tier": "trace",
+   "value": 3,
+   "freshness": "fresh",
+   "square_id": "fd898e1cd9a83869"
+  },
+  {
+   "x": 11,
+   "y": 17,
+   "purity": 2,
+   "tier": "trace",
+   "value": 2,
+   "freshness": "fresh",
+   "square_id": "4e92b8e69c36b0a2"
+  },
+  {
+   "x": 15,
+   "y": 18,
+   "purity": 2,
+   "tier": "trace",
+   "value": 2,
+   "freshness": "fresh",
+   "square_id": "6ecfbc3369bc4090"
+  },
+  {
+   "x": 15,
+   "y": 19,
+   "purity": 1,
+   "tier": "trace",
+   "value": 1,
+   "freshness": "fresh",
+   "square_id": "f2c0e85a8bafa75a"
+  },
+  {
+   "x": 16,
+   "y": 20,
+   "purity": 1,
+   "tier": "trace",
+   "value": 1,
+   "freshness": "fresh",
+   "square_id": "7aebe531a0a82619"
+  },
+  {
+   "x": 13,
+   "y": 21,
+   "purity": 1,
+   "tier": "trace",
+   "value": 1,
+   "freshness": "fresh",
+   "square_id": "8e506dfe2aa4d52d"
+  },
+  {
+   "x": 14,
+   "y": 19,
+   "purity": 0,
+   "tier": "trace",
+   "value": 0,
+   "freshness": "fresh",
+   "square_id": "39985f295676c9f1"
+  },
+  {
+   "x": 22,
+   "y": 21,
+   "purity": 81,
+   "tier": "vein",
+   "value": 81,
+   "freshness": "stale",
+   "square_id": "51a661cf6a6a1db5"
+  },
+  {
+   "x": 17,
+   "y": 22,
+   "purity": 72,
+   "tier": "vein",
+   "value": 72,
+   "freshness": "stale",
+   "square_id": "f481e3d9ae4252bc"
+  },
+  {
+   "x": 21,
+   "y": 26,
+   "purity": 49,
+   "tier": "trace",
+   "value": 49,
+   "freshness": "stale",
+   "square_id": "1f835607c159d2b8"
+  },
+  {
+   "x": 10,
+   "y": 10,
+   "purity": 46,
+   "tier": "trace",
+   "value": 46,
+   "freshness": "stale",
+   "square_id": "4de66b6ea63f8fc3"
+  },
+  {
+   "x": 18,
+   "y": 22,
+   "purity": 44,
+   "tier": "trace",
+   "value": 44,
+   "freshness": "stale",
+   "square_id": "8aca0dfc0d9b3168"
+  },
+  {
+   "x": 11,
+   "y": 10,
+   "purity": 42,
+   "tier": "trace",
+   "value": 42,
+   "freshness": "stale",
+   "square_id": "ca57aeead39fc034"
+  },
+  {
+   "x": 25,
+   "y": 11,
+   "purity": 38,
+   "tier": "trace",
+   "value": 38,
+   "freshness": "stale",
+   "square_id": "75dd52f5dfc4d52f"
+  },
+  {
+   "x": 35,
+   "y": 13,
+   "purity": 38,
+   "tier": "trace",
+   "value": 38,
+   "freshness": "stale",
+   "square_id": "2efdc13c1014024c"
+  },
+  {
+   "x": 20,
+   "y": 21,
+   "purity": 37,
+   "tier": "trace",
+   "value": 37,
+   "freshness": "stale",
+   "square_id": "0751889d8249c43b"
+  },
+  {
+   "x": 17,
+   "y": 23,
+   "purity": 36,
+   "tier": "trace",
+   "value": 36,
+   "freshness": "stale",
+   "square_id": "a00cc7eb5a93bf7f"
+  },
+  {
+   "x": 21,
+   "y": 23,
+   "purity": 36,
+   "tier": "trace",
+   "value": 36,
+   "freshness": "stale",
+   "square_id": "7e8252dfbebdb250"
+  },
+  {
+   "x": 18,
+   "y": 25,
+   "purity": 35,
+   "tier": "trace",
+   "value": 35,
+   "freshness": "stale",
+   "square_id": "b8af13d76db53433"
+  },
+  {
+   "x": 28,
+   "y": 19,
+   "purity": 34,
+   "tier": "trace",
+   "value": 34,
+   "freshness": "stale",
+   "square_id": "bb9e276783b86ccd"
+  },
+  {
+   "x": 19,
+   "y": 23,
+   "purity": 31,
+   "tier": "trace",
+   "value": 31,
+   "freshness": "stale",
+   "square_id": "3bc6e36565ab5e2b"
+  },
+  {
+   "x": 20,
+   "y": 23,
+   "purity": 31,
+   "tier": "trace",
+   "value": 31,
+   "freshness": "stale",
+   "square_id": "b76a2d148d0caf6c"
+  },
+  {
+   "x": 23,
+   "y": 25,
+   "purity": 27,
+   "tier": "trace",
+   "value": 27,
+   "freshness": "stale",
+   "square_id": "e505048f0a5c9b90"
+  },
+  {
+   "x": 23,
+   "y": 11,
+   "purity": 23,
+   "tier": "trace",
+   "value": 23,
+   "freshness": "stale",
+   "square_id": "9f28e4bae482df58"
+  },
+  {
+   "x": 24,
+   "y": 11,
+   "purity": 22,
+   "tier": "trace",
+   "value": 22,
+   "freshness": "stale",
+   "square_id": "91ae889db72251e6"
+  },
+  {
+   "x": 36,
+   "y": 12,
+   "purity": 22,
+   "tier": "trace",
+   "value": 22,
+   "freshness": "stale",
+   "square_id": "a7fbd9517e197d9e"
+  },
+  {
+   "x": 19,
+   "y": 22,
+   "purity": 19,
+   "tier": "trace",
+   "value": 19,
+   "freshness": "stale",
+   "square_id": "f5b45b5f06422183"
+  },
+  {
+   "x": 22,
+   "y": 6,
+   "purity": 19,
+   "tier": "trace",
+   "value": 19,
+   "freshness": "stale",
+   "square_id": "c5363e57aedcc59a"
+  },
+  {
+   "x": 26,
+   "y": 9,
+   "purity": 19,
+   "tier": "trace",
+   "value": 19,
+   "freshness": "stale",
+   "square_id": "7e2f17c6077af1bb"
+  },
+  {
+   "x": 22,
+   "y": 7,
+   "purity": 17,
+   "tier": "trace",
+   "value": 17,
+   "freshness": "stale",
+   "square_id": "a731ee8f68535544"
+  },
+  {
+   "x": 32,
+   "y": 19,
+   "purity": 17,
+   "tier": "trace",
+   "value": 17,
+   "freshness": "stale",
+   "square_id": "21d7b24805927e57"
+  },
+  {
+   "x": 36,
+   "y": 7,
+   "purity": 15,
+   "tier": "trace",
+   "value": 15,
+   "freshness": "stale",
+   "square_id": "8d02d4008f811d35"
+  },
+  {
+   "x": 20,
+   "y": 8,
+   "purity": 14,
+   "tier": "trace",
+   "value": 14,
+   "freshness": "stale",
+   "square_id": "5539632fb7739831"
+  },
+  {
+   "x": 35,
+   "y": 12,
+   "purity": 14,
+   "tier": "trace",
+   "value": 14,
+   "freshness": "stale",
+   "square_id": "1b120b76f5fbc439"
+  },
+  {
+   "x": 21,
+   "y": 6,
+   "purity": 13,
+   "tier": "trace",
+   "value": 13,
+   "freshness": "stale",
+   "square_id": "c2a07280c964d9d0"
+  },
+  {
+   "x": 19,
+   "y": 19,
+   "purity": 11,
+   "tier": "trace",
+   "value": 11,
+   "freshness": "stale",
+   "square_id": "82e51cc37fff1830"
+  },
+  {
+   "x": 22,
+   "y": 23,
+   "purity": 11,
+   "tier": "trace",
+   "value": 11,
+   "freshness": "stale",
+   "square_id": "e824e06ecf837003"
+  },
+  {
+   "x": 24,
+   "y": 22,
+   "purity": 11,
+   "tier": "trace",
+   "value": 11,
+   "freshness": "stale",
+   "square_id": "739a3741835227a8"
+  },
+  {
+   "x": 25,
+   "y": 23,
+   "purity": 11,
+   "tier": "trace",
+   "value": 11,
+   "freshness": "stale",
+   "square_id": "624789bb102280d8"
+  },
+  {
+   "x": 26,
+   "y": 10,
+   "purity": 10,
+   "tier": "trace",
+   "value": 10,
+   "freshness": "stale",
+   "square_id": "0baeb2e236739f26"
+  },
+  {
+   "x": 19,
+   "y": 25,
+   "purity": 9,
+   "tier": "trace",
+   "value": 9,
+   "freshness": "stale",
+   "square_id": "6de03bd912d17437"
+  },
+  {
+   "x": 22,
+   "y": 26,
+   "purity": 9,
+   "tier": "trace",
+   "value": 9,
+   "freshness": "stale",
+   "square_id": "bce99f8a3edbdfd5"
+  },
+  {
+   "x": 30,
+   "y": 18,
+   "purity": 9,
+   "tier": "trace",
+   "value": 9,
+   "freshness": "stale",
+   "square_id": "e91ece76efe4e39d"
+  },
+  {
+   "x": 37,
+   "y": 12,
+   "purity": 9,
+   "tier": "trace",
+   "value": 9,
+   "freshness": "stale",
+   "square_id": "b49573957246b745"
+  },
+  {
+   "x": 23,
+   "y": 26,
+   "purity": 8,
+   "tier": "trace",
+   "value": 8,
+   "freshness": "stale",
+   "square_id": "330c31d9dda71027"
+  },
+  {
+   "x": 36,
+   "y": 8,
+   "purity": 8,
+   "tier": "trace",
+   "value": 8,
+   "freshness": "stale",
+   "square_id": "746f5aa7ade57a7d"
+  },
+  {
+   "x": 37,
+   "y": 8,
+   "purity": 7,
+   "tier": "trace",
+   "value": 7,
+   "freshness": "stale",
+   "square_id": "9e35a3f53d259784"
+  },
+  {
+   "x": 11,
+   "y": 12,
+   "purity": 6,
+   "tier": "trace",
+   "value": 6,
+   "freshness": "stale",
+   "square_id": "2b8b6d2cad89c7fb"
+  },
+  {
+   "x": 20,
+   "y": 22,
+   "purity": 6,
+   "tier": "trace",
+   "value": 6,
+   "freshness": "stale",
+   "square_id": "a12e6fb6688b2ec0"
+  },
+  {
+   "x": 28,
+   "y": 20,
+   "purity": 6,
+   "tier": "trace",
+   "value": 6,
+   "freshness": "stale",
+   "square_id": "edd16bc43ca56ded"
+  },
+  {
+   "x": 21,
+   "y": 27,
+   "purity": 5,
+   "tier": "trace",
+   "value": 5,
+   "freshness": "stale",
+   "square_id": "b60a127728c765ba"
+  },
+  {
+   "x": 31,
+   "y": 19,
+   "purity": 5,
+   "tier": "trace",
+   "value": 5,
+   "freshness": "stale",
+   "square_id": "472007e32e29592c"
+  },
+  {
+   "x": 20,
+   "y": 24,
+   "purity": 4,
+   "tier": "trace",
+   "value": 4,
+   "freshness": "stale",
+   "square_id": "6d61d47b0b84f9e7"
+  },
+  {
+   "x": 27,
+   "y": 20,
+   "purity": 4,
+   "tier": "trace",
+   "value": 4,
+   "freshness": "stale",
+   "square_id": "c78e0bbe9d07a36a"
+  },
+  {
+   "x": 18,
+   "y": 20,
+   "purity": 3,
+   "tier": "trace",
+   "value": 3,
+   "freshness": "stale",
+   "square_id": "873de83605b49a37"
+  },
+  {
+   "x": 22,
+   "y": 22,
+   "purity": 3,
+   "tier": "trace",
+   "value": 3,
+   "freshness": "stale",
+   "square_id": "580c7e2fbaeb6dce"
+  },
+  {
+   "x": 24,
+   "y": 21,
+   "purity": 3,
+   "tier": "trace",
+   "value": 3,
+   "freshness": "stale",
+   "square_id": "3b4050c1d807c016"
+  },
+  {
+   "x": 17,
+   "y": 20,
+   "purity": 2,
+   "tier": "trace",
+   "value": 2,
+   "freshness": "stale",
+   "square_id": "c03fafb61cd2d4e1"
+  },
+  {
+   "x": 18,
+   "y": 23,
+   "purity": 2,
+   "tier": "trace",
+   "value": 2,
+   "freshness": "stale",
+   "square_id": "d4800c291a51ab35"
+  },
+  {
+   "x": 21,
+   "y": 24,
+   "purity": 2,
+   "tier": "trace",
+   "value": 2,
+   "freshness": "stale",
+   "square_id": "39c88c7ee4e92920"
+  }
+ ],
+ "green_tiles": [
+  {
+   "x": 15,
+   "y": 21,
+   "purity": 255,
+   "square_id": "64378d53155018dd",
+   "lineage": "synthetic",
+   "harvested": true
+  },
+  {
+   "x": 16,
+   "y": 21,
+   "purity": 255,
+   "square_id": "229178c615432524",
+   "lineage": "synthetic",
+   "harvested": true
+  },
+  {
+   "x": 17,
+   "y": 21,
+   "purity": 255,
+   "square_id": "831fde2cc27e2dbb",
+   "lineage": "synthetic",
+   "harvested": true
+  },
+  {
+   "x": 13,
+   "y": 22,
+   "purity": 255,
+   "square_id": "a71165e3c4e8273b",
+   "lineage": "synthetic",
+   "harvested": true
+  },
+  {
+   "x": 12,
+   "y": 23,
+   "purity": 255,
+   "square_id": "efa37ad07d5dab19",
+   "lineage": "synthetic",
+   "harvested": true
+  },
+  {
+   "x": 13,
+   "y": 23,
+   "purity": 255,
+   "square_id": "7779997cfa951ecb",
+   "lineage": "synthetic",
+   "harvested": true
+  },
+  {
+   "x": 14,
+   "y": 23,
+   "purity": 255,
+   "square_id": "2fea52b9753c2222",
+   "lineage": "synthetic",
+   "harvested": true
+  }
+ ],
+ "blue_tiles": [
+  {
+   "x": 13,
+   "y": 19,
+   "purity": 255,
+   "value": 255,
+   "freshness": "fresh",
+   "square_id": "6d58301a4e45330a"
+  },
+  {
+   "x": 14,
+   "y": 20,
+   "purity": 147,
+   "value": 147,
+   "freshness": "fresh",
+   "square_id": "ad39f765cef26533"
+  }
+ ],
+ "blue_sign": [
+  {
+   "cells": [
+    [
+     4,
+     6,
+     0.207
+    ],
+    [
+     4,
+     7,
+     0.167
+    ],
+    [
+     4,
+     8,
+     0.117
+    ],
+    [
+     5,
+     4,
+     0.253
+    ],
+    [
+     5,
+     5,
+     0.394
+    ],
+    [
+     5,
+     6,
+     0.492
+    ],
+    [
+     5,
+     7,
+     0.33
+    ],
+    [
+     5,
+     8,
+     0.318
+    ],
+    [
+     6,
+     3,
+     0.178
+    ],
+    [
+     6,
+     4,
+     0.421
+    ],
+    [
+     6,
+     5,
+     0.627
+    ],
+    [
+     6,
+     6,
+     0.377
+    ],
+    [
+     6,
+     7,
+     0.568
+    ],
+    [
+     6,
+     8,
+     0.535
+    ],
+    [
+     6,
+     9,
+     0.322
+    ],
+    [
+     7,
+     3,
+     0.272
+    ],
+    [
+     7,
+     4,
+     0.31
+    ],
+    [
+     7,
+     5,
+     0.678
+    ],
+    [
+     7,
+     6,
+     0.819
+    ],
+    [
+     7,
+     7,
+     0.545
+    ],
+    [
+     7,
+     8,
+     0.348
+    ],
+    [
+     7,
+     9,
+     0.378
+    ],
+    [
+     8,
+     3,
+     0.234
+    ],
+    [
+     8,
+     4,
+     0.34
+    ],
+    [
+     8,
+     5,
+     0.543
+    ],
+    [
+     8,
+     6,
+     0.715
+    ],
+    [
+     8,
+     7,
+     0.617
+    ],
+    [
+     8,
+     8,
+     0.562
+    ],
+    [
+     8,
+     9,
+     0.28
+    ],
+    [
+     9,
+     4,
+     0.222
+    ],
+    [
+     9,
+     5,
+     0.618
+    ],
+    [
+     9,
+     6,
+     0.614
+    ],
+    [
+     9,
+     7,
+     0.545
+    ],
+    [
+     9,
+     8,
+     0.376
+    ],
+    [
+     9,
+     9,
+     0.188
+    ],
+    [
+     10,
+     4,
+     0.206
+    ],
+    [
+     10,
+     5,
+     0.266
+    ],
+    [
+     10,
+     6,
+     0.287
+    ],
+    [
+     10,
+     7,
+     0.397
+    ],
+    [
+     11,
+     5,
+     0.085
+    ]
+   ],
+   "center": [
+    7.33,
+    6.18
+   ],
+   "id": "bluesign-0"
+  },
+  {
+   "cells": [
+    [
+     18,
+     8,
+     0.264
+    ],
+    [
+     18,
+     9,
+     0.207
+    ],
+    [
+     18,
+     10,
+     0.13
+    ],
+    [
+     19,
+     6,
+     0.114
+    ],
+    [
+     19,
+     7,
+     0.225
+    ],
+    [
+     19,
+     8,
+     0.561
+    ],
+    [
+     19,
+     9,
+     0.317
+    ],
+    [
+     19,
+     10,
+     0.512
+    ],
+    [
+     19,
+     11,
+     0.199
+    ],
+    [
+     20,
+     6,
+     0.241
+    ],
+    [
+     20,
+     7,
+     0.471
+    ],
+    [
+     20,
+     8,
+     0.632
+    ],
+    [
+     20,
+     9,
+     0.718
+    ],
+    [
+     20,
+     10,
+     0.673
+    ],
+    [
+     20,
+     11,
+     0.381
+    ],
+    [
+     20,
+     12,
+     0.112
+    ],
+    [
+     21,
+     6,
+     0.25
+    ],
+    [
+     21,
+     7,
+     0.356
+    ],
+    [
+     21,
+     8,
+     0.563
+    ],
+    [
+     21,
+     9,
+     0.751
+    ],
+    [
+     21,
+     10,
+     0.746
+    ],
+    [
+     21,
+     11,
+     0.473
+    ],
+    [
+     22,
+     6,
+     0.241
+    ],
+    [
+     22,
+     7,
+     0.247
+    ],
+    [
+     22,
+     8,
+     0.583
+    ],
+    [
+     22,
+     9,
+     0.704
+    ],
+    [
+     22,
+     10,
+     0.435
+    ],
+    [
+     22,
+     11,
+     0.185
+    ],
+    [
+     23,
+     7,
+     0.203
+    ],
+    [
+     23,
+     8,
+     0.261
+    ],
+    [
+     23,
+     9,
+     0.327
+    ],
+    [
+     23,
+     10,
+     0.368
+    ],
+    [
+     23,
+     11,
+     0.109
+    ],
+    [
+     24,
+     8,
+     0.156
+    ],
+    [
+     24,
+     9,
+     0.082
+    ],
+    [
+     24,
+     10,
+     0.088
+    ]
+   ],
+   "center": [
+    20.77,
+    8.68
+   ],
+   "id": "bluesign-1"
+  },
+  {
+   "cells": [
+    [
+     7,
+     10,
+     0.18
+    ],
+    [
+     7,
+     11,
+     0.197
+    ],
+    [
+     7,
+     12,
+     0.408
+    ],
+    [
+     7,
+     13,
+     0.294
+    ],
+    [
+     7,
+     14,
+     0.117
+    ],
+    [
+     8,
+     10,
+     0.388
+    ],
+    [
+     8,
+     11,
+     0.424
+    ],
+    [
+     8,
+     12,
+     0.523
+    ],
+    [
+     8,
+     13,
+     0.375
+    ],
+    [
+     8,
+     14,
+     0.304
+    ],
+    [
+     9,
+     9,
+     0.207
+    ],
+    [
+     9,
+     10,
+     0.49
+    ],
+    [
+     9,
+     11,
+     0.914
+    ],
+    [
+     9,
+     12,
+     0.922
+    ],
+    [
+     9,
+     13,
+     0.699
+    ],
+    [
+     9,
+     14,
+     0.215
+    ],
+    [
+     10,
+     9,
+     0.248
+    ],
+    [
+     10,
+     10,
+     0.49
+    ],
+    [
+     10,
+     11,
+     0.556
+    ],
+    [
+     10,
+     12,
+     0.534
+    ],
+    [
+     10,
+     13,
+     0.481
+    ],
+    [
+     10,
+     14,
+     0.354
+    ],
+    [
+     11,
+     10,
+     0.296
+    ],
+    [
+     11,
+     11,
+     0.479
+    ],
+    [
+     11,
+     12,
+     0.653
+    ],
+    [
+     11,
+     13,
+     0.427
+    ],
+    [
+     11,
+     14,
+     0.225
+    ],
+    [
+     12,
+     11,
+     0.163
+    ],
+    [
+     12,
+     13,
+     0.211
+    ]
+   ],
+   "center": [
+    9.33,
+    11.77
+   ],
+   "id": "bluesign-2"
+  },
+  {
+   "cells": [
+    [
+     11,
+     19,
+     0.129
+    ],
+    [
+     11,
+     20,
+     0.133
+    ],
+    [
+     11,
+     21,
+     0.106
+    ],
+    [
+     11,
+     22,
+     0.096
+    ],
+    [
+     12,
+     19,
+     0.452
+    ],
+    [
+     12,
+     20,
+     0.47
+    ],
+    [
+     12,
+     21,
+     0.296
+    ],
+    [
+     12,
+     22,
+     0.268
+    ],
+    [
+     13,
+     17,
+     0.15
+    ],
+    [
+     13,
+     18,
+     0.264
+    ],
+    [
+     13,
+     19,
+     0.652
+    ],
+    [
+     13,
+     20,
+     0.42
+    ],
+    [
+     13,
+     21,
+     0.712
+    ],
+    [
+     13,
+     22,
+     0.335
+    ],
+    [
+     13,
+     23,
+     0.276
+    ],
+    [
+     14,
+     17,
+     0.237
+    ],
+    [
+     14,
+     18,
+     0.428
+    ],
+    [
+     14,
+     19,
+     0.61
+    ],
+    [
+     14,
+     20,
+     0.754
+    ],
+    [
+     14,
+     21,
+     0.939
+    ],
+    [
+     14,
+     22,
+     0.379
+    ],
+    [
+     14,
+     23,
+     0.285
+    ],
+    [
+     15,
+     17,
+     0.178
+    ],
+    [
+     15,
+     18,
+     0.427
+    ],
+    [
+     15,
+     19,
+     0.766
+    ],
+    [
+     15,
+     20,
+     0.578
+    ],
+    [
+     15,
+     21,
+     0.627
+    ],
+    [
+     15,
+     22,
+     0.342
+    ],
+    [
+     15,
+     23,
+     0.314
+    ],
+    [
+     16,
+     18,
+     0.375
+    ],
+    [
+     16,
+     19,
+     0.598
+    ],
+    [
+     16,
+     20,
+     0.447
+    ],
+    [
+     16,
+     21,
+     0.35
+    ],
+    [
+     16,
+     22,
+     0.226
+    ],
+    [
+     17,
+     19,
+     0.222
+    ],
+    [
+     17,
+     20,
+     0.266
+    ],
+    [
+     17,
+     21,
+     0.289
+    ],
+    [
+     17,
+     22,
+     0.136
+    ],
+    [
+     18,
+     20,
+     0.08
+    ]
+   ],
+   "center": [
+    14.26,
+    20.18
+   ],
+   "id": "bluesign-3"
+  }
+ ],
+ "redsign": [],
+ "shipped_record": [
+  {
+   "effective_purity": 5,
+   "harvested_on_planning_day": 2,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "c088fcf1a269a403",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 5,
+   "score_tier": "trace",
+   "shipped_day": 3,
+   "site_id": "a62c59b295de4a68",
+   "square_id": "a62c59b295de4a68",
+   "stored_received_planning_day": 2,
+   "tile_at_harvest": 2,
+   "x": 21,
+   "y": 9,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 64,
+   "harvested_on_planning_day": 2,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "52e54e87d0457546",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 64,
+   "score_tier": "vein",
+   "shipped_day": 3,
+   "site_id": "e943482cc73b723f",
+   "square_id": "e943482cc73b723f",
+   "stored_received_planning_day": 2,
+   "tile_at_harvest": 2,
+   "x": 21,
+   "y": 10,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 55,
+   "harvested_on_planning_day": 2,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "24703c07f6e09b64",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 55,
+   "score_tier": "vein",
+   "shipped_day": 3,
+   "site_id": "579e1b42adf61bcf",
+   "square_id": "579e1b42adf61bcf",
+   "stored_received_planning_day": 2,
+   "tile_at_harvest": 2,
+   "x": 22,
+   "y": 10,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 41,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "a82b57e319774a45",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 41,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "b2e7081b8d9c7dc1",
+   "square_id": "b2e7081b8d9c7dc1",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 30,
+   "y": 19,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 1,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "f2602a8fe45d50f3",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 1,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "4579413041119e3b",
+   "square_id": "4579413041119e3b",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 29,
+   "y": 19,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 67,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "ea12c5f1fb1a59b5",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 67,
+   "score_tier": "vein",
+   "shipped_day": 4,
+   "site_id": "2c59bab27b9a3fbc",
+   "square_id": "2c59bab27b9a3fbc",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 29,
+   "y": 20,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 14,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "0bdedbfb13f3c50a",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 14,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "acda29c3afe21a62",
+   "square_id": "acda29c3afe21a62",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 30,
+   "y": 20,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 0,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p1_2",
+   "lineage": "natural",
+   "minted_synthetic_id": "e37f591ca4f4a13d",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 0,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "efa8a8870002817c",
+   "square_id": "efa8a8870002817c",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 9,
+   "y": 11,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 19,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p1_2",
+   "lineage": "natural",
+   "minted_synthetic_id": "7d8bcf80d22d44fe",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 19,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "0d1ed4ae6bb239e5",
+   "square_id": "0d1ed4ae6bb239e5",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 10,
+   "y": 11,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 12,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p1_2",
+   "lineage": "natural",
+   "minted_synthetic_id": "1293c8811c56a6ec",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 12,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "14060dedb2111ac5",
+   "square_id": "14060dedb2111ac5",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 11,
+   "y": 11,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 62,
+   "harvested_on_planning_day": 4,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "ddea105aba6eb676",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 62,
+   "score_tier": "vein",
+   "shipped_day": 5,
+   "site_id": "e85e56a68830f29d",
+   "square_id": "e85e56a68830f29d",
+   "stored_received_planning_day": 4,
+   "tile_at_harvest": 2,
+   "x": 21,
+   "y": 22,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 44,
+   "harvested_on_planning_day": 4,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "9b8487fac312b56d",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 44,
+   "score_tier": "trace",
+   "shipped_day": 5,
+   "site_id": "e24b59761f827a80",
+   "square_id": "e24b59761f827a80",
+   "stored_received_planning_day": 4,
+   "tile_at_harvest": 2,
+   "x": 21,
+   "y": 21,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 3,
+   "harvested_on_planning_day": 4,
+   "harvester_id": "harvester_p1_2",
+   "lineage": "natural",
+   "minted_synthetic_id": "f2cabe72b537f2c4",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 3,
+   "score_tier": "trace",
+   "shipped_day": 5,
+   "site_id": "ea7b425cea42bc89",
+   "square_id": "ea7b425cea42bc89",
+   "stored_received_planning_day": 4,
+   "tile_at_harvest": 2,
+   "x": 36,
+   "y": 11,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 0,
+   "harvested_on_planning_day": 4,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "paint": {
+    "bg": "rgb(63,185,80)",
+    "ch": "  "
+   },
+   "parent_square_id": null,
+   "penalty": 100,
+   "purity_at_harvest": 255,
+   "score_tier": "green",
+   "shipped_day": 5,
+   "site_id": "49f386e3832e48ca",
+   "square_id": "49f386e3832e48ca",
+   "stored_received_planning_day": 4,
+   "tile_at_harvest": 1,
+   "x": 21,
+   "y": 18,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 255,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "a71165e3c4e8273b",
+   "paint": {
+    "bg": "rgb(255,0,0)",
+    "ch": "  "
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 255,
+   "score_tier": "pure",
+   "shipped_day": 6,
+   "site_id": "a2fc2298526755e9",
+   "square_id": "a2fc2298526755e9",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 13,
+   "y": 22,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 255,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "7779997cfa951ecb",
+   "paint": {
+    "bg": "rgb(255,0,0)",
+    "ch": "  "
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 255,
+   "score_tier": "pure",
+   "shipped_day": 6,
+   "site_id": "3a659a79d0403f83",
+   "square_id": "3a659a79d0403f83",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 13,
+   "y": 23,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 58,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p1",
+   "lineage": "natural",
+   "minted_synthetic_id": "efa37ad07d5dab19",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 58,
+   "score_tier": "vein",
+   "shipped_day": 6,
+   "site_id": "977ae282c6a3b679",
+   "square_id": "977ae282c6a3b679",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 12,
+   "y": 23,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 67,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p1_2",
+   "lineage": "natural",
+   "minted_synthetic_id": "eb7e417027e20083",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 67,
+   "score_tier": "vein",
+   "shipped_day": 6,
+   "site_id": "32f46c77fecf3bfa",
+   "square_id": "32f46c77fecf3bfa",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 22,
+   "y": 24,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 21,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p1_2",
+   "lineage": "natural",
+   "minted_synthetic_id": "187655ad225d3ab5",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 21,
+   "score_tier": "trace",
+   "shipped_day": 6,
+   "site_id": "aa64e23d177382cb",
+   "square_id": "aa64e23d177382cb",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 22,
+   "y": 25,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 112,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p1_2",
+   "lineage": "natural",
+   "minted_synthetic_id": "c576d790e53376c2",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 112,
+   "score_tier": "vein",
+   "shipped_day": 6,
+   "site_id": "93cca8bb40f061ad",
+   "square_id": "93cca8bb40f061ad",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 21,
+   "y": 25,
+   "owner": "p1"
+  },
+  {
+   "effective_purity": 16,
+   "harvested_on_planning_day": 2,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "3609b416fa407e44",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 16,
+   "score_tier": "trace",
+   "shipped_day": 3,
+   "site_id": "1d88a5a5312cdc13",
+   "square_id": "1d88a5a5312cdc13",
+   "stored_received_planning_day": 2,
+   "tile_at_harvest": 2,
+   "x": 20,
+   "y": 9,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 72,
+   "harvested_on_planning_day": 2,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "c25d8d068baa6fa5",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 72,
+   "score_tier": "vein",
+   "shipped_day": 3,
+   "site_id": "8b0c8efefa7ff50e",
+   "square_id": "8b0c8efefa7ff50e",
+   "stored_received_planning_day": 2,
+   "tile_at_harvest": 2,
+   "x": 20,
+   "y": 10,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 43,
+   "harvested_on_planning_day": 2,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "8c38ea2e48cec0ec",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 43,
+   "score_tier": "trace",
+   "shipped_day": 3,
+   "site_id": "6690930832938ad9",
+   "square_id": "6690930832938ad9",
+   "stored_received_planning_day": 2,
+   "tile_at_harvest": 2,
+   "x": 20,
+   "y": 11,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 19,
+   "harvested_on_planning_day": 2,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "a46e235d9441cbfc",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 19,
+   "score_tier": "trace",
+   "shipped_day": 3,
+   "site_id": "7cb3309a1ce458fc",
+   "square_id": "7cb3309a1ce458fc",
+   "stored_received_planning_day": 2,
+   "tile_at_harvest": 2,
+   "x": 21,
+   "y": 11,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 70,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "f495464019a93ff4",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2592\u2592",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 70,
+   "score_tier": "vein",
+   "shipped_day": 4,
+   "site_id": "bc4bacc87270382a",
+   "square_id": "bc4bacc87270382a",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 27,
+   "y": 7,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 20,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "018d26f0eb6ac208",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 20,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "374ca1100a34cc2b",
+   "square_id": "374ca1100a34cc2b",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 27,
+   "y": 6,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 3,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "2d64e3e5f9235729",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 3,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "621063a4b3c8fcba",
+   "square_id": "621063a4b3c8fcba",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 28,
+   "y": 6,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 9,
+   "harvested_on_planning_day": 3,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "89461f5faa4255ee",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 9,
+   "score_tier": "trace",
+   "shipped_day": 4,
+   "site_id": "93c936e503ba6dec",
+   "square_id": "93c936e503ba6dec",
+   "stored_received_planning_day": 3,
+   "tile_at_harvest": 2,
+   "x": 30,
+   "y": 6,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 9,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "f5e73f82f1f40edd",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 9,
+   "score_tier": "trace",
+   "shipped_day": 6,
+   "site_id": "b7debb5805b6d46d",
+   "square_id": "b7debb5805b6d46d",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 7,
+   "y": 8,
+   "owner": "p2"
+  },
+  {
+   "effective_purity": 10,
+   "harvested_on_planning_day": 5,
+   "harvester_id": "harvester_p2",
+   "lineage": "natural",
+   "minted_synthetic_id": "8d1c805359c1d035",
+   "paint": {
+    "bg": "rgb(14,11,22)",
+    "ch": "\u2591\u2591",
+    "fg": "rgb(255,0,0)"
+   },
+   "parent_square_id": null,
+   "purity_at_harvest": 10,
+   "score_tier": "trace",
+   "shipped_day": 6,
+   "site_id": "245bf1dc1a9823be",
+   "square_id": "245bf1dc1a9823be",
+   "stored_received_planning_day": 5,
+   "tile_at_harvest": 2,
+   "x": 7,
+   "y": 7,
+   "owner": "p2"
+  }
+ ],
+ "fog_clusters": [
+  {
+   "centroid": [
+    18,
+    12
+   ],
+   "size": 774,
+   "nearest_visible_edge": [
+    15,
+    16
+   ]
+  },
+  {
+   "centroid": [
+    12,
+    15
+   ],
+   "size": 1,
+   "nearest_visible_edge": [
+    13,
+    15
+   ]
+  },
+  {
+   "centroid": [
+    9,
+    18
+   ],
+   "size": 1,
+   "nearest_visible_edge": [
+    10,
+    18
+   ]
+  }
+ ],
+ "entities": {
+  "mine": [
+   {
+    "id": "harvester_p1",
+    "type": "harvester",
+    "pos": null,
+    "carrying_red": false,
+    "cargo_count": 0,
+    "lost_last_night": false,
+    "damaged": false
+   },
+   {
+    "id": "harvester_p1_2",
+    "type": "harvester",
+    "pos": null,
+    "carrying_red": false,
+    "cargo_count": 0,
+    "lost_last_night": false,
+    "damaged": false
+   },
+   {
+    "id": "harvester_p1_3",
+    "type": "harvester",
+    "pos": null,
+    "carrying_red": false,
+    "cargo_count": 0,
+    "lost_last_night": false,
+    "damaged": false
+   },
+   {
+    "id": "orblift_p1",
+    "type": "orblift",
+    "pos": null,
+    "holds_red": false
+   },
+   {
+    "id": "probe_p1_6",
+    "type": "probe",
+    "pos": [
+     13,
+     19
+    ],
+    "nights_remaining": 1
+   },
+   {
+    "id": "probe_p1_7",
+    "type": "probe",
+    "pos": [
+     13,
+     21
+    ],
+    "nights_remaining": 1
+   }
+  ],
+  "echoes": [
+   {
+    "id": "probe_p2_10?",
+    "type": "probe",
+    "last_seen_pos": [
+     13,
+     3
+    ]
+   },
+   {
+    "id": "probe_p2_9?",
+    "type": "probe",
+    "last_seen_pos": [
+     19,
+     23
+    ]
+   },
+   {
+    "id": "harvester_p2?",
+    "type": "harvester",
+    "last_seen_pos": [
+     21,
+     11
+    ]
+   },
+   {
+    "id": "probe_p2_11?",
+    "type": "probe",
+    "last_seen_pos": [
+     24,
+     19
+    ]
+   },
+   {
+    "id": "probe_p2_12?",
+    "type": "probe",
+    "last_seen_pos": [
+     3,
+     5
+    ]
+   }
+  ]
+ },
+ "entity_detail": {
+  "harvester_p1": {
+   "asset_type": "harvester",
+   "created_on_day": 1,
+   "first_deployed_day": 2,
+   "destroyed_on_day": null,
+   "total_red_harvested": 17,
+   "total_days_on_surface": 0,
+   "last_seen": [
+    14,
+    23
+   ]
+  },
+  "harvester_p1_2": {
+   "asset_type": "harvester",
+   "created_on_day": 3,
+   "first_deployed_day": 3,
+   "destroyed_on_day": null,
+   "total_red_harvested": 14,
+   "total_days_on_surface": 0,
+   "last_seen": [
+    19,
+    20
+   ]
+  },
+  "harvester_p1_3": {
+   "asset_type": "harvester",
+   "created_on_day": 6,
+   "first_deployed_day": 6,
+   "destroyed_on_day": null,
+   "total_red_harvested": 5,
+   "total_days_on_surface": 0,
+   "last_seen": [
+    36,
+    9
+   ]
+  },
+  "orblift_p1": {
+   "asset_type": "orblift",
+   "created_on_day": 1,
+   "first_deployed_day": null,
+   "destroyed_on_day": null,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 0,
+   "last_seen": null
+  },
+  "probe_p1_1": {
+   "asset_type": "probe",
+   "created_on_day": 1,
+   "first_deployed_day": 1,
+   "destroyed_on_day": 3,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 3,
+   "last_seen": [
+    24,
+    8
+   ]
+  },
+  "probe_p1_2": {
+   "asset_type": "probe",
+   "created_on_day": 1,
+   "first_deployed_day": 1,
+   "destroyed_on_day": 3,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 3,
+   "last_seen": [
+    8,
+    14
+   ]
+  },
+  "probe_p1_3": {
+   "asset_type": "probe",
+   "created_on_day": 2,
+   "first_deployed_day": 2,
+   "destroyed_on_day": 4,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 3,
+   "last_seen": [
+    29,
+    17
+   ]
+  },
+  "probe_p1_4": {
+   "asset_type": "probe",
+   "created_on_day": 4,
+   "first_deployed_day": 4,
+   "destroyed_on_day": 6,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 3,
+   "last_seen": [
+    21,
+    23
+   ]
+  },
+  "probe_p1_5": {
+   "asset_type": "probe",
+   "created_on_day": 4,
+   "first_deployed_day": 4,
+   "destroyed_on_day": 6,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 2,
+   "last_seen": [
+    35,
+    9
+   ]
+  },
+  "probe_p1_6": {
+   "asset_type": "probe",
+   "created_on_day": 5,
+   "first_deployed_day": 5,
+   "destroyed_on_day": null,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 2,
+   "last_seen": [
+    13,
+    19
+   ]
+  },
+  "probe_p1_7": {
+   "asset_type": "probe",
+   "created_on_day": 5,
+   "first_deployed_day": 5,
+   "destroyed_on_day": null,
+   "total_red_harvested": 0,
+   "total_days_on_surface": 2,
+   "last_seen": [
+    13,
+    21
+   ]
+  }
+ },
+ "recent_log": [
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 253,
+   "level": "info",
+   "text": "[H14] harvester_p1_3 harvested RED at (37,10) @1299995042721ef0",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 254,
+   "level": "info",
+   "text": "[H14] harvester_p2_2 lifted to berth \u2014 banked 4 parcel(s)",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 255,
+   "level": "info",
+   "text": "[H14] p2 hoard 6/15; harvester_p2_2 banked +4 squares",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 256,
+   "level": "info",
+   "text": "[H15] harvester_p1_3 \u2192 (37,9)",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 257,
+   "level": "info",
+   "text": "p2 launched probe_p2_11 at (24,19) \u2014 visible from orbit",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 258,
+   "level": "info",
+   "text": "[H15] p2 deployed probe_p2_11 at (24,19)",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 259,
+   "level": "info",
+   "text": "[H16] harvester_p1_3 harvested RED at (36,9) @e6d2fcde63be60cd",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 260,
+   "level": "info",
+   "text": "p2 launched probe_p2_12 at (3,5) \u2014 visible from orbit",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 261,
+   "level": "info",
+   "text": "[H16] p2 deployed probe_p2_12 at (3,5)",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 262,
+   "level": "info",
+   "text": "[H17] harvester_p1 lifted to berth \u2014 banked 1 parcel(s)",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 263,
+   "level": "info",
+   "text": "[H17] p1 hoard 2/15; harvester_p1 banked +1 squares",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 264,
+   "level": "info",
+   "text": "[H18] harvester_p1_2 lifted to berth \u2014 banked 6 parcel(s)",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 265,
+   "level": "info",
+   "text": "[H18] p1 hoard 8/15; harvester_p1_2 banked +6 squares",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 266,
+   "level": "info",
+   "text": "[H19] harvester_p1_3 lifted to berth \u2014 banked 5 parcel(s)",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 267,
+   "level": "info",
+   "text": "[H19] p1 hoard 13/15; harvester_p1_3 banked +5 squares",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 6,
+   "seq": 268,
+   "level": "info",
+   "text": "probe lifetime (3 nights) reached \u2014 expired probe_p1_4",
+   "ts": "2026-08-27 02:26:52.467000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 7,
+   "seq": 269,
+   "level": "info",
+   "text": "[orbit] day 7: +1000 credits awarded to every seat.",
+   "ts": "2026-08-27 02:26:53.385000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 7,
+   "seq": 270,
+   "level": "info",
+   "text": "[dawnComplete] day 7 opens in ORBIT phase",
+   "ts": "2026-08-27 02:26:53.385000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 7,
+   "seq": 271,
+   "level": "info",
+   "text": "day 7: p2 locked orbit (1 action(s)).",
+   "ts": "2026-08-27 02:27:08.753000"
+  },
+  {
+   "session_id": "7830d381bd4246f9928dbf4de9d6ff7f",
+   "day": 7,
+   "seq": 272,
+   "level": "info",
+   "text": "[RED_HARVEST_LITE] [heuristic] (p2) orbit day plan (1500c available): built harvester (1500c); deferred probe build (need 250c, have 0c). Carryover 0c.",
+   "ts": "2026-08-27 02:27:13.842000"
+  }
+ ]
+}

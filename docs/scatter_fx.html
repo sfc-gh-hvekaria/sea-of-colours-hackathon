@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Scatter FX Demo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;overflow:hidden;}
+.stage{position:fixed;inset:0;background:#000;}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;}
+.btns{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  display:flex;gap:10px;z-index:10;
+}
+.btn{padding:9px 20px;background:rgba(0,0,0,0.7);border:1px solid #333;font-family:monospace;font-size:11px;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;color:#555;}
+.btn:hover{border-color:#888;color:#aaa;}
+.btn.lime{color:#aaff00;border-color:#446600}.btn.lime:hover{border-color:#aaff00}
+.btn.p1{color:#f4eedb;border-color:#555549}.btn.p1:hover{border-color:#f4eedb}
+.btn.p2{color:#f3c64a;border-color:#554a1a}.btn.p2:hover{border-color:#f3c64a}
+.btn.p3{color:#ff5fd7;border-color:#551a48}.btn.p3:hover{border-color:#ff5fd7}
+.btn.p4{color:#5fd7ff;border-color:#1a4855}.btn.p4:hover{border-color:#5fd7ff}
+</style>
+</head>
+<body>
+<div class="stage" id="stage"><canvas id="cv"></canvas></div>
+<div class="btns">
+  <button class="btn lime" onclick="runFx('#aaff00')">LIME</button>
+  <button class="btn p1"   onclick="runFx('#f4eedb')">P1</button>
+  <button class="btn p2"   onclick="runFx('#f3c64a')">P2</button>
+  <button class="btn p3"   onclick="runFx('#ff5fd7')">P3</button>
+  <button class="btn p4"   onclick="runFx('#5fd7ff')">P4</button>
+</div>
+
+<script>
+'use strict';
+
+// ── grid config ───────────────────────────────────────────────────────────
+const PITCH = 6;          // px per cell
+const FONT  = '5px ui-monospace,"Cascadia Code","Fira Code",monospace';
+
+// 6 char types ordered by sort weight (0 = float to top, 5 = sink to bottom)
+const CTYPES = ['.', '-', '|', '+', '/', '×'];
+const NC = CTYPES.length;
+
+// ── timing ───────────────────────────────────────────────────────────────
+const T_FILL     = 1800;   // ms – diagonal fill sweeps left→right
+const T_SORT     = 1100;   // ms – column bubble-sort by char weight
+const T_HOLD     = 160;    // ms – show sorted state
+const T_DISSOLVE = 900;    // ms – reverse-fill: last-in first-out clusters
+const T_TOTAL    = T_FILL + T_SORT + T_HOLD + T_DISSOLVE;
+const T_STAGGER  = 380;    // sort wave lag: rightmost col sorts T_STAGGER ms later
+
+// ── setup ─────────────────────────────────────────────────────────────────
+const stage = document.getElementById('stage');
+const cv    = document.getElementById('cv');
+const ctx   = cv.getContext('2d');
+
+let W, H, COLS, ROWS;
+// per-cell: { ct: char-type 0-5, fillT: normalised 0-1, active: bool }
+let grid;
+
+function resize() {
+  W = cv.width  = stage.offsetWidth;
+  H = cv.height = stage.offsetHeight;
+  COLS = Math.floor(W / PITCH);
+  ROWS = Math.floor(H / PITCH);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── 2D value noise (bilinear interp on coarse grid) ───────────────────────
+function valueNoise2D(cols, rows, scale) {
+  const cg = Math.ceil(cols / scale) + 2;
+  const rg = Math.ceil(rows / scale) + 2;
+  const r  = Array.from({length: rg}, () => Array.from({length: cg}, () => Math.random()));
+  return Array.from({length: rows}, (_, ry) =>
+    Array.from({length: cols}, (_, cx) => {
+      const fx = cx / scale, fy = ry / scale;
+      const x0 = Math.floor(fx), y0 = Math.floor(fy);
+      const tx = fx - x0, ty = fy - y0;
+      const v  = (a, b, t) => a + (b - a) * t;
+      const top    = v(r[y0][x0], r[y0][x0+1], tx);
+      const bottom = v(r[y0+1][x0], r[y0+1][x0+1], tx);
+      return v(top, bottom, ty);
+    })
+  );
+}
+
+// ── build grid ────────────────────────────────────────────────────────────
+function buildGrid() {
+  // char-type noise: coarse scale so territories are wide enough to see
+  const charNoise = valueNoise2D(COLS, ROWS, COLS / 7);
+  // fill-timing noise: finer scale for ragged wavefront
+  const timeNoise = valueNoise2D(COLS, ROWS, COLS / 18);
+
+  grid = Array.from({length: ROWS}, (_, r) =>
+    Array.from({length: COLS}, (_, c) => {
+      // diagonal sweep (col-weighted) + noise jitter → fill time 0-1
+      const sweep  = c / COLS * 0.65 + r / ROWS * 0.35;
+      const jitter = (timeNoise[r][c] - 0.5) * 0.22;
+      const fillT  = Math.max(0, Math.min(1, sweep + jitter));
+
+      // char type from a separate noise field → territorial regions
+      const ct = Math.floor(charNoise[r][c] * NC) % NC;
+
+      return { ct, fillT, active: false };
+    })
+  );
+}
+
+// ── sort step ─────────────────────────────────────────────────────────────
+// heavy chars (high ct) sink; light chars (low ct) float.
+// each column has its own start time for a left→right ripple.
+function sortStep(elapsed) {
+  const sortBase = T_FILL;
+  for (let c = 0; c < COLS; c++) {
+    const colOn = sortBase + (c / COLS) * T_STAGGER;
+    if (elapsed < colOn) continue;
+    for (let r = ROWS - 1; r > 0; r--) {
+      const a = grid[r-1][c], b = grid[r][c];
+      if (!a.active || !b.active) continue;
+      if (a.ct > b.ct) { const t = a.ct; a.ct = b.ct; b.ct = t; }
+    }
+  }
+}
+
+// ── draw ──────────────────────────────────────────────────────────────────
+let COLOR = '#aaff00';
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.font      = FONT;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = COLOR;
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (!grid[r][c].active) continue;
+      ctx.fillText(
+        CTYPES[grid[r][c].ct],
+        c * PITCH + PITCH * 0.5,
+        r * PITCH + PITCH * 0.5
+      );
+    }
+  }
+}
+
+// ── main tick ─────────────────────────────────────────────────────────────
+let animId  = null;
+let t0      = null;
+let lastSort = 0;
+
+function tick(ts) {
+  if (t0 === null) t0 = ts;
+  const el = ts - t0;
+
+  if (el >= T_TOTAL) {
+    ctx.clearRect(0, 0, W, H);
+    animId = null;
+    return;
+  }
+
+  // phase 1 – fill
+  if (el < T_FILL) {
+    const prog = el / T_FILL;
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++)
+        if (!grid[r][c].active && grid[r][c].fillT <= prog)
+          grid[r][c].active = true;
+  }
+
+  // phase 2 – sort  (runs every ~40 ms)
+  const sortStart = T_FILL;
+  if (el >= sortStart && el < sortStart + T_SORT) {
+    if (el - lastSort > 40) {
+      lastSort = el;
+      // ensure all cells activated before sorting
+      for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++)
+          if (!grid[r][c].active) grid[r][c].active = true;
+      sortStep(el);
+      sortStep(el);
+    }
+  }
+
+  // phase 3 – dissolve (reverse fill: last-in deactivates first)
+  const dissolveStart = sortStart + T_SORT + T_HOLD;
+  if (el >= dissolveStart) {
+    const prog = (el - dissolveStart) / T_DISSOLVE; // 0→1
+    // cells whose fillT > (1 - prog) go dark → outermost cells die first
+    const cutoff = 1 - prog;
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++)
+        if (grid[r][c].fillT > cutoff)
+          grid[r][c].active = false;
+  }
+
+  draw();
+  animId = requestAnimationFrame(tick);
+}
+
+// ── entry ─────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => runFx('#aaff00'));
+
+function runFx(color) {
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+  resize();
+  COLOR = color || '#aaff00';
+  buildGrid();
+  t0 = null;
+  lastSort = 0;
+  animId = requestAnimationFrame(tick);
+}
+</script>
+</body>
+</html>

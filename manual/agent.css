@@ -1,0 +1,840 @@
+/* agent.css — delta on top of manual.css for the agent & harness guide.
+ *
+ * manual.css owns the look: the palette tokens, the board renderer's cell
+ * rules, .mn-frame / .mn-btn / .mn-stage-* and the terminal header. Nothing
+ * here re-declares any of that. What the guide needs that the manual does not
+ * is a SCROLL: the manual is a fixed app shell (body{height:100vh;overflow:
+ * hidden}) with tabs, whereas this is one long read with a nav rail beside it.
+ */
+
+/* The one override. Everything below assumes the page scrolls. */
+html, body {
+  height: auto;
+  overflow: visible;
+}
+
+.ag-viewport {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 12px 16px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ag-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  /* Opaque: board cells scroll underneath this. */
+  background: var(--bg);
+}
+
+.ag-body {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+/* ── nav rail ─────────────────────────────────────────────────────── */
+
+.ag-nav {
+  position: sticky;
+  top: 52px;
+  border: 1px solid var(--frame);
+  background: var(--panel-bg);
+  padding: 10px 0;
+  font-size: 12px;
+  max-height: calc(100vh - 72px);
+  overflow-y: auto;
+}
+.ag-nav-title {
+  color: var(--green);
+  letter-spacing: 0.08em;
+  padding: 0 12px 8px;
+  border-bottom: 1px dashed var(--frame);
+  margin-bottom: 6px;
+}
+.ag-nav a {
+  display: block;
+  padding: 4px 12px;
+  color: var(--dim);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  line-height: 1.35;
+}
+.ag-nav a:hover { color: var(--fg); }
+.ag-nav a.is-current {
+  color: var(--fg);
+  border-left-color: var(--green);
+  background: rgba(77, 202, 94, 0.06);
+}
+.ag-nav a .n { color: var(--frame); margin-right: 0.75ch; }
+.ag-nav a.is-current .n { color: var(--green); }
+
+/* Difficulty ramp: the guide gets harder as it goes, and the rail says so. */
+.ag-nav-band {
+  padding: 9px 12px 3px;
+  color: var(--frame);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+/* ── scenes ───────────────────────────────────────────────────────── */
+
+.ag-scene {
+  scroll-margin-top: 64px;
+  padding-bottom: 34px;
+  margin-bottom: 34px;
+  border-bottom: 1px dashed var(--frame);
+}
+.ag-scene:last-child { border-bottom: 0; }
+
+.ag-scene h2 {
+  font-family: var(--retro);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--fg);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 1ch;
+}
+.ag-num {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--green);
+  border: 1px solid var(--frame);
+  padding: 2px 7px;
+  letter-spacing: 0.08em;
+}
+
+.ag-lede {
+  color: var(--fg);
+  font-size: 14.5px;
+  line-height: 1.62;
+  max-width: 78ch;
+  margin: 0 0 16px;
+}
+.ag-lede em { color: rgb(255, 199, 40); font-style: normal; }
+
+.ag-scene h3 {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin: 20px 0 8px;
+  font-weight: 400;
+}
+
+.ag-scene p {
+  font-size: 14px;
+  line-height: 1.62;
+  max-width: 78ch;
+  margin: 0 0 12px;
+}
+.ag-scene ul { max-width: 78ch; padding-left: 2ch; margin: 0 0 12px; }
+.ag-scene li { font-size: 14px; line-height: 1.6; margin-bottom: 6px; }
+
+.ag-scene b, .ag-scene strong { color: var(--fg); font-weight: 600; }
+.ag-scene code {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  color: rgb(255, 199, 40);
+  white-space: nowrap;
+}
+
+/* ── takeaway ─────────────────────────────────────────────────────── */
+
+.ag-takeaway {
+  border-left: 2px solid var(--green);
+  background: rgba(77, 202, 94, 0.05);
+  padding: 10px 14px;
+  margin-top: 18px;
+  max-width: 84ch;
+}
+.ag-takeaway .lbl {
+  display: block;
+  color: var(--green);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  margin-bottom: 4px;
+}
+.ag-takeaway p { margin: 0; font-size: 14px; }
+
+/* ── text panes (prompt / json / code) ────────────────────────────── */
+
+.ag-pane {
+  border: 1px solid var(--frame);
+  background: #06060a;
+  overflow: hidden;
+}
+.ag-pane-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1ch;
+  padding: 5px 10px;
+  border-bottom: 1px dashed var(--frame);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.ag-pane-head .t { color: var(--green); text-transform: uppercase; }
+.ag-pane-head .s { color: var(--dim); }
+.ag-pane-head .r { margin-left: auto; color: var(--frame); }
+.ag-pane pre {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+}
+.ag-pane pre.is-tall { max-height: 460px; }
+.ag-pane pre.is-mid  { max-height: 320px; }
+.ag-pane pre.is-short { max-height: 190px; }
+
+/* JSON / prompt tinting, applied by agent.js so the panes stay readable
+ * without pulling in a syntax highlighter. */
+.tok-key  { color: var(--blue); }
+.tok-str  { color: rgb(255, 199, 40); }
+.tok-num  { color: var(--green); }
+.tok-punc { color: var(--dim); }
+.tok-dim  { color: var(--dim); }
+.tok-hd   { color: var(--green); }
+
+.ag-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.ag-cols.is-pair { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+
+/* ── board scenes ─────────────────────────────────────────────────── */
+
+.ag-stage {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.ag-stage .mn-board-host {
+  flex: 0 0 auto;
+  padding: 0;
+  justify-content: flex-start;
+}
+.ag-stage-side {
+  flex: 1 1 300px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Overlay marks: probe disks, sign smears, routes, drops.
+ *
+ * These MUST be drawn on a pseudo-element rather than as an inset box-shadow
+ * on the cell. Every child of .mn-cell is absolutely positioned at inset:0 and
+ * the terrain layer fills it with solid ██ glyphs, so a shadow painted at the
+ * cell's own background layer is completely hidden. ::after sits above the fog
+ * layer (z-index 3) and is deliberately NOT suppressed by .is-fogged, so a
+ * smear still reads over fogged ground — which is the whole point in §04. */
+.mn-cell[class*="ag-mark-"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+/* Later rules win where a cell carries more than one mark, so these are
+ * ordered weakest signal first. */
+.mn-cell.ag-mark-smear::after { box-shadow: inset 0 0 0 1px rgba(255, 133, 133, 0.55); }
+.mn-cell.ag-mark-disk::after  { box-shadow: inset 0 0 0 1px rgba(122, 184, 255, 0.55); }
+.mn-cell.ag-mark-route::after { box-shadow: inset 0 0 0 2px rgba(255, 199, 40, 0.9); }
+.mn-cell.ag-mark-probe::after { box-shadow: inset 0 0 0 2px var(--blue); }
+.mn-cell.ag-mark-drop::after  { box-shadow: inset 0 0 0 2px var(--seat-p1); }
+.mn-cell.ag-mark-pure::after {
+  box-shadow: inset 0 0 0 2px #fff;
+  background: rgba(255, 255, 255, 0.10);
+}
+.mn-cell.ag-dim { opacity: 0.30; }
+
+.ag-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 11.5px;
+  color: var(--dim);
+  padding: 8px 0 0;
+}
+.ag-legend span { display: inline-flex; align-items: center; gap: 0.6ch; }
+.ag-legend i {
+  width: 11px; height: 11px;
+  display: inline-block;
+  border: 1px solid currentColor;
+  font-style: normal;
+}
+.ag-key-disk  { color: rgba(122, 184, 255, 0.9); }
+.ag-key-smear { color: rgba(255, 133, 133, 0.9); }
+.ag-key-route { color: rgba(255, 199, 40, 0.95); }
+.ag-key-pure  { color: #fff; }
+
+.mn-btn.is-on {
+  color: var(--bg);
+  background: var(--green);
+  border-color: var(--green);
+}
+
+/* ── flow diagram (section 02 / 11) ───────────────────────────────── */
+
+.ag-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+.ag-flow-step {
+  flex: 1 1 128px;
+  min-width: 118px;
+  border: 1px solid var(--frame);
+  background: #06060a;
+  padding: 9px 10px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.ag-flow-step:hover { border-color: var(--dim); }
+.ag-flow-step.is-on { border-color: var(--green); background: rgba(77,202,94,0.07); }
+.ag-flow-step .k {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--frame);
+  margin-bottom: 3px;
+}
+/* Names and paths are long unbroken tokens (`build_agent_view`,
+ * `tabula_v12/_v7/move_sanitizer.py`) and will clip rather than wrap unless
+ * told they may break mid-token. */
+.ag-flow-step .n {
+  display: block;
+  font-size: 13px;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+.ag-flow-step .f {
+  display: block;
+  font-size: 11px;
+  color: var(--dim);
+  margin-top: 4px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.ag-flow-step.is-engine { border-style: dashed; }
+.ag-flow-arrow {
+  align-self: center;
+  color: var(--frame);
+  font-size: 13px;
+}
+
+/* ── the pyramid (section 05) ─────────────────────────────────────── */
+
+.ag-pyramid { max-width: 78ch; margin-bottom: 6px; }
+.ag-tier {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2ch;
+  border: 1px solid var(--frame);
+  border-left-width: 3px;
+  background: #06060a;
+  padding: 9px 12px;
+  margin: 0 0 5px;
+}
+.ag-tier .r {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--frame);
+  flex: 0 0 4ch;
+}
+.ag-tier .h { color: var(--fg); font-size: 13.5px; }
+.ag-tier .w { color: var(--dim); font-size: 12.5px; margin-left: auto; }
+.ag-tier.t1 { border-left-color: #ff4d4d; }
+.ag-tier.t2 { border-left-color: #ff8585; }
+.ag-tier.t3 { border-left-color: rgb(255, 199, 40); }
+.ag-tier.t4 { border-left-color: var(--blue); }
+.ag-tier.t5 { border-left-color: var(--frame); }
+
+/* ── option cards (section 06) ────────────────────────────────────── */
+
+.ag-opt {
+  border: 1px solid var(--frame);
+  background: #06060a;
+  padding: 0;
+  margin-bottom: 6px;
+}
+.ag-opt-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1ch;
+  padding: 7px 10px;
+  cursor: pointer;
+  flex-wrap: wrap;
+}
+.ag-opt-head:hover { background: rgba(255,255,255,0.03); }
+.ag-opt-id {
+  font-size: 12px;
+  color: var(--bg);
+  background: var(--dim);
+  padding: 1px 6px;
+  letter-spacing: 0.04em;
+}
+.ag-opt.is-picked .ag-opt-id { background: var(--green); }
+.ag-opt.is-picked { border-color: var(--green); }
+.ag-opt-h { font-size: 13px; color: var(--fg); flex: 1 1 auto; }
+.ag-opt-cost { font-size: 11.5px; color: var(--dim); }
+.ag-opt-body {
+  display: none;
+  padding: 0 10px 10px 10px;
+  border-top: 1px dashed var(--frame);
+}
+.ag-opt.is-open .ag-opt-body { display: block; }
+.ag-opt-row { display: flex; gap: 1ch; font-size: 12px; margin-top: 8px; }
+.ag-opt-row .k {
+  flex: 0 0 9ch;
+  color: var(--green);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  padding-top: 2px;
+}
+.ag-opt-row .v { flex: 1 1 auto; color: var(--dim); line-height: 1.55; }
+.ag-opt-row.is-why .v { color: var(--fg); }
+
+/* ── module map (section 12) ──────────────────────────────────────── */
+
+.ag-mods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 8px;
+}
+.ag-mod {
+  border: 1px solid var(--frame);
+  background: #06060a;
+  padding: 9px 11px;
+}
+.ag-mod.is-fired { border-left: 3px solid var(--green); }
+.ag-mod .f {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: rgb(255, 199, 40);
+}
+.ag-mod .d {
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.ag-mod .fired {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-top: 6px;
+}
+
+/* ── misc ─────────────────────────────────────────────────────────── */
+
+.ag-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ag-stat {
+  border: 1px solid var(--frame);
+  background: #06060a;
+  padding: 8px 13px;
+  min-width: 116px;
+}
+.ag-stat .v {
+  font-family: var(--retro);
+  font-size: 27px;
+  line-height: 1;
+  color: var(--fg);
+}
+.ag-stat .v.is-hot { color: rgb(255, 199, 40); }
+.ag-stat .k {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  margin-top: 5px;
+}
+
+.ag-bar {
+  display: flex;
+  height: 24px;
+  border: 1px solid var(--frame);
+  margin: 4px 0 8px;
+  max-width: 78ch;
+  overflow: hidden;
+}
+.ag-bar div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  color: var(--bg);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ag-note {
+  font-size: 12.5px;
+  color: var(--dim);
+  border-left: 2px solid var(--frame);
+  padding-left: 11px;
+  margin: 12px 0;
+  max-width: 78ch;
+  line-height: 1.6;
+}
+
+.ag-foot {
+  color: var(--dim);
+  font-size: 12px;
+  padding-top: 18px;
+  line-height: 1.7;
+}
+.ag-foot a { color: var(--blue); }
+
+/* ══════════════════════════════════════════════════════════════════
+ * SECTION 00 — the novice walkthrough
+ *
+ * Three actors, three colours, used consistently from the one-line overview
+ * all the way down the vertical flow. Once a reader has learned that blue is
+ * the game, green is our Python and amber is the model, every diagram on the
+ * page can be read at a glance without a key.
+ * ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --ph-engine: #7ab8ff;
+  --ph-harness: #4dca5e;
+  --ph-model: #ffc728;
+}
+
+.ph-engine  { color: var(--ph-engine); }
+.ph-harness { color: var(--ph-harness); }
+.ph-model   { color: var(--ph-model); }
+
+/* ── the one-line overview ────────────────────────────────────────── */
+
+.ag-mini {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin: 6px 0 10px;
+  border: 1px solid var(--frame);
+  background: #06060a;
+  padding: 8px;
+}
+.ag-mini-step {
+  flex: 1 1 0;
+  min-width: 86px;
+  border-top: 3px solid var(--frame);
+  padding: 7px 8px 8px;
+  cursor: pointer;
+  background: transparent;
+  text-align: left;
+  font-family: var(--mono);
+  transition: background 0.12s;
+}
+.ag-mini-step:hover { background: rgba(255, 255, 255, 0.05); }
+.ag-mini-step .i {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  margin-bottom: 3px;
+}
+.ag-mini-step .t {
+  display: block;
+  font-size: 11.5px;
+  color: var(--fg);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.ag-mini-step.is-engine  { border-top-color: var(--ph-engine); }
+.ag-mini-step.is-harness { border-top-color: var(--ph-harness); }
+.ag-mini-step.is-model   { border-top-color: var(--ph-model); }
+.ag-mini-step.is-engine .i  { color: var(--ph-engine); }
+.ag-mini-step.is-harness .i { color: var(--ph-harness); }
+.ag-mini-step.is-model .i   { color: var(--ph-model); }
+
+.ag-mini-loop {
+  font-size: 11px;
+  color: var(--dim);
+  text-align: right;
+  margin: -4px 0 16px;
+}
+
+/* ── the connective-tissue diagram ────────────────────────────────── */
+
+.ag-bridge {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0 14px;
+}
+.ag-actor {
+  flex: 1 1 210px;
+  border: 1px solid var(--frame);
+  background: #06060a;
+  padding: 11px 13px;
+}
+.ag-actor.is-engine  { border-color: rgba(122, 184, 255, 0.5); }
+.ag-actor.is-harness { border-color: rgba(77, 202, 94, 0.5); }
+.ag-actor.is-model   { border-color: rgba(255, 199, 40, 0.5); }
+.ag-actor .who {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  margin-bottom: 4px;
+}
+.ag-actor .what { font-size: 13.5px; color: var(--fg); }
+.ag-actor .note {
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.ag-wire {
+  flex: 0 0 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
+  text-align: center;
+}
+.ag-wire span {
+  font-size: 10.5px;
+  color: var(--dim);
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.ag-wire .arrow { color: var(--frame); letter-spacing: 0.1em; }
+
+/* ── the vertical flow ────────────────────────────────────────────── */
+
+.ag-steps { margin: 4px 0 0; }
+
+.ag-step {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 14px;
+  scroll-margin-top: 70px;
+}
+/* The rail draws the connector, so the last step must not trail a line into
+ * nothing. */
+.ag-step:last-child .ag-step-rail::after { display: none; }
+
+.ag-step-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+.ag-step-rail::after {
+  content: "";
+  position: absolute;
+  top: 40px;
+  bottom: -6px;
+  width: 1px;
+  background: var(--frame);
+}
+.ag-step-num {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--frame);
+  background: var(--bg);
+  font-family: var(--retro);
+  font-size: 21px;
+  line-height: 1;
+  color: var(--dim);
+}
+.ag-step.is-engine  .ag-step-num { border-color: var(--ph-engine); color: var(--ph-engine); }
+.ag-step.is-harness .ag-step-num { border-color: var(--ph-harness); color: var(--ph-harness); }
+.ag-step.is-model   .ag-step-num { border-color: var(--ph-model); color: var(--ph-model); }
+
+.ag-step-main {
+  border-left: 3px solid var(--frame);
+  padding: 0 0 26px 15px;
+}
+.ag-step.is-engine  .ag-step-main { border-left-color: rgba(122, 184, 255, 0.45); }
+.ag-step.is-harness .ag-step-main { border-left-color: rgba(77, 202, 94, 0.45); }
+.ag-step.is-model   .ag-step-main { border-left-color: rgba(255, 199, 40, 0.45); }
+
+.ag-step-who {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+.ag-step h4 {
+  font-family: var(--retro);
+  font-size: 23px;
+  font-weight: 400;
+  color: var(--fg);
+  margin: 1px 0 7px;
+  letter-spacing: 0.02em;
+}
+.ag-step p { font-size: 14px; line-height: 1.6; max-width: 74ch; margin: 0 0 10px; }
+.ag-step .ag-pane { margin-top: 10px; }
+
+.ag-aside {
+  border: 1px dashed var(--frame);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 9px 12px;
+  margin: 10px 0;
+  max-width: 74ch;
+}
+.ag-aside .lbl {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--dim);
+  margin-bottom: 3px;
+}
+.ag-aside p { margin: 0; font-size: 13px; color: var(--dim); }
+.ag-aside p b { color: var(--fg); }
+
+/* ── the digestion floor ──────────────────────────────────────────── */
+
+.ag-lanes { max-width: 900px; margin: 12px 0 4px; }
+
+.ag-lane {
+  border: 1px solid var(--frame);
+  border-left: 3px solid rgba(77, 202, 94, 0.55);
+  background: #06060a;
+  margin-bottom: 8px;
+}
+.ag-lane-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5ch;
+  flex-wrap: wrap;
+  padding: 8px 12px 7px;
+  border-bottom: 1px solid var(--frame);
+  background: rgba(77, 202, 94, 0.06);
+}
+.ag-lane-head .q {
+  font-family: var(--retro);
+  font-size: 17px;
+  color: var(--ph-harness);
+  letter-spacing: 0.02em;
+}
+.ag-lane-head .fd { font-size: 11px; color: var(--dim); }
+.ag-lane-head .fd b { color: var(--fg); font-weight: 400; }
+.ag-lane-head .sz {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.ag-ops { padding: 6px 0 7px; }
+.ag-op {
+  display: grid;
+  grid-template-columns: 18ch minmax(0, 1fr) 140px;
+  align-items: center;
+  gap: 1.5ch;
+  padding: 3px 12px;
+}
+.ag-op:hover { background: rgba(255, 255, 255, 0.03); }
+.ag-op .nm { font-size: 12px; color: var(--ph-harness); }
+.ag-op .ds { font-size: 12.5px; color: var(--fg); line-height: 1.45; }
+/* A fixed track so the bars share a left baseline and can be read against
+ * each other, rather than right-aligning into a ragged edge. */
+.ag-op .mt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5ch;
+  align-items: center;
+  gap: 1ch;
+}
+.ag-op .bar {
+  height: 6px;
+  background: rgba(77, 202, 94, 0.5);
+  min-width: 2px;
+}
+.ag-op .lc { font-size: 10.5px; color: var(--dim); text-align: right; }
+
+.ag-lane-foot {
+  font-size: 11.5px;
+  color: var(--dim);
+  padding: 6px 12px 8px;
+  border-top: 1px dashed var(--frame);
+  line-height: 1.5;
+}
+.ag-lane-foot b { color: var(--fg); font-weight: 400; }
+
+.ag-lanes-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 2ch;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--dim);
+  border-top: 1px solid var(--frame);
+  padding-top: 7px;
+  margin-top: 10px;
+}
+.ag-lanes-total b { color: var(--ph-harness); font-weight: 400; }
+
+.ag-lanes-rest {
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.55;
+  margin: 6px 0 0;
+  max-width: 74ch;
+}
+
+/* ── the prompt stack ─────────────────────────────────────────────── */
+
+.ag-stack { max-width: 74ch; margin: 10px 0 4px; }
+.ag-slab {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2ch;
+  border: 1px solid var(--frame);
+  border-left: 3px solid var(--ph-harness);
+  background: #06060a;
+  padding: 9px 12px;
+  margin-bottom: 4px;
+}
+.ag-slab .nm {
+  flex: 0 0 17ch;
+  color: var(--ph-harness);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+.ag-slab .ds { flex: 1 1 auto; font-size: 13px; color: var(--fg); line-height: 1.45; }
+.ag-slab .sz { flex: 0 0 auto; font-size: 11px; color: var(--dim); }
+.ag-slab.is-out { border-left-color: var(--ph-model); }
+.ag-slab.is-out .nm { color: var(--ph-model); }
+
+@media (max-width: 900px) {
+  .ag-body { grid-template-columns: 1fr; }
+  .ag-nav { position: static; max-height: none; }
+  .ag-step { grid-template-columns: 40px minmax(0, 1fr); gap: 10px; }
+  .ag-wire { flex-basis: 100%; padding: 6px 0; }
+  .ag-slab { flex-wrap: wrap; }
+  .ag-slab .nm { flex-basis: 100%; }
+  .ag-op { grid-template-columns: minmax(0, 1fr) 90px; }
+  .ag-op .nm { grid-column: 1 / -1; }
+}

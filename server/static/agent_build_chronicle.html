@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Building Agents in the Sea of Colours — A Field Chronicle</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --bg-soft: #121722;
+    --panel: #161c28;
+    --panel-2: #1b2333;
+    --ink: #e6ebf5;
+    --ink-dim: #9aa7bd;
+    --ink-faint: #6b7788;
+    --line: #263145;
+    --red: #ff5c6c;
+    --green: #56d987;
+    --blue: #5aa9ff;
+    --amber: #f5b942;
+    --violet: #b98bff;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: radial-gradient(1200px 600px at 70% -10%, #17233a 0%, var(--bg) 55%);
+    color: var(--ink); font-family: var(--sans); line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px 120px; }
+  header.hero {
+    padding: 88px 24px 56px; text-align: center;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(90,169,255,0.06), transparent);
+  }
+  .kicker { letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--blue); font-weight: 600; }
+  h1 { font-size: clamp(30px, 5vw, 52px); line-height: 1.05; margin: 14px auto 10px; max-width: 780px; letter-spacing: -0.02em; }
+  .subtitle { color: var(--ink-dim); font-size: 18px; max-width: 640px; margin: 0 auto; }
+  .meta { margin-top: 22px; color: var(--ink-faint); font-size: 13px; font-family: var(--mono); }
+
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin: 40px auto 8px; max-width: 820px;
+  }
+  nav.toc a {
+    font-size: 13px; color: var(--ink-dim); text-decoration: none;
+    border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px;
+    background: var(--panel); transition: .15s;
+  }
+  nav.toc a:hover { color: var(--ink); border-color: var(--blue); }
+
+  section { margin-top: 64px; scroll-margin-top: 24px; }
+  h2 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 6px; }
+  h2 .num { color: var(--ink-faint); font-family: var(--mono); font-size: 18px; margin-right: 10px; }
+  h3 { font-size: 19px; margin: 32px 0 8px; color: var(--ink); }
+  .lead { color: var(--ink-dim); font-size: 17px; }
+  p { color: var(--ink); }
+  p.dim { color: var(--ink-dim); }
+  a { color: var(--blue); }
+
+  .callout {
+    border-left: 3px solid var(--amber); background: var(--panel);
+    padding: 16px 20px; border-radius: 0 10px 10px 0; margin: 22px 0;
+  }
+  .callout.big { border-left-color: var(--green); }
+  .callout.warn { border-left-color: var(--red); }
+  .callout .tag { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+  .callout h4 { margin: 4px 0 8px; font-size: 17px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px){ .grid2 { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .card h4 { margin: 0 0 8px; font-size: 15px; }
+  .card.bad { border-color: #4a2530; }
+  .card.good { border-color: #23472f; }
+  .card .icon { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border-radius: 6px; }
+  .bad .icon { background: rgba(255,92,108,.14); color: var(--red); }
+  .good .icon { background: rgba(86,217,135,.14); color: var(--green); }
+
+  pre {
+    background: #0a0d13; border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; overflow-x: auto; font-family: var(--mono);
+    font-size: 12.5px; line-height: 1.55; color: #cdd6e6; margin: 16px 0;
+  }
+  pre .c { color: var(--ink-faint); }
+  pre .k { color: var(--violet); }
+  pre .s { color: var(--green); }
+  pre .n { color: var(--amber); }
+  pre .r { color: var(--red); }
+  pre .b { color: var(--blue); }
+  code { font-family: var(--mono); font-size: .9em; background: var(--panel-2); padding: 1px 6px; border-radius: 5px; color: #cbd6ea; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--ink-faint); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  td.mono, th.mono { font-family: var(--mono); }
+  tr.win td { color: var(--green); }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+  .pill.g { color: var(--green); border-color:#23472f; }
+  .pill.r { color: var(--red); border-color:#4a2530; }
+
+  .pagecards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 28px 0; }
+  @media (max-width: 720px){ .pagecards { grid-template-columns: 1fr; } }
+  .pagecard { display: block; text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; transition: .15s; }
+  .pagecard:hover { border-color: var(--blue); transform: translateY(-2px); }
+  .pagecard .v { font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--ink); }
+  .pagecard .tagline { color: var(--ink-dim); font-size: 13.5px; margin-top: 6px; }
+  .pagecard .stat { font-family: var(--mono); font-size: 12px; color: var(--green); margin-top: 10px; }
+
+  .timeline { border-left: 2px solid var(--line); margin: 24px 0 8px; padding-left: 24px; }
+  .tl { position: relative; margin-bottom: 22px; }
+  .tl::before { content:""; position:absolute; left:-31px; top:4px; width:12px; height:12px; border-radius:50%; background:var(--bg); border:2px solid var(--blue); }
+  .tl.dead::before { border-color: var(--red); }
+  .tl.win::before { border-color: var(--green); background: var(--green); }
+  .tl .v { font-family: var(--mono); font-weight: 700; color: var(--ink); }
+  .tl .d { color: var(--ink-dim); font-size: 14px; }
+
+  hr { border: none; border-top: 1px solid var(--line); margin: 40px 0; }
+  footer { text-align: center; color: var(--ink-faint); font-size: 13px; margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .quote { font-style: italic; color: var(--ink-dim); border-left: 3px solid var(--violet); padding-left: 16px; margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">A Field Chronicle · Sea of Colours</div>
+  <h1>Teaching a token-bounded model to actually finish a plan</h1>
+  <p class="subtitle">Eight agent generations of fighting one enemy: a language model that runs out of budget before it says what it wants to do. Two findings that changed everything.</p>
+  <div class="meta">tabula v1 → v8 · haiku-4-5 / sonnet-4-6 on Snowflake Cortex · updated Jul 2026</div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <a href="#game">The game</a>
+  <a href="#problem">The core problem</a>
+  <a href="#timeline">The road to v8</a>
+  <a href="#finding1">Finding 1 · Opaque budget</a>
+  <a href="#finding2">Finding 2 · Moves-first</a>
+  <a href="#v6">What v6 fixed</a>
+  <a href="#v7">What v7 fixed</a>
+  <a href="#evidence">Evidence: 4 seasons</a>
+  <a href="#intel">Signs of real intelligence</a>
+  <a href="#gaps">Where it's still dumb</a>
+  <a href="#v8">The v8 worldview</a>
+  <a href="#lessons">Lessons</a>
+</nav>
+
+<section id="versions" style="margin-top:40px">
+  <h2><span class="num">→</span>Per-generation deep dives</h2>
+  <p class="dim">The overview below tells the arc. Each generation also has its own page — engineering changes, what it carried forward, performance, and the "aha" moments.</p>
+  <div class="pagecards">
+    <a class="pagecard" href="chronicle/v6.html">
+      <div class="v">v6 · Comprehension</div>
+      <div class="tagline">Grounded reflection, fog-gated hot-drops, anti-self-crush. A fast collator — and its ceiling.</div>
+      <div class="stat">the "complete ≠ smart" wall</div>
+    </a>
+    <a class="pagecard" href="chronicle/v7.html">
+      <div class="v">v7 · Containment</div>
+      <div class="tagline">Off the opaque Agents API onto the inference API. Contained two-call split.</div>
+      <div class="stat">4/4 wins · 0 fallbacks · 2.5–5× faster</div>
+    </a>
+    <a class="pagecard" href="chronicle/v8.html">
+      <div class="v">v8 · Worldview</div>
+      <div class="tagline">The collision blind-spot fix. 3-pillar prompt, enemy probes, weapon geometry, redsign poker.</div>
+      <div class="stat">reflection now names the collision → routes around it</div>
+    </a>
+  </div>
+</section>
+
+<section id="game">
+  <h2><span class="num">00</span>The arena</h2>
+  <p class="lead">Sea of Colours is a two-player, hidden-information resource game on a 40×28 grid.</p>
+  <p>Each night an agent launches <b>probes</b> (which reveal a Euclidean radius-4 disk of fog), drops <b>harvesters</b> that walk chains of cells banking <span style="color:var(--red)">RED</span> (score), <span style="color:var(--blue)">BLUE</span> (weapons fuel), and avoiding <span style="color:var(--green)">GREEN</span> (poison). By day it runs an orbit economy — build probes/harvesters, refine trace→vein, catapult high-purity parcels for score, and build <b>chaff flares</b> that jam the opponent's action slots during an egress window.</p>
+  <p class="dim">The agent's whole night is one JSON document: a <code>moves</code> array plus its plan, rationale, prediction, and reflection. If that document is truncated or malformed, the turn is wasted. That single constraint is the source of nearly every hard problem below.</p>
+</section>
+
+<section id="problem">
+  <h2><span class="num">01</span>The core problem, stated plainly</h2>
+  <div class="callout warn">
+    <div class="tag">The recurring failure</div>
+    <h4>The agent runs out of budget before it emits a complete plan.</h4>
+    <p class="dim" style="margin:0">Across every version, the same thing kept happening: the model would think, narrate, deliberate — and hit its cap mid-sentence, before the <code>moves</code> array was ever written. A truncated turn is a dead turn. In a 7-night season, two dead turns loses the game.</p>
+  </div>
+  <p>The naïve reactions all failed:</p>
+  <div class="grid2">
+    <div class="card bad"><span class="icon">✗ tried</span><h4>"Be concise"</h4><p class="dim">The model still front-loads reasoning prose and runs out. Politeness is not a budget.</p></div>
+    <div class="card bad"><span class="icon">✗ tried</span><h4>Bigger cap</h4><p class="dim">Extended thinking expands to fill any budget. A bigger cap buys a longer ramble, not a finished plan.</p></div>
+    <div class="card bad"><span class="icon">✗ tried</span><h4>"Don't think"</h4><p class="dim">v6's "reason in your head" fix. It works — but you get a fast, obedient <i>collator</i> of deterministic hints, not a strategist. Useful, still dumb.</p></div>
+    <div class="card good"><span class="icon">✓ worked</span><h4>Separate the budgets</h4><p class="dim">Thinking and answering must be <i>different, individually-capped resources</i>. This is Finding 1 — and it was an API problem all along.</p></div>
+  </div>
+</section>
+
+<section id="timeline">
+  <h2><span class="num">02</span>The road to v8</h2>
+  <div class="timeline">
+    <div class="tl"><span class="v">v1–v4</span> <span class="d">— Two-call pilots (thinker + mover), heavy prompts. Frequent truncation, prompt bloat, illegal moves. Established the need for a <b>move sanitizer</b>.</span></div>
+    <div class="tl"><span class="v">v5</span> <span class="d">— State-triggered doctrine + the first big win: the <b>moves-first output contract</b>. Emit <code>moves</code> before any prose. Truncation stops killing turns.</span></div>
+    <div class="tl"><span class="v">v6</span> <span class="d">— Comprehension pass on top of v5: <b>grounded reflection</b>, <b>fog-gated hot-drops with a precomputed comb path</b>, <b>absorb-first-step</b> anti-self-crush. "Reason in your head" keeps it fast but reveals the dumbness ceiling.</span></div>
+    <div class="tl dead"><span class="v">v7 · split</span> <span class="d">— Two-call reasoning split (a dedicated thinker committing a DECISION directive). <b>Parked</b>: haiku thinks unbounded on the Agents API (~40s), broke the wall, no benefit. A documented negative result.</span></div>
+    <div class="tl win"><span class="v">v7 · inference</span> <span class="d">— The containment fix: move the strategic surface off the Agents API onto the Cortex <b>inference</b> API. Separate answer/think budgets + a JSON schema guarantee. <b>4/4 season wins, 0 fallbacks, 2.5–5× faster.</b></span></div>
+    <div class="tl win"><span class="v">v8 · worldview</span> <span class="d">— Fixing what the agent <i>knows</i>, not how hard it thinks. A true fork of the feeding layer: a 3-pillar prompt, the <b>collision blind-spot fix</b> (the agent literally never saw it was in a pile-up), enemy-probe + weapon-geometry blocks, and a redsign-poker doctrine. Validated: the reflection now <b>names</b> a collision and routes around it the next night (a single 3-way season is variance-dominated, so scores aren't the claim). <a href="chronicle/v8.html">Full detail →</a></span></div>
+    <div class="tl"><span class="v">v9</span> <span class="d">— The next bet: bounded <i>native</i> thinking on sonnet-4-6 via <code>reasoning.max_tokens</code>, on the same contained inference path. Make it think harder now that it finally knows what happened.</span></div>
+  </div>
+</section>
+
+<section id="finding1">
+  <h2><span class="num">03</span>Finding 1 — the token-opaque budget <span class="pill g">HUGE</span></h2>
+  <p class="lead">It was never the model. It was the <b>API surface</b> we were calling — and specifically <i>which controls that surface exposes over how the token budget is spent.</i></p>
+  <p>Snowflake Cortex exposes two different ways to talk to the same underlying model, and they have <b>fundamentally different budget mechanics</b>. We built v1–v6 on the wrong one for our task.</p>
+
+  <table>
+    <thead><tr><th>&nbsp;</th><th>Cortex <b>Agents</b> API</th><th>Cortex <b>Inference</b> API</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">endpoint</td><td class="mono">/api/v2/databases/.../agents/{name}:run</td><td class="mono">/api/v2/cortex/v1/chat/completions</td></tr>
+      <tr><td class="mono">transport</td><td>SSE stream of typed events</td><td>single request → single response</td></tr>
+      <tr><td>what runs server-side</td><td>an <b>orchestration loop</b>: think → (maybe tools) → answer, re-entrant</td><td>one forward pass: (optional think) → answer</td></tr>
+      <tr><td>budget model</td><td><b>one opaque budget</b> shared by think + tools + answer</td><td><b>three independent dials</b> (below)</td></tr>
+      <tr><td>your only external control</td><td>a <b>wallclock guillotine</b> (close the socket at N seconds)</td><td>hard token ceilings + a grammar constraint, all server-honored</td></tr>
+      <tr><td>best for</td><td>genuinely agentic, multi-step tool-looping tasks</td><td>bounded, must-be-complete, well-formed answers</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Why it <span style="color:var(--red)">didn't</span> work — the exact mechanism</h3>
+  <p>On the Agents API the model's response arrives as a <b>Server-Sent Event stream of <i>typed</i> events</b>. Reasoning tokens come on their own event type (<code>response.thinking.delta</code> / <code>response.thinking</code>); answer tokens come on separate <code>text</code> frames; tool calls interleave. The server-side orchestration loop decides, on its own, how many tokens to spend thinking <i>before it emits a single answer token</i> — and that decision is <b>not a parameter you can set</b>.</p>
+  <p>So the only lever the client actually has is a <b>guillotine</b>: keep reading the stream until a wallclock deadline, then close the socket. Our real invoker does exactly that (<code>agent/cortex_invoker.py</code>):</p>
+<pre><span class="k">for</span> line <span class="k">in</span> response.iter_lines():           <span class="c"># SSE frames, in arrival order</span>
+    <span class="k">if</span> time.time() - started &gt;= wallclock_cap_s:
+        wallclock_capped = <span class="k">True</span>
+        <span class="k">break</span>                                <span class="c"># <-- the ONLY budget control: cut the wire</span>
+
+    <span class="k">if</span> current_event.startswith(<span class="s">"response.thinking"</span>):
+        thinking_response += tok            <span class="c"># divert reasoning to a side buffer (OUR isolation)</span>
+        <span class="k">continue</span>                            <span class="c"># ...but the SERVER already spent the time/tokens</span>
+    agent_response += tok                    <span class="c"># the answer — may never arrive before the cut</span></pre>
+  <p>We can isolate the thinking tokens on <i>our</i> side (so they don't corrupt the answer buffer), but we cannot stop the <i>server</i> from spending the turn on them. Measured for haiku-4-5 with a reasoning-inviting prompt: <b>~27&nbsp;KB / ~30–44&nbsp;s of thinking arrives before the first answer token.</b> That makes the guillotine a lose-lose:</p>
+  <div class="grid2">
+    <div class="card bad"><span class="icon">cut early</span><h4>Cut at 18s</h4><p class="dim">You slice through the <i>thinking</i> stream. No answer frame ever arrived → empty/partial plan → fallback. (This is precisely why the v7 two-call thinker returned <code>[thinker=none]</code> 7/7 nights.)</p></div>
+    <div class="card bad"><span class="icon">cut late</span><h4>Cut at 50s</h4><p class="dim">The think finishes, but you've blown the turn's wallclock and the answer is rushed in whatever's left — often still truncated, and always slow.</p></div>
+  </div>
+  <p>There is <b>no cut point</b> that reliably yields "a bounded think <i>and</i> a complete answer," because the think:answer split is decided server-side and ordered think-first. The budget is "opaque" in the literal sense: <b>you cannot see or set how it is divided.</b></p>
+  <p>v6's "reason in your head" trick is the <i>only</i> other Agents-API setting available — it instructs the model to skip extended thinking, so the loop jumps straight to the answer: fast and complete, but you've thrown away reasoning entirely and get a <b>collator</b> of our precomputed hints, not a strategist. On the Agents API there is no middle setting. That binary — <i>runaway think</i> or <i>no think</i> — is the whole trap.</p>
+
+  <h3>Why it <span style="color:var(--green)">does</span> work now — the exact mechanism</h3>
+  <p>The inference <code>/chat/completions</code> API is a plain request/response with no orchestration loop, and it exposes the budget as <b>three independent, server-honored controls</b>:</p>
+  <table>
+    <thead><tr><th>Control</th><th>Mechanism (what the server actually does)</th><th>Measured</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">max_completion_tokens</td><td>a <b>hard ceiling on answer tokens only.</b> The model is trained to <i>self-budget</i> its output to fit — it plans a shorter answer rather than being sliced. <code>finish_reason</code> returns <code>"stop"</code> (finished) or <code>"length"</code> (hit ceiling) — a <b>true</b> truncation signal, not a guess.</td><td>haiku: complete 21-move plan in ~6–14s, never runs away</td></tr>
+      <tr><td class="mono">reasoning.max_tokens</td><td>a <b>separate</b> thinking budget on a <b>separate channel</b> (returned in <code>message.reasoning_content</code>). It draws from a different pool than the answer, so thinking <i>cannot</i> starve the answer. (Cortex requires <code>temperature=1</code> when it's enabled.)</td><td>sonnet-4-6 latency scales monotonically with the budget: 1500→~16s, 4000→~25s; answer untouched</td></tr>
+      <tr><td class="mono">response_format<br>(json_schema)</td><td><b>constrained decoding</b>: the server masks the token distribution at each step so only tokens that keep the output valid against the schema can be sampled. A well-formed object is produced <b>by construction</b> — it is not "please output JSON," it is "the decoder cannot emit invalid JSON."</td><td>0 malformed / truncated plans across 5 seasons</td></tr>
+    </tbody>
+  </table>
+  <p>Put together: the answer can never be starved by the think (different pools), the answer can never be sliced mid-structure (the model self-budgets to the ceiling), and even a minimal answer is a <b>valid plan</b> (constrained decoding). The whole client is ~150 lines, non-streaming because the call is now bounded (<code>orchestrator_2/cortex_chat.py</code>):</p>
+<pre>payload = {
+    <span class="s">"model"</span>: <span class="s">"claude-haiku-4-5"</span>,
+    <span class="s">"messages"</span>: [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: prompt}],
+    <span class="s">"max_completion_tokens"</span>: max_tokens,   <span class="c"># dial 1: HARD answer budget</span>
+    <span class="s">"response_format"</span>: response_format,    <span class="c"># dial 3: grammar-enforced shape</span>
+    <span class="c"># "reasoning": {"max_tokens": 1500},      # dial 2: bounded think (sonnet/opus)</span>
+    <span class="s">"stream"</span>: <span class="k">False</span>,
+}
+resp = requests.post(endpoint, headers=auth, json=payload, timeout=wallclock_cap_s)
+choice = resp.json()[<span class="s">"choices"</span>][0]
+<span class="k">return</span> {
+    <span class="s">"response"</span>:  choice[<span class="s">"message"</span>][<span class="s">"content"</span>],            <span class="c"># the complete plan</span>
+    <span class="s">"thinking"</span>:  choice[<span class="s">"message"</span>].get(<span class="s">"reasoning_content"</span>), <span class="c"># isolated, audit-only</span>
+    <span class="s">"capped"</span>:    choice[<span class="s">"finish_reason"</span>] == <span class="s">"length"</span>,     <span class="c"># real truncation signal</span>
+}</pre>
+  <div class="callout big">
+    <div class="tag">The one-sentence difference</div>
+    <p style="margin:0">The Agents API gives you <b>one knob</b> — a wallclock guillotine — over a think+answer budget the <i>server</i> divides; the inference API gives you <b>three knobs</b> — a hard answer budget, a separate think budget, and an enforced output grammar — that <i>you</i> divide. Reliable completion was never a prompting problem; it was a matter of calling the surface that exposes the budget you need to control.</p>
+  </div>
+
+  <h3>Making this knowledge universal at Snowflake</h3>
+  <p>This isn't a tabula quirk — it's a decision rule for <b>any</b> token-bounded agent on Cortex. The portable playbook:</p>
+  <ol>
+    <li><b>Pick the surface by task shape, not by habit.</b> If the deliverable is a <i>complete, well-formed answer</i> (a plan, a JSON payload, a classification, a structured extraction), use the <b>inference API</b>. Reserve the <b>Agents API</b> for genuinely autonomous, multi-step <i>tool-looping</i> work where you actually want the server to orchestrate and can tolerate variable-length runs.</li>
+    <li><b>Always set <code>max_completion_tokens</code></b> and treat <code>finish_reason == "length"</code> as your authoritative truncation signal. Never infer truncation from string heuristics.</li>
+    <li><b>Budget thinking explicitly</b> with <code>reasoning.max_tokens</code> (or <code>effort</code>) on a thinking-capable model — never let reasoning and answer share a pool. Remember <code>temperature=1</code> is required when reasoning is on.</li>
+    <li><b>Enforce output shape with <code>response_format: json_schema</code></b> (constrained decoding), not prose. Design around Cortex's strict-mode quirks: no <code>type</code>-arrays (no nullable-via-union), no <code>minItems</code>/<code>maxItems</code>, set <code>additionalProperties:false</code>, and keep only always-present fields in <code>required</code>.</li>
+    <li><b>Keep deterministic work out of the token budget.</b> Precompute everything that isn't a genuine judgment call (arithmetic, legal-move sets, candidate lists) and hand it in; spend the model's bounded budget only on the irreducible decision.</li>
+    <li><b>Ship it as one shared client with a stable envelope.</b> <code>CortexChatInvoker</code> returns the same <code>{response, thinking, capped, wallclock_capped, elapsed_ms}</code> shape as the Agents client, so any team can switch transports without touching downstream code. That envelope compatibility is what makes the fix a <i>library</i>, not a one-off.</li>
+  </ol>
+  <p class="dim">In short: standardize on "hard answer budget + separate think budget + enforced grammar" as the default contract for every Cortex agent that must return a complete answer. The opaque single-budget path should be the exception you opt <i>into</i> for tool-looping, not the default you back <i>into</i>.</p>
+</section>
+
+<section id="finding2">
+  <h2><span class="num">04</span>Finding 2 — the forced moves-first contract <span class="pill g">HUGE</span></h2>
+  <p class="lead">Make emitting the complete answer the first, cheapest, most-protected thing the model does — then let the API guarantee its shape and a deterministic pass guarantee its legality.</p>
+  <p>Moves-first began (v5) as a pure <b>truncation defense</b>: put <code>moves</code> first in the output so that if the model is cut off, the valuable part is already written. On the inference path it fuses with constrained decoding into something stronger — a <b>layered contract</b> where <i>something legal always ships</i>:</p>
+  <ol>
+    <li><b>Order:</b> <code>moves</code> is the first field emitted. Focuses the model on committing actions before prose, and preserves the payload under any early stop.</li>
+    <li><b>Precomputed hints:</b> ready-to-copy chains, comb paths, and supersede targets arrive as compact lines — the model <i>selects</i>, it doesn't derive from scratch.</li>
+    <li><b>Schema guarantee (v7):</b> <code>response_format: json_schema</code> makes a well-formed <code>moves</code> object valid <i>by construction</i> — enforced by the decoder, not requested in prose.</li>
+    <li><b>Move sanitizer:</b> a deterministic pass repairs game-illegal moves (out-of-bounds, non-adjacent steps, self-crush, orphaned chains) before submission.</li>
+    <li><b>Finisher:</b> on the Agents path, if JSON still truncates, a tiny second call completes it from the board state. (On the inference path this rarely fires — the cap + self-budgeting prevent the truncation.)</li>
+    <li><b>Heuristic net:</b> if everything above fails, a deterministic policy plays the turn — a dead turn becomes a decent turn.</li>
+  </ol>
+
+  <h3>Shape ≠ legality — why the schema alone isn't enough</h3>
+  <p>This is the subtle part builders miss. Constrained decoding guarantees the output is a <b>syntactically valid</b> object of the right types. It <i>cannot</i> express the game's <b>legality</b> rules — those aren't a grammar:</p>
+  <ul>
+    <li>a step must be Manhattan-1 from the harvester's <i>current</i> cell (a runtime fact the schema can't see);</li>
+    <li>moves must follow the <code>drop → step* → pickup</code> grammar <i>per unit</i>;</li>
+    <li>a drop must not crush your own live probe.</li>
+  </ul>
+  <p>So <code>{"a":"step","unit":"harvester_p1","to":[30,2]}</code> is <b>schema-valid and game-illegal</b> if the harvester is at (10,10). That is exactly why the two guarantees are kept <b>deliberately separate</b>: the schema owns <b>shape</b> (the object exists and is parseable), the sanitizer + engine own <b>legality</b> (the moves are playable). Collapsing them into one layer is the trap — you'd either over-constrain the schema (and hit Cortex strict-mode rejections) or trust the model to self-enforce runtime rules (which it doesn't).</p>
+
+  <h3>Does the schema fight moves-first? No — they reinforce</h3>
+  <p>A fair worry: constrained decoding fixes the emission order to the schema's property order, so does it override our moves-first discipline? In practice they compose. We put <code>moves</code> at the front of the schema's properties, so the decoder emits it first anyway. And the truncation-safety <i>reason</i> for ordering largely dissolves on this path — the whole object is guaranteed complete (<code>finish_reason</code> tells you), so ordering is no longer load-bearing for completeness. It survives as a <b>focusing</b> device (commit actions, then explain) and as defense-in-depth for the Agents path. Ordering + schema = belt and braces, not a conflict.</p>
+
+  <h3>Designing the schema for Cortex strict mode</h3>
+  <p>Cortex's strict json-schema mode rejects several common constructs; the schema is shaped around them empirically:</p>
+  <table>
+    <thead><tr><th>Cortex rejects</th><th>Consequence for us</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">type: ["object","null"]<br>(nullable via union)</td><td>can't make a field "object-or-null" → we make optional things <b>optional</b> (absent), not nullable. (This is why <code>reflection_on_last_night</code> is omitted on night 1 rather than sent as <code>null</code>.)</td></tr>
+      <tr><td class="mono">minItems / maxItems</td><td>can't force "≥1 move" at the schema level → the <b>sanitizer + heuristic net</b> own the empty-moves case instead.</td></tr>
+      <tr><td>heterogeneous array items</td><td>fine — as long as only the always-present field is <code>required</code> and the rest are optional.</td></tr>
+    </tbody>
+  </table>
+  <p>Hence the move item requires only <code>a</code> (the action); <code>unit</code>/<code>at</code>/<code>to</code> are optional so one schema covers all four verbs, and the sanitizer fills/repairs the rest:</p>
+<pre><span class="c"># chat_schema.py — one loose item type covers drop/step/pickup/probe.</span>
+_MOVE_ITEM = {
+  <span class="s">"type"</span>: <span class="s">"object"</span>, <span class="s">"additionalProperties"</span>: <span class="k">False</span>,
+  <span class="s">"properties"</span>: {
+    <span class="s">"a"</span>: {<span class="s">"type"</span>: <span class="s">"string"</span>, <span class="s">"enum"</span>: [<span class="s">"drop"</span>,<span class="s">"step"</span>,<span class="s">"pickup"</span>,<span class="s">"probe"</span>]},
+    <span class="s">"unit"</span>: {<span class="s">"type"</span>: <span class="s">"string"</span>}, <span class="s">"at"</span>: _CELL, <span class="s">"to"</span>: _CELL,
+  },
+  <span class="s">"required"</span>: [<span class="s">"a"</span>],          <span class="c"># shape only; legality is the sanitizer's job</span>
+}</pre>
+  <div class="callout big">
+    <div class="tag">The contract, in one line</div>
+    <p style="margin:0">The <b>API</b> guarantees the answer <i>exists and parses</i>; the <b>sanitizer + engine</b> guarantee it's <i>playable</i>; the <b>heuristic net</b> guarantees a turn <i>ships regardless</i>. Never make one layer do another's job.</p>
+  </div>
+</section>
+
+<section id="v6">
+  <h2><span class="num">05</span>What v6 actually changed <span class="pill">comprehension</span></h2>
+  <p class="dim">v6 kept the moves-first win and added three understanding upgrades. (Full detail: <code>harnesses/CHANGES_TABULA_v6_v7.md</code>.)</p>
+  <h3>Grounded reflection</h3>
+  <p>v5 authored its "what happened last night" from memory and routinely got it wrong. v6 feeds the <b>engine-resolved truth</b> — actual banked points and concrete losses (chaff jam, probe crush, dawn crash) — and the schema forces the agent to echo the exact number and name the gap cause. It can no longer invent an outcome.</p>
+  <h3>Fog-gated hot-drops with a precomputed comb path</h3>
+  <p>A "hot drop" only makes sense if the target is genuinely fogged. v6 gates on that (<code>target_in_fog</code>) and precomputes a <b>blind serpentine comb</b> over the probe's radius-4 disk — staying in-disk, avoiding known green, biased toward value — so a hot-drop becomes a ready-to-copy chain instead of a 2-step gesture.</p>
+  <h3>Absorb-first-step (anti self-crush)</h3>
+  <p>Dropping a harvester onto your own live probe crushes it. When a harvest chain follows, v6's sanitizer <b>absorbs the first step into the drop</b> — rerouting the drop to the first step's cell — sparing the probe <i>and</i> keeping the chain intact.</p>
+</section>
+
+<section id="v7">
+  <h2><span class="num">06</span>What v7 actually changed <span class="pill">containment</span></h2>
+  <div class="grid2">
+    <div class="card bad">
+      <span class="icon">✗ parked</span>
+      <h4>Two-call reasoning split</h4>
+      <p class="dim">A dedicated thinker commits a tiny DECISION directive; the mover executes it. Fully built + tested, kept behind <code>TABULA_V7_MODE=split</code>. Parked as a negative result: haiku thinks unbounded on the Agents API, so an 18s cap truncated the thinker every night and a 50s cap broke the wall while landing a directive only ~2/7 nights — with a score <i>regression</i> (980 vs 1768).</p>
+    </div>
+    <div class="card good">
+      <span class="icon">✓ shipped</span>
+      <h4>Inference-API mover</h4>
+      <p class="dim">The containment fix from Finding 1: <code>CortexChatInvoker</code> + <code>MOVES_RESPONSE_FORMAT</code>, wired behind <code>TABULA_V7_MOVER_API=chat</code>. Hard answer cap, separate think channel, schema-guaranteed moves. This is the winning path.</p>
+    </div>
+  </div>
+  <p class="dim" style="margin-top:16px">The failed split matters: it's the experiment that <i>isolated the root cause</i>. Watching the thinker overrun its budget on the Agents API is what proved the problem was the opaque budget, not the model — which pointed directly at the inference API as the cure.</p>
+</section>
+
+<section id="evidence">
+  <h2><span class="num">07</span>Evidence — four seasons, inference mover vs heuristic</h2>
+  <p class="dim">haiku-4-5 on the inference path (<code>TABULA_V7_MOVER_API=chat</code>), 7 nights each, vs the deterministic RED_HARVEST heuristic. Same engine, four seeds.</p>
+  <table>
+    <thead><tr><th>Seed</th><th>p1 (tabula v7, inference)</th><th>p2 (heuristic)</th><th>Winner</th><th>Fallbacks</th><th>Turn time</th></tr></thead>
+    <tbody>
+      <tr class="win"><td class="mono">42</td><td class="mono">3591</td><td class="mono">986</td><td>p1</td><td class="mono">0</td><td class="mono">~12s</td></tr>
+      <tr class="win"><td class="mono">7</td><td class="mono">1271</td><td class="mono">134</td><td>p1</td><td class="mono">0</td><td class="mono">~13s</td></tr>
+      <tr class="win"><td class="mono">99</td><td class="mono">610</td><td class="mono">26</td><td>p1</td><td class="mono">0</td><td class="mono">~13s</td></tr>
+      <tr class="win"><td class="mono">2024</td><td class="mono">1068</td><td class="mono">16</td><td>p1</td><td class="mono">0</td><td class="mono">~12s</td></tr>
+    </tbody>
+  </table>
+  <p><b>4/4 decisive wins. Zero fallbacks all season. Every plan complete and schema-valid.</b> Compare the Agents-API baseline (~30–60s/turn, occasional truncation fallbacks) — the containment fix is 2.5–5× faster and never drops a turn. The <i>containment</i> is proven; the score margins (a stochastic model at n=1/seed) are corroborating, not conclusive.</p>
+  <p class="dim">A fifth season (seed 2024, re-run <i>after</i> the reflection-schema fix in §09·2) also won cleanly — <span class="mono">1518–448</span>, 0 fallbacks — but that game tree happened not to feature chaff, so it validates the containment + the restored field, not chaff-avoidance behavior. The controlled chaff test is still outstanding.</p>
+</section>
+
+<section id="intel">
+  <h2><span class="num">08</span>Signs of real intelligence</h2>
+  <p class="lead">The point of the win isn't the score — it's that with a complete-plan guarantee, genuine strategy finally survives to the board. Verbatim from the season logs:</p>
+
+  <h3>1 · Coordinate-level RED chains with value estimates</h3>
+  <p class="dim">Not "harvest some red" — explicit paths with point predictions, walking dense vein seams.</p>
+<pre><span class="c">seed 7, day 4</span>
+[plan=Execute Chain A (25,4)&rarr;(26,4)&rarr;(27,4)&rarr;(28,4)&rarr;(29,4)&rarr;(29,5)
+      to bank ~800 red pts f...] [predicted=<span class="n">high</span>]
+<span class="c">seed 7, day 6</span>
+[plan=Execute Chain C (8,4)&rarr;(8,5)&rarr;(8,6)&rarr;(7,6)&rarr;(7,5)&rarr;(7,4)
+      to bank ~1100 red pts...] [predicted=<span class="n">high</span>]</pre>
+
+  <h3>2 · Reading a probe's revealed disk and combing the seam</h3>
+  <p class="dim">It drops into a specific probe's disk and follows the value, banking 5–6 parcels a night, repeatedly.</p>
+<pre><span class="c">seed 99, day 2</span>
+[plan=Drop harvester_p1 into probe_p1_1 disk at (4,5), walk the
+      high-value vein seam n...]        &rarr; <span class="s">banked +5</span>
+<span class="c">seed 99, day 3</span>
+[plan=Drop harvester_p1 into probe_p1_3 disk at (20,14), walk the
+      vein seam southward...]          &rarr; <span class="s">banked +6</span></pre>
+
+  <h3>3 · The last-night probe-supersede doctrine fires — in all three seeds</h3>
+  <p class="dim">On the final night, a probe landing on an enemy probe destroys and replaces it. The agent deliberately blinds the opponent's frontier. This state-triggered doctrine (from v5) executed correctly every time:</p>
+<pre><span class="c">seed 7, day 7</span>   probe probe_p1_13 <span class="b">superseded</span> probe_p2_13 at (5,7)
+                probe probe_p1_14 <span class="b">superseded</span> probe_p2_10 at (6,22)
+<span class="c">seed 99, day 7</span>  probe probe_p1_10 <span class="b">superseded</span> probe_p2_12 at (5,24)
+                probe probe_p1_11 <span class="b">superseded</span> probe_p2_11 at (3,7)
+<span class="c">seed 2024, day 7</span> probe probe_p1_11 <span class="b">superseded</span> probe_p2_14 at (26,8)</pre>
+
+  <h3>4 · Two-night probe→harvest sequencing (an honest low prediction)</h3>
+  <p class="dim">When disks are exhausted, it scouts fresh fog one night — and correctly predicts <code>low</code> because that night banks nothing — then drops into that new disk the next night.</p>
+<pre><span class="c">seed 99, day 4</span> [plan=Launch probe_p1_5 into fresh fog at (28,13) to
+                expand frontier vision...] [predicted=<span class="r">low</span>]
+<span class="c">seed 99, day 5</span> [plan=Drop harvester_p1 into probe_p1_6 disk at (28,13),
+                walk the visible trace seam...] &rarr; <span class="s">banked +6</span></pre>
+  <p class="dim">Multi-harvester coordination (two chains, two units in one night) and calibrated <code>low/medium/high</code> predictions show up consistently alongside these.</p>
+</section>
+
+<section id="gaps">
+  <h2><span class="num">09</span>Where it's still dumb (the honest part)</h2>
+  <p class="lead">A complete plan is not a smart plan. The same three failures recur across all seeds.</p>
+
+  <h3>1 · Chaff blindness → dawn crashes</h3>
+  <p>The heuristic builds a <b>chaff flare</b> and fires it during an egress window, cancelling the agent's action slots. In every seed the agent kept scheduling its pickup inside that window, got jammed, and <b>lost a loaded harvester to Aurora destruction at dawn</b> — even after being chaffed the night before.</p>
+<pre><span class="c">seed 2024, day 6 AND day 7 — chaffed both nights, never adapted:</span>
+[H05] p2 fired orbital chaff flare (hours 5..7)
+[H05] p1: action cancelled by orbital chaff @ hour 5
+[H06] p1: action cancelled by orbital chaff @ hour 6
+[H07] p1: action cancelled by orbital chaff @ hour 7
+<span class="r">[ERR] p1 Aurora destruction — harvester harvester_p1 unrecovered
+      at (15,21); 4 cargo square(s) spilled.</span>
+<span class="c">(same pattern: seed 7 lost harvester_p1 @ (19,2), 4 cargo;
+             seed 99 lost harvester_p1 @ (20,9), 3 cargo.)</span></pre>
+
+  <h3>2 · The reflection channel was missing on the winning path <span class="pill g">now fixed</span></h3>
+  <div class="callout warn">
+    <div class="tag">Root cause of #1 — diagnosed, then fixed</div>
+    <p style="margin:0">The inference schema (<code>chat_schema.py</code>) originally <i>omitted</i> <code>reflection_on_last_night</code> — so in strict json-schema mode the field was silently dropped and v6's grounded-reflection ("you got chaffed, move your egress") <b>never reached the model on the chat path.</b> The whole pipeline behind it still ran (the recorder fills the real numbers; the prompt injects the REFLECT block) — only the schema declaration was missing, severing the night-to-night learning loop. <b>Fix shipped:</b> the field is now in the schema (optional, so night 1 can omit; live-verified the model emits a correct grounded reflection). <b>Honest caveat:</b> this restores the <i>capability</i>; it is not yet proven to change chaff <i>behavior</i> — that needs a controlled test against a chaff-building opponent.</p>
+  </div>
+
+  <h3>3 · Unit-id / pickup confusion</h3>
+  <p class="dim">On one final night the agent scheduled steps and a pickup on <code>harvester_p1_2</code> (which was "not on surface" / "already orbital") while the real loaded harvester never got picked up — compounding the chaff loss.</p>
+<pre><span class="c">seed 2024, day 7</span>
+<span class="r">[ERR] p1: step harvester_p1_2 &rarr; (14,20) — not on surface</span>
+<span class="r">[ERR] p1: pickup harvester_p1_2 — already orbital</span>
+<span class="c">... meanwhile harvester_p1 (loaded) is never picked up &rarr; crashes.</span></pre>
+  <p>Notably, the agent still won every game: its RED-chain combing + supersede doctrine starved the opponent of RED (p2 stranded at 16–134 points). But these gaps are exactly the ceiling that the v8 worldview restructure (complete the picture) and then bounded native thinking (v9, add depth) — on top of the now-restored reflection loop — are meant to break.</p>
+</section>
+
+<section id="v8">
+  <h2><span class="num">10</span>v8 shipped the worldview — v9 is the bet on <i>native</i> thinking</h2>
+  <div class="callout big">
+    <div class="tag">What v8 actually shipped</div>
+    <p style="margin:0">Before making the agent think harder, we checked whether it was even being <i>told</i> what happened to it — and it wasn't. v8 became the <b>worldview</b> release: a 3-pillar prompt restructure, the <b>collision blind-spot fix</b> (the agent recited the collision rule on day 7 and dove onto the mutual-kill cell anyway, because on the nights it collided it was never told), plus enemy-probe / weapon-geometry blocks and a redsign-poker doctrine. It won the seed-42 three-way. <a href="chronicle/v8.html"><b>Read the full v8 story →</b></a></p>
+  </div>
+  <p class="lead">v7 proved <b>containment</b>; v8 fixed what the agent <b>knows</b>. <b>v9</b> asks the next question: now that the answer is safe <i>and</i> the picture is complete, can we spend a <i>bounded, real</i> think to make the answer <b>smarter</b> — without reopening the runaway wound?</p>
+  <p>v7's mover is still <code>haiku</code>, which has no native thinking on this API — it answers within the cap, competently, but it doesn't <i>reason</i>. The gaps in §09 (chaff pre-emption, unit-identity discipline, multi-night planning) are depth problems, and depth is what a thinking-capable model buys. v9 (planned) switches the mover to <code>claude-sonnet-4-6</code> and turns on the <b>second dial</b> from Finding 1:</p>
+<pre>payload = {
+    <span class="s">"model"</span>: <span class="s">"claude-sonnet-4-6"</span>,        <span class="c"># thinking-capable (haiku is not)</span>
+    <span class="s">"messages"</span>: [...],
+    <span class="s">"reasoning"</span>: {<span class="s">"max_tokens"</span>: 4000},    <span class="c"># dial 2: a BOUNDED real think</span>
+    <span class="s">"max_completion_tokens"</span>: M,           <span class="c"># dial 1: answer budget, untouched by the think</span>
+    <span class="s">"response_format"</span>: MOVES_RESPONSE_FORMAT,  <span class="c"># dial 3: shape still guaranteed</span>
+    <span class="s">"temperature"</span>: 1,                      <span class="c"># required whenever reasoning is on</span>
+}</pre>
+  <p>The critical difference from the parked v7 two-call split: there, the "think" was unbounded (haiku on the Agents API, ~40s, no way to cap it). Here it is a <b>hard sub-budget on a separate channel</b> — the exact mechanism that made the answer safe now makes the <i>think</i> safe. We already measured that sonnet honors it: latency scales monotonically with the budget (1500→~16s, 4000→~25s), and the answer budget is never touched.</p>
+
+  <h3>What actually changes vs v7 (and what doesn't)</h3>
+  <div class="grid2">
+    <div class="card good"><h4>Changes</h4><p class="dim">Mover model → sonnet-4-6; add a bounded <code>reasoning.max_tokens</code> pass; the isolated thinking trace gets persisted to <code>SOC_AGENT_INVOCATION</code> for audit; instructions move inline as a system message (no server-side agent spec, since tabula uses no tools).</p></div>
+    <div class="card good"><h4>Stays identical</h4><p class="dim">Everything harness-side: the v8 worldview prompt, precomputed hints, grounded reflection, the move sanitizer, the finisher, the heuristic net, and the json-schema shape guarantee. v9 is a <i>transport + model</i> swap behind the same envelope — not a rewrite.</p></div>
+  </div>
+
+  <h3>Why it's a bet, not a slam-dunk</h3>
+  <p>Native thinking is slower and pricier per token, so it has to <b>earn</b> its place. v9 ships only if it clears explicit gates:</p>
+  <ul>
+    <li><b>Quality is the whole point:</b> the reasoning trace must show <i>genuine</i> chaff anticipation / targeting logic that <b>demonstrably changes the moves</b> — not post-hoc rationalization of what haiku would have done anyway.</li>
+    <li><b>Wallclock:</b> sonnet + think must fit the accepted ceiling (55s, or a deliberately raised one justified by the quality gain). Bounded via <code>reasoning.max_tokens</code> + <code>effort</code>.</li>
+    <li><b>Cost:</b> quantified per season; only worth it if quality clearly wins.</li>
+    <li><b>It must beat both v7 and v8</b> on the full seed set (42 / 7 / 99 / 2024) in a three-way A/B — else v8 stays champion and v9 is shelved <i>with its findings recorded</i>, exactly like the two-call split.</li>
+  </ul>
+  <p class="dim">The elegance is that v9 needs no new invention — it's Finding 1's three dials, with dial 2 finally turned up on a model that can use it. Containment made the answer trustworthy; the v8 worldview made the picture complete; only because of both can we now safely add depth.</p>
+</section>
+
+<section id="lessons">
+  <h2><span class="num">11</span>What we'd tell the next builder</h2>
+  <div class="grid2">
+    <div class="card good"><h4>Separate the budgets, at the API</h4><p class="dim">Answer tokens, think tokens, and output shape must be three independent guarantees. A single opaque budget is the root of "it never finished."</p></div>
+    <div class="card good"><h4>Make the answer the cheapest act</h4><p class="dim">Moves-first + schema-enforced shape means something legal always ships. Protect the deliverable structurally, not with polite instructions.</p></div>
+    <div class="card good"><h4>Precompute the deterministic, reserve tokens for the strategic</h4><p class="dim">Hand the model ready chains, comb paths, supersede targets. Don't spend its budget re-deriving arithmetic.</p></div>
+    <div class="card good"><h4>Keep the learning loop in the schema</h4><p class="dim">A field you drop from the schema is a capability you delete. The chaff blindness is a missing <code>reflection</code> field, nothing more.</p></div>
+    <div class="card bad"><h4>Negative results are load-bearing</h4><p class="dim">The parked two-call split is what isolated the opaque-budget root cause. Keep failed experiments behind a flag as evidence.</p></div>
+    <div class="card bad"><h4>A complete plan ≠ a smart plan</h4><p class="dim">Containment gets strategy to the board reliably; the v8 worldview makes sure the strategy is reasoning about the truth. Depth (anticipating chaff, managing unit identity) is the next mountain — v9.</p></div>
+  </div>
+
+  <blockquote class="quote">"An agent — haiku or anyone — needs to be able to provide an answer in 15s, 30s, 60s, or whatever token limit, and not twist its thinking. We needed a cohesive, contained way of extracting raw thinking from the model over this strategic surface." — the brief that drove Finding 1.</blockquote>
+</section>
+
+<footer>
+  Sea of Colours · agent build chronicle · tabula v1→v8 · companion doc: <code>orchestrator_2/harnesses/CHANGES_TABULA_v6_v7.md</code>
+</footer>
+
+</div>
+</body>
+</html>

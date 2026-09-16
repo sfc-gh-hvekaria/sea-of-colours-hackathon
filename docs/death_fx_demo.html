@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Harvester Death FX</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#0a0e16;
+  height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  font-family:monospace;color:#8899aa;
+}
+.label{
+  font-size:11px;letter-spacing:3px;color:#2a3f55;
+  margin-bottom:28px;text-transform:uppercase;
+}
+.stage{
+  position:relative;
+  width:360px;height:360px;
+  display:flex;align-items:center;justify-content:center;
+}
+canvas.xfx{
+  position:absolute;top:0;left:0;
+  pointer-events:none;z-index:10;
+}
+.cell{
+  width:44px;height:44px;
+  background:#162030;
+  border:1px solid #2a4060;
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:#4a9fd4;
+  position:relative;z-index:2;
+  user-select:none;
+  text-shadow:0 0 8px #2a7faa;
+}
+button{
+  margin-top:32px;
+  padding:11px 36px;
+  background:#0d1a28;
+  color:#4a9fd4;
+  border:1px solid #1e4060;
+  font-family:monospace;font-size:13px;
+  cursor:pointer;letter-spacing:2px;text-transform:uppercase;
+  transition:all .12s;
+}
+button:not(:disabled):hover{background:#162030;border-color:#3a7090;}
+button:disabled{opacity:.45;cursor:default;}
+.hint{margin-top:10px;font-size:10px;color:#1e3040;letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<div class="label">Harvester Death FX · Demo</div>
+<div class="stage" id="stage">
+  <canvas class="xfx" id="xfx"></canvas>
+  <div class="cell">⬡</div>
+</div>
+<button id="btn">TRIGGER DEATH</button>
+<div class="hint">click to replay</div>
+
+<script>
+'use strict';
+
+const stage   = document.getElementById('stage');
+const xfxEl   = document.getElementById('xfx');
+const btn     = document.getElementById('btn');
+const xctx    = xfxEl.getContext('2d');
+const CELL_PX = 44;
+
+function resize() {
+  xfxEl.width  = stage.offsetWidth;
+  xfxEl.height = stage.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Explosion — exact copy of game's spawnPixelExplosion logic ────
+// (adapted to use stage-relative coords instead of collisionFxLayer)
+function addExplosion(stageX, stageY, colors, delayMs) {
+  const P    = Math.max(2, Math.round(CELL_PX / 6));
+  const R    = 3;
+  const LIFE = 2;
+  const palette = colors.length ? colors : ['#ffffff'];
+
+  function ringDensity(d) {
+    const t = [1.0, 1.0, 0.95, 0.85, 0.70, 0.55, 0.40, 0.25];
+    return t[Math.min(d, t.length - 1)];
+  }
+
+  const pixels = [];
+  for (let dy = -R; dy <= R; dy++) {
+    for (let dx = -R; dx <= R; dx++) {
+      const d = Math.abs(dx) + Math.abs(dy);
+      if (d > R) continue;
+      if (d === 0 || Math.random() < ringDensity(d)) {
+        pixels.push({ dx, dy, d, color: palette[Math.floor(Math.random() * palette.length)] });
+      }
+    }
+  }
+  const sparks = [];
+  for (let dy = -(R + 1); dy <= R + 1; dy++) {
+    for (let dx = -(R + 1); dx <= R + 1; dx++) {
+      if (Math.abs(dx) + Math.abs(dy) !== R + 1) continue;
+      if (Math.random() < 0.60) {
+        sparks.push({ dx, dy, color: palette[Math.floor(Math.random() * palette.length)] });
+      }
+    }
+  }
+
+  const size = (2 * (R + 2)) * P + P;
+  const half = Math.floor(P / 2);
+  const ox   = size / 2;
+  const oy   = size / 2;
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = size;
+  canvas.height = size;
+  canvas.style.position        = 'absolute';
+  canvas.style.left            = (stageX - size / 2) + 'px';
+  canvas.style.top             = (stageY - size / 2) + 'px';
+  canvas.style.pointerEvents   = 'none';
+  canvas.style.imageRendering  = 'pixelated';
+  canvas.style.zIndex          = '6';
+
+  setTimeout(function() {
+    stage.appendChild(canvas);
+    const ctx2  = canvas.getContext('2d');
+    let   frame = 0;
+    const timer = setInterval(function() {
+      ctx2.clearRect(0, 0, size, size);
+      for (let i = 0; i < pixels.length; i++) {
+        const px = pixels[i];
+        const age = frame - px.d;
+        if (age < 0 || age >= LIFE) continue;
+        ctx2.fillStyle = age === 0 ? '#ffffff' : px.color;
+        ctx2.fillRect(ox + px.dx * P - half, oy + px.dy * P - half, P, P);
+      }
+      const si = frame - (R - 1);
+      if (si >= 0 && si < LIFE) {
+        for (let i = 0; i < sparks.length; i++) {
+          const sp = sparks[i];
+          ctx2.fillStyle = si === 0 ? '#ffffff' : sp.color;
+          ctx2.fillRect(ox + sp.dx * P - half, oy + sp.dy * P - half, P, P);
+        }
+      }
+      frame++;
+      if (frame > R + LIFE + 1) {
+        clearInterval(timer);
+        canvas.remove();
+        // all explosions done — re-enable button after last expected one
+        checkDone();
+      }
+    }, 75);
+  }, delayMs);
+}
+
+// ── Red X ─────────────────────────────────────────────────────────
+const X_FONT = (function() {
+  const c = document.createElement('canvas'), x = c.getContext('2d');
+  x.font = '600 18px ui-monospace, Cascadia Code, Fira Code, monospace';
+  const m = x.measureText('X');
+  return {
+    rx: m.width / 2,
+    ry: (m.actualBoundingBoxAscent + Math.max(0, m.actualBoundingBoxDescent)) / 2,
+    lw: Math.max(3, 18 * 0.26),
+  };
+})();
+
+let xRaf = null;
+let xDone = false;
+
+function addRedX(cx, cy, delayMs) {
+  var rx_f = X_FONT.rx, ry_f = X_FONT.ry;
+  var rx_s = CELL_PX / 2, ry_s = CELL_PX / 2;
+  var lw = X_FONT.lw;
+  var GROW = 180, SHRINK = 140, HOLD = 120, FADE = 220;
+  var t0 = null, W = xfxEl.width, H = xfxEl.height;
+
+  setTimeout(function() {
+    xDone = false;
+    function tick(ts) {
+      if (t0 === null) t0 = ts;
+      var el = ts - t0;
+      if (el >= GROW + SHRINK + HOLD + FADE) {
+        xctx.clearRect(0, 0, W, H);
+        xDone = true; checkDone(); return;
+      }
+      xctx.clearRect(0, 0, W, H);
+      xctx.save();
+      xctx.strokeStyle = '#ff0000'; xctx.lineWidth = lw; xctx.lineCap = 'butt';
+      if (el < GROW) {
+        // Phase 1: 4 arms grow from corner points toward centre
+        var e = 1 - Math.pow(1 - el / GROW, 3);
+        var frac = 1 - e;
+        [[-1,-1],[+1,-1],[+1,+1],[-1,+1]].forEach(function(s) {
+          xctx.beginPath();
+          xctx.moveTo(cx + s[0]*rx_s, cy + s[1]*ry_s);
+          xctx.lineTo(cx + s[0]*rx_s*frac, cy + s[1]*ry_s*frac);
+          xctx.stroke();
+        });
+      } else {
+        // Phase 2: contracts to glyph size, holds, then fades out
+        var p2 = Math.min(1, (el - GROW) / SHRINK);
+        var e2 = 1 - Math.pow(1 - p2, 3);
+        var ex = rx_s + (rx_f - rx_s) * e2, ey = ry_s + (ry_f - ry_s) * e2;
+        var fadeStart = GROW + SHRINK + HOLD;
+        xctx.globalAlpha = el > fadeStart ? Math.max(0, 1 - (el - fadeStart) / FADE) : 1;
+        xctx.beginPath(); xctx.moveTo(cx-ex,cy-ey); xctx.lineTo(cx+ex,cy+ey); xctx.stroke();
+        xctx.beginPath(); xctx.moveTo(cx+ex,cy-ey); xctx.lineTo(cx-ex,cy+ey); xctx.stroke();
+      }
+      xctx.restore();
+      xRaf = requestAnimationFrame(tick);
+    }
+    xRaf = requestAnimationFrame(tick);
+  }, delayMs);
+}
+
+// ── Done detection ─────────────────────────────────────────────────
+let pendingExplosions = 0;
+
+function checkDone() {
+  pendingExplosions--;
+  if (pendingExplosions <= 0 && xDone) {
+    btn.textContent = 'TRIGGER DEATH';
+    btn.disabled    = false;
+  }
+}
+
+// ── triggerDeath ──────────────────────────────────────────────────
+btn.addEventListener('click', triggerDeath);
+
+function triggerDeath() {
+  btn.disabled    = true;
+  btn.textContent = '· · ·';
+
+  if (xRaf) { cancelAnimationFrame(xRaf); xRaf = null; }
+  xctx.clearRect(0, 0, xfxEl.width, xfxEl.height);
+  xDone = false;
+  stage.querySelectorAll('canvas:not(#xfx)').forEach(function(c) { c.remove(); });
+
+  const W  = xfxEl.width, H = xfxEl.height;
+  const cx = W / 2,       cy = H / 2;
+  const C  = CELL_PX;
+
+  // Player colours — p1 blue, p2 orange (game defaults)
+  const P1A = '#4a9fd4', P1B = '#2a7faa';
+  const P2A = '#d4834a', P2B = '#aa5a2a';
+
+  // 3 explosions total: 1 central + 2 random scatter
+  pendingExplosions = 4; // 3 explosions + 1 for X
+
+  addExplosion(cx, cy, [P1A, P1B, P2A, P2B], 0);
+  for (var i = 0; i < 2; i++) {
+    var ang = Math.random() * Math.PI * 2;
+    var d   = C * (0.3 + Math.random() * 0.4);
+    addExplosion(cx + Math.cos(ang)*d, cy + Math.sin(ang)*d,
+                 i === 0 ? [P1A, P1B] : [P2A, P2B], 90 + i * 130);
+  }
+
+  // X arms close in 90ms after central burst; xDone flag + pendingExplosions handles re-enable
+  addRedX(cx, cy, 90);
+}
+</script>
+</body>
+</html>

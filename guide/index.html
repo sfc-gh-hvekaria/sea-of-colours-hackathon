@@ -1,0 +1,2161 @@
+<!doctype html>
+<!--
+  sea_of_colours · install guide + tutorial
+
+  Self-contained on purpose: an attendee opens this straight out of the
+  downloaded folder, before Python exists on the machine, so it may not
+  depend on a build step, a server, or any sibling asset except the
+  manual it links to (../manual/index.html#tab=<name>).
+
+  Palette, fonts and frame chrome are lifted from manual/manual.css so
+  the two documents read as one publication. Structure — fixed nav,
+  scroll progress, numbered scenes, a stepped walkthrough — mirrors the
+  Snowflake "agentic loop" deck.
+
+  The clone URL is tagged data-repo-url in §01 — update it there if the
+  repo ever moves or goes public.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sea_of_colours · install guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ══ tokens — copied from manual/manual.css so the guide and the
+         manual can sit side by side without a seam ══════════════════ */
+      :root {
+        --bg: #0d0d12;
+        --panel-bg: #0d0d12;
+        --panel-raise: #131319;
+        --fg: #f0f6fc;
+        --dim: #a8b1bd;
+        --frame: #4a4a5a;
+        --frame-soft: #2a2a35;
+
+        --green: #4dca5e;
+        --red: #ff8585;
+        --blue: #7ab8ff;
+        --amber: #ffc857;
+
+        --tile-void: rgb(14, 11, 22);
+        --tile-red: rgb(255, 0, 0);
+        --tile-green: rgb(63, 185, 80);
+        --tile-blue: rgb(59, 143, 224);
+
+        --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas',
+          'Menlo', ui-monospace, monospace;
+        --retro: 'VT323', 'JetBrains Mono', ui-monospace, monospace;
+
+        --topbar-h: 34px;
+        --nav-h: 40px;
+      }
+
+      * { box-sizing: border-box; }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: calc(var(--topbar-h) + var(--nav-h) + 18px);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--mono);
+        font-size: 14px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a { color: var(--blue); text-decoration: none; border-bottom: 1px dotted currentColor; }
+      a:hover { color: var(--green); }
+      b, strong { font-weight: 500; color: var(--fg); }
+      .dim { color: var(--dim); }
+      .fg-green { color: var(--green); }
+      .fg-red { color: var(--red); }
+      .fg-blue { color: var(--blue); }
+
+      /* ══ top bar — the manual's shell prompt ══════════════════════ */
+      .gd-topbar {
+        position: fixed;
+        inset: 0 0 auto 0;
+        height: var(--topbar-h);
+        display: flex;
+        align-items: center;
+        gap: 0.5ch;
+        padding: 0 14px;
+        background: var(--panel-bg);
+        border-bottom: 1px solid var(--frame);
+        font-size: 13px;
+        z-index: 60;
+      }
+      .prompt-sigil { color: var(--green); }
+      .prompt-caret {
+        color: var(--green);
+        animation: gd-blink 1.1s steps(2, start) infinite;
+      }
+      @keyframes gd-blink { to { opacity: 0; } }
+      .gd-spacer { flex: 1; }
+      .gd-topbar .gd-manual-link {
+        border: 1px solid var(--frame);
+        border-bottom-style: solid;
+        color: var(--dim);
+        padding: 2px 9px;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+      }
+      .gd-topbar .gd-manual-link:hover { color: var(--green); border-color: var(--green); }
+
+      /* ══ scroll progress ══════════════════════════════════════════ */
+      .gd-progress {
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: 2px;
+        width: 0;
+        background: var(--green);
+        z-index: 61;
+        transition: width 0.08s linear;
+      }
+
+      /* ══ section nav ══════════════════════════════════════════════ */
+      .gd-nav {
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        right: 0;
+        height: var(--nav-h);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0 10px;
+        background: var(--panel-bg);
+        border-bottom: 1px solid var(--frame);
+        overflow-x: auto;
+        scrollbar-width: none;
+        z-index: 55;
+      }
+      .gd-nav::-webkit-scrollbar { display: none; }
+      .gd-nav a {
+        flex: none;
+        border: 1px solid transparent;
+        color: var(--dim);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        padding: 4px 9px;
+        white-space: nowrap;
+      }
+      .gd-nav a:hover { color: var(--fg); border-color: var(--frame); }
+      .gd-nav a.is-active { color: var(--green); border-color: var(--green); }
+
+      /* ══ hero ═════════════════════════════════════════════════════ */
+      .gd-hero {
+        padding: calc(var(--topbar-h) + var(--nav-h) + 56px) 24px 64px;
+        max-width: 1080px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .gd-eyebrow {
+        color: var(--dim);
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+      .gd-hero h1 {
+        font-family: var(--retro);
+        font-size: clamp(56px, 12vw, 132px);
+        line-height: 0.88;
+        margin: 14px 0 6px;
+        letter-spacing: 0.02em;
+        color: var(--fg);
+        text-shadow: 0 0 26px rgba(77, 202, 94, 0.16);
+      }
+      .gd-hero h1 .sep { color: var(--green); }
+      .gd-hero .gd-sub {
+        color: var(--dim);
+        font-size: 15px;
+        margin: 0 0 26px;
+      }
+      .gd-hero .gd-lede {
+        max-width: 68ch;
+        margin: 0 auto 30px;
+        text-align: left;
+        color: var(--fg);
+      }
+
+      /* fog-reveal strip — the surface, in miniature */
+      .gd-fog {
+        font-family: var(--mono);
+        font-size: 11px;
+        line-height: 0.82;
+        letter-spacing: 0;
+        white-space: pre;
+        overflow: hidden;
+        border: 1px solid var(--frame);
+        background: #08070d;
+        padding: 10px 8px;
+        margin: 0 0 30px;
+        user-select: none;
+        text-align: left;
+      }
+      .gd-fog i { font-style: normal; transition: color 0.45s linear; }
+
+      .gd-cta {
+        display: inline-flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .gd-btn {
+        border: 1px solid var(--frame);
+        color: var(--dim);
+        padding: 8px 16px;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+      }
+      .gd-btn:hover { color: var(--green); border-color: var(--green); }
+      .gd-btn--primary { color: var(--green); border-color: var(--green); }
+      .gd-btn--primary:hover { background: rgba(77, 202, 94, 0.08); }
+
+      /* ══ scenes ═══════════════════════════════════════════════════ */
+      main { max-width: 1080px; margin: 0 auto; padding: 0 24px 96px; }
+      .gd-scene { padding: 46px 0 10px; }
+      .gd-kicker {
+        color: var(--green);
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin: 0 0 6px;
+      }
+      .gd-scene h2 {
+        font-family: var(--retro);
+        font-size: 40px;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        margin: 0 0 10px;
+        color: var(--fg);
+      }
+      .gd-scene > .gd-lede {
+        max-width: 74ch;
+        color: var(--dim);
+        margin: 0 0 22px;
+      }
+      .gd-scene > .gd-lede strong { color: var(--fg); }
+
+      /* reveal-on-scroll */
+      .reveal {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+      .reveal.is-in { opacity: 1; transform: none; }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal { opacity: 1; transform: none; transition: none; }
+      }
+
+      /* ══ frame — the manual's panel ═══════════════════════════════ */
+      .gd-frame {
+        border: 1px solid var(--frame);
+        background: var(--panel-bg);
+        padding: 12px 14px 16px;
+        margin: 0 0 16px;
+      }
+      .gd-frame-head {
+        display: flex;
+        align-items: baseline;
+        gap: 1ch;
+        margin-bottom: 12px;
+        padding-bottom: 7px;
+        border-bottom: 1px dashed var(--frame);
+      }
+      .gd-frame-title {
+        color: var(--fg);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .gd-frame-sub { color: var(--dim); font-size: 12px; margin-left: auto; }
+      .gd-frame p { margin: 0 0 10px; }
+      .gd-frame p:last-child { margin-bottom: 0; }
+      .gd-frame ul, .gd-frame ol { margin: 0 0 10px; padding-left: 2.2ch; }
+      .gd-frame li { margin-bottom: 5px; }
+      .gd-frame li::marker { color: var(--green); }
+
+      /* ══ terminal block ═══════════════════════════════════════════ */
+      .gd-term {
+        position: relative;
+        border: 1px solid var(--frame-soft);
+        background: #08070d;
+        padding: 10px 12px;
+        margin: 0 0 12px;
+        overflow-x: auto;
+      }
+      .gd-term pre {
+        margin: 0;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.6;
+        white-space: pre;
+      }
+      .gd-term .c { color: var(--dim); }         /* comment  */
+      .gd-term .s { color: var(--green); }        /* $ sigil  */
+      .gd-term .o { color: var(--dim); }          /* output   */
+      .gd-term .k { color: var(--blue); }         /* keyword  */
+      .gd-term .w { color: var(--amber); }        /* caution  */
+      .gd-copy {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        border: 1px solid var(--frame);
+        background: var(--bg);
+        color: var(--dim);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        padding: 2px 7px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .gd-term:hover .gd-copy, .gd-copy:focus-visible { opacity: 1; }
+      .gd-copy:hover { color: var(--green); border-color: var(--green); }
+
+      /* ══ callouts ═════════════════════════════════════════════════ */
+      .gd-note {
+        border-left: 2px solid var(--frame);
+        background: rgba(255, 255, 255, 0.017);
+        padding: 9px 13px;
+        margin: 0 0 12px;
+        font-size: 13.5px;
+      }
+      .gd-note b.tag {
+        display: block;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+      .gd-note--ok { border-left-color: var(--green); }
+      .gd-note--ok b.tag { color: var(--green); }
+      .gd-note--warn { border-left-color: var(--amber); }
+      .gd-note--warn b.tag { color: var(--amber); }
+      .gd-note--stop { border-left-color: var(--red); }
+      .gd-note--stop b.tag { color: var(--red); }
+      .gd-note--info { border-left-color: var(--blue); }
+      .gd-note--info b.tag { color: var(--blue); }
+      .gd-note p { margin: 0 0 7px; }
+      .gd-note p:last-child { margin-bottom: 0; }
+
+      /* ══ checkpoint ═══════════════════════════════════════════════ */
+      .gd-check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        border: 1px dashed var(--green);
+        padding: 9px 13px;
+        margin: 0 0 12px;
+        font-size: 13.5px;
+      }
+      .gd-check .mark { color: var(--green); flex: none; }
+
+      /* ══ step player ══════════════════════════════════════════════ */
+      .gd-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+      .gd-chip {
+        border: 1px solid var(--frame);
+        background: transparent;
+        color: var(--dim);
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        padding: 4px 10px;
+        cursor: pointer;
+      }
+      .gd-chip:hover { color: var(--fg); }
+      .gd-chip.is-on { color: var(--green); border-color: var(--green); }
+      .gd-chip .n { color: var(--frame); margin-right: 0.7ch; }
+      .gd-chip.is-on .n { color: var(--green); }
+
+      .gd-stepbody { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+      @media (max-width: 820px) { .gd-stepbody { grid-template-columns: 1fr; } }
+      .gd-step-label {
+        color: var(--green);
+        font-size: 13px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .gd-step-num { color: var(--dim); font-size: 12px; margin-bottom: 8px; }
+      .gd-step-body p { margin: 0 0 9px; }
+      .gd-step-cite { color: var(--dim); font-size: 11px; letter-spacing: 0.06em; }
+      .gd-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--frame);
+      }
+      .gd-ctl {
+        border: 1px solid var(--frame);
+        background: transparent;
+        color: var(--dim);
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        cursor: pointer;
+      }
+      .gd-ctl:hover { color: var(--green); border-color: var(--green); }
+      .gd-status { color: var(--dim); font-size: 12px; margin-left: auto; }
+
+      /* ══ card grid ════════════════════════════════════════════════ */
+      .gd-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 10px;
+      }
+      .gd-card {
+        display: block;
+        border: 1px solid var(--frame);
+        border-bottom: 1px solid var(--frame);
+        padding: 11px 13px;
+        color: var(--fg);
+      }
+      .gd-card:hover { border-color: var(--green); color: var(--fg); }
+      .gd-card .t {
+        color: var(--green);
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .gd-card .d { color: var(--dim); font-size: 12.5px; line-height: 1.5; }
+
+      /* ══ key/value table ══════════════════════════════════════════ */
+      table.gd-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+      table.gd-tbl th, table.gd-tbl td {
+        text-align: left;
+        padding: 6px 10px 6px 0;
+        border-bottom: 1px solid var(--frame-soft);
+        vertical-align: top;
+      }
+      table.gd-tbl th {
+        color: var(--dim);
+        font-weight: 400;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      table.gd-tbl td code { color: var(--green); }
+      table.gd-tbl tr:last-child td { border-bottom: none; }
+
+      code {
+        font-family: var(--mono);
+        color: var(--green);
+        font-size: 0.94em;
+      }
+
+      /* ══ footer ═══════════════════════════════════════════════════ */
+      .gd-foot {
+        border-top: 1px solid var(--frame);
+        margin-top: 40px;
+        padding: 20px 24px 40px;
+        max-width: 1080px;
+        margin-left: auto;
+        margin-right: auto;
+        color: var(--dim);
+        font-size: 12.5px;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="gd-topbar">
+      <span class="prompt-sigil">$</span>
+      <span>sea_of_colours</span>
+      <span class="dim">· install guide · v0.1</span>
+      <span class="prompt-caret">_</span>
+      <span class="gd-spacer"></span>
+      <a class="gd-manual-link" href="./leader.html"
+         title="Running a team? The day in order, with a checkpoint per stage">[ TEAM LEADER ]</a>
+      <a class="gd-manual-link" href="../manual/index.html">[ MANUAL ]</a>
+    </header>
+    <div class="gd-progress" id="gd-progress"></div>
+
+    <nav class="gd-nav" id="gd-nav">
+      <a href="#overview">[ 00 · WHAT THIS IS ]</a>
+      <a href="#install">[ 01 · INSTALL ]</a>
+      <a href="#run">[ 02 · FIRST RUN ]</a>
+      <a href="#game">[ 03 · FIRST GAME ]</a>
+      <a href="#night">[ 04 · FIRST NIGHT ]</a>
+      <a href="#snowflake">[ 05 · SNOWFLAKE ]</a>
+      <a href="#v12">[ 06 · PLAY V12 ]</a>
+      <a href="#multiplayer">[ 07 · MULTIPLAYER ]</a>
+      <a href="#build">[ 08 · BUILD ]</a>
+      <a href="#trouble">[ 09 · TROUBLE ]</a>
+    </nav>
+
+    <section class="gd-hero">
+      <p class="gd-eyebrow">Hackathon onboarding · zero to first Nox</p>
+      <h1>sea<span class="sep">_</span>of<span class="sep">_</span>colours</h1>
+      <p class="gd-sub"># download &rarr; install &rarr; play &rarr; beat the agent</p>
+
+      <div class="gd-fog" id="gd-fog" aria-hidden="true"></div>
+
+      <p class="gd-lede">
+        A turn-based, fog-of-war strategy game about harvesting a hostile planet
+        by night. You will have it running in about
+        <strong>three minutes</strong> and be playing a full season against a
+        heuristic bot on the fourth. Snowflake is
+        <strong>optional</strong> and only needed later, when you want to play
+        against &mdash; and then improve &mdash; the LLM agent.
+      </p>
+
+      <div class="gd-cta">
+        <a class="gd-btn gd-btn--primary" href="#install">[ START INSTALLING &darr; ]</a>
+        <a class="gd-btn" href="../manual/index.html">[ READ THE MANUAL ]</a>
+      </div>
+    </section>
+
+    <main>
+      <!-- ══ 00 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="overview">
+        <p class="gd-kicker">00 &middot; What this is</p>
+        <h2>The game, and the exercise</h2>
+        <p class="gd-lede">
+          Two things ship in this repo: a <strong>game</strong> you play in a
+          browser, and an <strong>LLM agent</strong> that plays it badly enough
+          to be interesting. Your job at the hackathon is the second one.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">The game in six lines</span>
+            <span class="gd-frame-sub">§2 &middot; §3</span>
+          </div>
+          <ul>
+            <li>
+              A planet is hidden under fog. Beneath it lie three substances &mdash;
+              <span class="fg-red">RED</span> (precious),
+              <span class="fg-blue">BLUE</span> (fuel) and
+              <span class="fg-green">GREEN</span> (worthless, and a liability).
+            </li>
+            <li>
+              You harvest only at night. A season is <strong>7 nights</strong>,
+              each exactly <strong>21 hours</strong> long.
+            </li>
+            <li>
+              Each night you write a <strong>policy</strong>: a queue of orders
+              &mdash; step, drop, probe, pick up &mdash; that execute in slot
+              order once you transmit.
+            </li>
+            <li>
+              You see only what your units see. Probes light up a radius-4 disk
+              and expire after 3 nights.
+            </li>
+            <li>
+              At dawn you enter <strong>orbit</strong>, where you spend credits
+              on harvesters, repairs and weapons. Then your vault settles
+              itself &mdash; everything you hoarded ships automatically.
+            </li>
+            <li>Most points after seven nights wins.</li>
+          </ul>
+          <p class="dim">
+            That is the whole loop. Everything else &mdash; SNAPs, EMPs, chaff,
+            echo vision, catapult lanes &mdash; is detail the
+            <a href="../manual/index.html">manual</a> animates far better than
+            prose can.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Who you can play against</span>
+          </div>
+          <table class="gd-tbl">
+            <tr>
+              <th style="width: 20ch">Opponent</th>
+              <th style="width: 14ch">Needs</th>
+              <th>What it is</th>
+            </tr>
+            <tr>
+              <td><code>RED_HARVEST_LITE</code></td>
+              <td class="dim">nothing</td>
+              <td>
+                Heuristic bot with weapons switched off. Competent harvester,
+                won't EMP or chaff you. <b>Start here.</b>
+              </td>
+            </tr>
+            <tr>
+              <td><code>RED_HARVEST</code></td>
+              <td class="dim">nothing</td>
+              <td>The same bot with the full arsenal enabled. Considerably meaner.</td>
+            </tr>
+            <tr>
+              <td><code>V12</code></td>
+              <td class="dim">Snowflake PAT</td>
+              <td>
+                The LLM agent. Thinks in Snowflake Cortex, plays slowly, and is
+                the thing you are here to improve.
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="gd-note gd-note--info">
+          <b class="tag">The exercise</b>
+          <p>
+            V12 is strong at reading the board and terrible at two specific
+            things: it <strong>buys weapons and then never fires them</strong>,
+            and it <strong>under-values BLUE</strong>. Both gaps are deliberate.
+            Closing them &mdash; a purchasing heuristic for orbit, and a way to
+            inject weapon plays into the agent's reasoning &mdash; is the
+            hackathon. Details in <a href="#build">08 &middot; Build</a>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ 01 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="install">
+        <p class="gd-kicker">01 &middot; Install</p>
+        <h2>Get it on your machine</h2>
+        <p class="gd-lede">
+          Pure Python, no build step, no database. Five commands.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Prerequisites</span>
+          </div>
+          <table class="gd-tbl">
+            <tr>
+              <td style="width: 22ch"><code>Python 3.10+</code></td>
+              <td>
+                Check with <code>python3 --version</code>. Anything from 3.10
+                onwards is fine; 3.13 is what this is developed against.
+              </td>
+            </tr>
+            <tr>
+              <td><code>git</code></td>
+              <td>Only if you clone rather than download a zip.</td>
+            </tr>
+            <tr>
+              <td class="dim">A browser</td>
+              <td>Chrome, Edge, Safari or Firefox. No extensions needed.</td>
+            </tr>
+          </table>
+          <p class="dim">
+            No Snowflake account, no Docker, no Node. Those come later or not at
+            all.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Step 1 &middot; Fork it, then clone your fork</span>
+          </div>
+          <div class="gd-note gd-note--warn">
+            <b class="tag">Fork first</b>
+            <p>
+              Open
+              <a href="https://github.com/sfc-gh-lgalan/sea-of-colours-hackathon">the
+              repo</a> and press <b>Fork</b>. You now have your own copy at
+              <code>github.com/&lt;you&gt;/sea-of-colours-hackathon</code>, and
+              <em>that</em> is the one to clone. Your agent lives in your fork
+              all day; at the end an organiser gathers everyone's forks to
+              build the league.
+            </p>
+            <p>
+              Cloning this repo directly instead is the one setup mistake that
+              costs real time, because nothing goes wrong until you try to
+              publish &mdash; you can install, play and build an agent against
+              the wrong remote perfectly happily, and only find out at the
+              deadline. <code>soc doctor</code> checks it for you.
+            </p>
+          </div>
+          <div class="gd-term" data-repo-url="sfc-gh-lgalan/sea-of-colours-hackathon">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="c"># replace &lt;you&gt; with your GitHub username</span>
+<span class="s">$</span> git clone https://github.com/&lt;you&gt;/sea-of-colours-hackathon.git
+<span class="s">$</span> cd sea-of-colours-hackathon
+<span class="s">$</span> git remote add upstream https://github.com/sfc-gh-lgalan/sea-of-colours-hackathon.git</pre>
+          </div>
+          <div class="gd-note gd-note--info">
+            <b class="tag">Access</b>
+            <p>
+              The repo is private, so you need to be signed in to GitHub and
+              given read access before the <b>Fork</b> button will work
+              &mdash; ask the organiser if you get a 404. Prefer SSH? Use
+              <code>git@github.com:&lt;you&gt;/sea-of-colours-hackathon.git</code>.
+            </p>
+            <p>
+              That <code>upstream</code> remote is how you take kit fixes
+              during the day: <code>git pull upstream main</code>. You never
+              push to it. Everything you push goes to <code>origin</code>,
+              which is your fork.
+            </p>
+          </div>
+          <p class="dim">
+            Everything below assumes you are in the repo root &mdash; the folder
+            containing <code>run_web.py</code>.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Step 2 &middot; Virtual environment + dependencies</span>
+          </div>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="s">$</span> python3 -m venv .venv
+<span class="s">$</span> source .venv/bin/activate      <span class="c"># Windows: .venv\Scripts\activate</span>
+<span class="s">$</span> pip install -r requirements.txt</pre>
+          </div>
+          <p>
+            That pulls five packages &mdash; FastAPI, Uvicorn, httpx, requests
+            and pytest. The Snowflake libraries are deliberately
+            <em>not</em> in here; they are a separate, optional install covered
+            in <a href="#snowflake">05</a>.
+          </p>
+          <div class="gd-check">
+            <span class="mark">&#10003;</span>
+            <span>
+              <b>Checkpoint.</b> <code>pytest -q</code> should report roughly
+              <code>938 passed, 4 skipped</code> in a few seconds, with
+              <b>exactly one</b> failure:
+              <code>test_heuristic_passes_known_scenarios[two_seams_choose_one]</code>.
+              That one is a known pre-existing bug in a heuristic eval, not
+              your install. Anything else failing is worth investigating. The
+              suite needs no network, no credentials and no Snowflake.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ 02 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="run">
+        <p class="gd-kicker">02 &middot; First run</p>
+        <h2>Start the server</h2>
+        <p class="gd-lede">
+          One command, no environment variables. The server works out where to
+          keep game state from what you actually have installed, and says so on
+          the second line.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Run it</span>
+          </div>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="s">$</span> python run_web.py
+<span class="o">[soc] FastAPI starting</span>
+<span class="o">[soc] store backend: memory — sessions will not persist</span>
+<span class="o">[soc]   auto-detected memory: no Snowflake connection configured</span>
+<span class="o">INFO:     Uvicorn running on http://127.0.0.1:8000</span></pre>
+          </div>
+          <p>
+            Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>.
+          </p>
+        </div>
+
+        <div class="gd-note gd-note--warn">
+          <b class="tag">Run this in your own terminal</b>
+          <p>
+            Type it into a terminal window yourself. Do <b>not</b> ask an AI
+            coding assistant to start the server for you &mdash; the server
+            it launches belongs to that assistant's shell session, and when
+            the session ends or the assistant moves on to the next task, the
+            server is killed with it. Your game dies mid&#8209;night and it
+            looks exactly like the app crashing. Leave your own terminal
+            open for as long as you want to play.
+          </p>
+        </div>
+
+        <div class="gd-note">
+          <b class="tag">What that second line means</b>
+          <p>
+            The server picks where game state lives by looking at what you
+            actually have installed. With no Snowflake setup it uses
+            <code>memory</code> &mdash; every session lives in the server
+            process. That is the right answer for now: it costs nothing and
+            the full game against either heuristic works. What you give up is
+            keeping seasons across a restart, and with it the LLM agents,
+            which the launcher offers only on a persistent backend so that
+            every AI game can be replayed afterwards.
+            <a href="#snowflake">Section 05</a> sets that up.
+          </p>
+          <p class="dim">
+            <code>SOC_BACKEND=memory|file|snowflake</code> forces the
+            <em>default</em>; from v1.14 each game also picks its own in the
+            launcher's <b>STORAGE</b> row. The badge in the bottom-right corner
+            names the server default.
+          </p>
+        </div>
+
+        <div class="gd-note">
+          <b class="tag">Something not right?</b>
+          <p>
+            <code>python scripts/quickstart_check.py</code> checks your
+            Python version, dependencies, backend, agent roster, Snowflake
+            credentials and <code>cloudflared</code>, and prints the fix
+            next to anything that fails. Add <code>--network</code> to also
+            contact Snowflake, <code>--tests</code> to run the suite.
+            Optional things report <em>skip</em>, not failure &mdash; a
+            clean run means nothing is broken, not that you set up
+            Snowflake.
+          </p>
+        </div>
+
+        <div class="gd-check">
+          <span class="mark">&#10003;</span>
+          <span>
+            <b>Checkpoint.</b> You should see the title screen with
+            <code>Tutorial</code>, <code>Play</code>,
+            <code>Multiplayer</code>, <code>Replay</code> and
+            <code>Turn Lab</code>. Hit <code>Tutorial</code> and pick
+            <code>Quick game</code> &mdash; you are on the board against
+            <code>RED_HARVEST_LITE</code> immediately, with no films.
+            Skip to <a href="#night">04</a> if you'd rather start playing
+            than read about the launcher.
+          </span>
+        </div>
+      </section>
+
+      <!-- ══ 03 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="game">
+        <p class="gd-kicker">03 &middot; First game</p>
+        <h2>Spawn a session</h2>
+        <p class="gd-lede">
+          <code>Quick game</code> already did this for you &mdash; it spawns
+          the exact setup below. Read on when you want a different map, more
+          seats, or V12 in the other chair; hit <code>Play</code> on the
+          title screen to get the launcher.
+        </p>
+        <p>
+          The launcher asks four blocks of questions, and the defaults are the
+          right answer for a first game.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">// new game</span>
+          </div>
+          <table class="gd-tbl">
+            <tr>
+              <th style="width: 22ch">Block</th>
+              <th style="width: 16ch">Leave at</th>
+              <th>Note</th>
+            </tr>
+            <tr>
+              <td># BOARD</td>
+              <td><code>40 &times; 28</code><br /><code>7 nights</code></td>
+              <td>
+                The canonical competitive board and a full season. Drop
+                <code>LENGTH</code> to <code>3</code> nights for a quick first
+                pass.
+              </td>
+            </tr>
+            <tr>
+              <td># SEATS</td>
+              <td class="fg-green">
+                <code>2</code><br />P1 HUMAN<br />P2 RED_HARVEST_LITE
+              </td>
+              <td>
+                You and one opponent, already the default.
+                <code>RED_HARVEST_LITE</code> is the weapons-off bot &mdash; you
+                should not get EMP'd before you know what a parcel is. Each seat
+                can be renamed and recoloured here.
+              </td>
+            </tr>
+            <tr>
+              <td># VISIBILITY</td>
+              <td><code>HIDDEN</code></td>
+              <td>
+                Fog of war. <code>OPEN</code> makes every seat omniscient
+                &mdash; useful for watching two bots, wrong for playing, and
+                never valid for comparing agents.
+              </td>
+            </tr>
+            <tr>
+              <td># STORAGE</td>
+              <td><code>whatever is offered</code></td>
+              <td>
+                <code>MEMORY</code> is instant and forgets the season when the
+                server stops; <code>SNOWFLAKE</code> keeps it, and is the only
+                one that offers LLM seats &mdash; an AI game you cannot replay
+                is one you cannot learn from. If Snowflake is greyed out, the
+                row says which setup step is missing.
+              </td>
+            </tr>
+          </table>
+          <p>
+            The line beside <code>[ &gt; SPAWN SESSION ]</code> restates what
+            you are about to create &mdash; check the storage word in it before
+            you commit, because that is the one choice you cannot revise later.
+          </p>
+        </div>
+
+        <div class="gd-note gd-note--ok">
+          <b class="tag">You are now on night 1</b>
+          <p>
+            The board is fogged, you have a couple of units and a credit
+            balance, and the phase is <strong>planning</strong>. Nothing is
+            ticking &mdash; the game waits for you.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ 04 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="night">
+        <p class="gd-kicker">04 &middot; First night</p>
+        <h2>Play one Nox</h2>
+        <p class="gd-lede">
+          The whole game is this loop, seven times. Step through it below; each
+          step links to the manual page that animates it properly.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">One turn, end to end</span>
+            <span class="gd-frame-sub" id="gd-step-phase"># planning</span>
+          </div>
+
+          <div class="gd-chips" id="gd-chips"></div>
+
+          <div class="gd-stepbody">
+            <div>
+              <div class="gd-step-num" id="gd-step-num">Step 1 / 6</div>
+              <div class="gd-step-label" id="gd-step-label">LOOK</div>
+              <div class="gd-step-body" id="gd-step-text"></div>
+              <div class="gd-step-cite" id="gd-step-cite"></div>
+            </div>
+            <div class="gd-term" style="margin: 0">
+              <pre id="gd-step-term"></pre>
+            </div>
+          </div>
+
+          <div class="gd-controls">
+            <button class="gd-ctl" id="gd-prev">[ &#9668; PREV ]</button>
+            <button class="gd-ctl" id="gd-play">[ PLAY ]</button>
+            <button class="gd-ctl" id="gd-next">[ NEXT &#9658; ]</button>
+            <span class="gd-status" id="gd-step-status"># step 1 · look</span>
+          </div>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Read these while you play</span>
+            <span class="gd-frame-sub">opens the manual</span>
+          </div>
+          <div class="gd-grid">
+            <a class="gd-card" href="../manual/index.html#tab=tiles">
+              <span class="t">The surface</span>
+              <span class="d">What red, blue and green actually are, and which tiers are worth walking to.</span>
+            </a>
+            <a class="gd-card" href="../manual/index.html#tab=loop">
+              <span class="t">One Nox</span>
+              <span class="d">The 21-hour night, hour by hour, animated.</span>
+            </a>
+            <a class="gd-card" href="../manual/index.html#tab=orders">
+              <span class="t">Policy &amp; praxis</span>
+              <span class="d">Every order type and how the queue resolves in slot order.</span>
+            </a>
+            <a class="gd-card" href="../manual/index.html#tab=vision">
+              <span class="t">Vision</span>
+              <span class="d">Fog, live and echo &mdash; why what you see is already out of date.</span>
+            </a>
+            <a class="gd-card" href="../manual/index.html#tab=probes">
+              <span class="t">Probes</span>
+              <span class="d">Radius-4 disks that expire after three nights. Your only real intel.</span>
+            </a>
+            <a class="gd-card" href="../manual/index.html#tab=harvesters">
+              <span class="t">Harvesters</span>
+              <span class="d">Hold capacity, damage, and why repairs are not free.</span>
+            </a>
+            <a class="gd-card" href="../manual/index.html#tab=orbital">
+              <span class="t">Orbital station</span>
+              <span class="d">Spending credits at dawn, then automatic settlement.</span>
+            </a>
+            <a class="gd-card" href="../manual/index.html#tab=season">
+              <span class="t">Season</span>
+              <span class="d">How seven nights are scored, and when to stop hoarding.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ 05 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="snowflake">
+        <p class="gd-kicker">05 &middot; Snowflake</p>
+        <h2>Wire up Cortex</h2>
+        <p class="gd-lede">
+          Only needed to play against or work on <strong>V12</strong>. Any
+          Snowflake account works, including a fresh
+          <a href="https://signup.snowflake.com/">30-day trial</a>. This is a
+          <strong>token, not a deployment</strong> &mdash; no schema, no tables,
+          no warehouse.
+        </p>
+
+        <div class="gd-note gd-note--info">
+          <b class="tag">Two different things, often confused</b>
+          <p>
+            <strong>(a) Running V12</strong> needs a Programmatic Access Token
+            so the agent can call Cortex inference. That is this section, and it
+            is what nearly everyone wants.
+          </p>
+          <p>
+            <strong>(b) Persisting games to Snowflake tables</strong>
+            (<code>SOC_BACKEND=snowflake</code>) needs key-pair auth and a schema
+            deploy. Different credential, different purpose &mdash; a PAT will
+            not open a Snowpark session and a key pair will not authenticate a
+            Cortex call. It is at the bottom of this section, and if you are
+            here for the hackathon you want it too: the replay and turn-suite
+            tooling reads persisted games.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Step 1 &middot; Generate a PAT</span>
+          </div>
+          <p>In Snowsight:</p>
+          <p class="dim">
+            Admin &rarr; Users &amp; Roles &rarr; <em>your user</em> &rarr;
+            Programmatic access tokens &rarr; <b>Generate new token</b>
+          </p>
+          <p>
+            Copy the value immediately &mdash; Snowflake shows it exactly once.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Step 2 &middot; Let your role call Cortex</span>
+          </div>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="k">GRANT DATABASE ROLE</span> SNOWFLAKE.CORTEX_USER <span class="k">TO ROLE</span> &lt;your_role&gt;;</pre>
+          </div>
+          <p class="dim">
+            On a fresh trial, <code>ACCOUNTADMIN</code> already has this. Cortex
+            also has to be available in your region &mdash; see Snowflake's
+            <a href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/aisql#region-availability">availability list</a>.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Step 3 &middot; Point the game at your account</span>
+          </div>
+          <p>
+            The game reads your <strong>standard Snowflake connection</strong> &mdash;
+            the same <code>~/.snowflake/connections.toml</code> the Snowflake
+            CLI, Cortex Code and the VS Code extension use. If you have ever
+            run <code>snow connection add</code>, skip this step.
+          </p>
+          <p>Otherwise create <code>~/.snowflake/connections.toml</code>:</p>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre>[soc]
+account = "&lt;your_account_identifier&gt;"
+token = "&lt;the token from step 1&gt;"</pre>
+          </div>
+          <p>
+            Then point the game at it &mdash; this names one connection for
+            the game only, leaving your shell default alone:
+          </p>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre>export SOC_SNOWFLAKE_CONNECTION=soc</pre>
+          </div>
+          <p class="dim">
+            Prefer to keep the token out of a file? Set
+            <code>SNOWFLAKE_PAT</code> in your shell instead and leave
+            <code>token</code> out &mdash; the environment wins.
+          </p>
+          <p class="dim">
+            Your account identifier is in Snowsight's bottom-left account
+            selector, or in the URL:
+            <code>https://&lt;account_identifier&gt;.snowflakecomputing.com</code>.
+            If you would rather not keep the token in a file, drop the
+            <code>pat=</code> line and export
+            <code>SNOWFLAKE_PAT</code> in the shell you launch the server from
+            instead &mdash; the env var wins.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Step 4 &middot; Smoke-test before you trust it</span>
+          </div>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="s">$</span> python - &lt;&lt;'PY'
+from sea_of_colours.orchestrator_2.cortex_chat import CortexChatInvoker
+inv = CortexChatInvoker(max_completion_tokens=20)
+print("ready:", inv.is_ready())
+print(inv.invoke("Reply with exactly the word: pong"))
+PY</pre>
+          </div>
+          <div class="gd-check">
+            <span class="mark">&#10003;</span>
+            <span>
+              <b>Checkpoint.</b> <code>ready: True</code> and a reply containing
+              <code>pong</code>. If you get that, V12 will run.
+            </span>
+          </div>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Step 6 &middot; Persist games to Snowflake</span>
+            <span class="gd-frame-sub">about ten minutes &middot; unlocks the iteration loop</span>
+          </div>
+          <p>
+            Everything above ran on the <code>memory</code> backend, which
+            forgets a season the moment the server stops. That is fine for
+            practice games, but the tooling you will use to actually improve
+            your agent &mdash; <code>replay_turn.py</code>,
+            <code>turn_suite.py</code>, <code>advise_v12.py</code> &mdash; reads
+            games back off a persistent store, and the launcher only offers LLM
+            seats on one for the same reason. This is that store.
+          </p>
+          <p class="dim">
+            It authenticates with
+            <a href="https://docs.snowflake.com/en/user-guide/key-pair-auth">key-pair auth</a>,
+            not the PAT from step 1 &mdash; deliberately, so that wanting to
+            play against V12 never silently starts writing to your account.
+          </p>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="s">$</span> pip install -r requirements-snowflake.txt
+
+<span class="c"># 1. generate an UNENCRYPTED key pair (-nocrypt matters)</span>
+<span class="s">$</span> openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out rsa_key.p8 -nocrypt
+<span class="s">$</span> openssl rsa -in rsa_key.p8 -pubout -out rsa_key.pub
+
+<span class="c"># 2. print the key body alone — no BEGIN/END lines, no newlines</span>
+<span class="s">$</span> awk 'NR&gt;2 {print prev} {prev=$0}' rsa_key.pub | tr -d '\n'</pre>
+          </div>
+          <p>
+            Paste that single line into Snowsight:
+          </p>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="k">ALTER USER</span> &lt;your_username&gt; <span class="k">SET</span> RSA_PUBLIC_KEY='&lt;the one line&gt;';</pre>
+          </div>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="c"># 3. add to your connection:  user = "..."  private_key_file = "/path/rsa_key.p8"</span>
+
+<span class="s">$</span> python scripts/deploy_soc_schema.py --dry-run
+<span class="o">Target: SOC_HACKATHON_DB.SEA_OF_COLOURS (warehouse SOC_HACKATHON_WH)</span>
+
+<span class="s">$</span> python scripts/deploy_soc_schema.py
+<span class="s">$</span> python scripts/quickstart_check.py
+
+<span class="c"># the command to use from here on — see the note below</span>
+<span class="s">$</span> SOC_BACKEND=snowflake python run_web.py --no-reload
+<span class="o">[soc] store backend: snowflake (SOC_HACKATHON_DB.SEA_OF_COLOURS)</span></pre>
+          </div>
+          <div class="gd-note">
+            <b class="tag">Start it this way, in your own terminal</b>
+            <p>
+              <code>SOC_BACKEND=snowflake</code> turns Snowflake from a
+              preference into a requirement. Auto-detect is deliberately
+              forgiving &mdash; if anything about the Snowpark path is
+              unusable it hands you a <code>memory</code> server instead,
+              and you discover that an hour later when the season is gone
+              and the LLM seats never showed up. Explicit is strict: the
+              server refuses to start and tells you what to fix.
+            </p>
+            <p>
+              <code>--no-reload</code> because auto-reload is <b>on by
+              default</b>, and a file save restarts the process &mdash;
+              dropping any agent turn in flight and resetting the
+              per-process submit lock. Mid-night, that reads to players as
+              the game hanging.
+            </p>
+            <p>
+              Run it in a terminal you own and leave it running. A server
+              started by an AI coding agent is a child of that agent's
+              shell and dies with it, which looks exactly like a crash.
+            </p>
+          </div>
+          <div class="gd-note gd-note--warn">
+            <b class="tag">Seasons disappeared from the picker?</b>
+            <p>
+              The Snowpark auth token expires after a few hours. Today the
+              failure is silent &mdash; you get fewer games rather than an
+              error, and ASK V12 greys out as if you were on a memory
+              backend. Restart the server.
+            </p>
+          </div>
+          <div class="gd-note gd-note--warn">
+            <b class="tag">If auth fails later</b>
+            <p>
+              <code>JWT token is invalid</code> is nearly always the public key:
+              Snowflake wants the base64 body only, so a surviving
+              <code>-----BEGIN-----</code> line or a stray newline breaks it.
+              Re-run the <code>awk</code> one-liner and
+              <code>ALTER USER</code> again. A passphrase error instead means
+              the key was generated encrypted &mdash; regenerate with
+              <code>-nocrypt</code>.
+            </p>
+          </div>
+          <p class="dim">
+            Once <code>private_key_file</code> is on your connection the
+            server picks the Snowflake backend on its own &mdash; no env var. Set
+            <code>SOC_BACKEND=snowflake</code> explicitly if you'd rather the
+            server refuse to start than quietly fall back to
+            <code>memory</code> when something's wrong.
+          </p>
+          <p class="dim">
+            The database, schema and an XSMALL auto-suspending warehouse are
+            created if absent, so this works on a brand-new account. Names are
+            hackathon-scoped by default so they cannot collide with an existing
+            install; override with <code>SOC_DATABASE</code> /
+            <code>SOC_SCHEMA</code> / <code>SOC_WAREHOUSE</code>.
+          </p>
+          <div class="gd-note gd-note--info">
+            <b class="tag">Seasons accumulate</b>
+            <p>
+              Starting a new game never deletes an old one &mdash; each is a
+              fresh session alongside the last, and they all stay in the season
+              picker. Wiping exists but you have to ask for it
+              (<code>run_season.py --wipe-first</code>). Still worth checking
+              <code>--dry-run</code> points where you think it does before
+              deploying into an account with other things in it.
+            </p>
+          </div>
+          <div class="gd-note gd-note--info">
+            <b class="tag">You can still play fast</b>
+            <p>
+              Storage is chosen <em>per game</em>. The launcher's
+              <b>STORAGE</b> row offers Snowflake or Memory, and
+              <b>Quick game</b> on the title screen always uses Memory &mdash;
+              so having a schema deployed never means every practice game costs
+              a warehouse round-trip per move.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ 06 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="v12">
+        <p class="gd-kicker">06 &middot; Play V12</p>
+        <h2>Put the agent in a seat</h2>
+        <p class="gd-lede">
+          With the PAT in place, V12 is just another entry in the player
+          dropdown.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">In the browser</span>
+          </div>
+          <p>
+            <code>[ &gt; NEW GAME ]</code> &rarr; set <b>P2</b> to
+            <code>V12 &mdash; LLM agent</code> &rarr;
+            <code>[ &gt; SPAWN SESSION ]</code>.
+          </p>
+          <p>
+            The agent is dispatched server-side each night. Expect each of its
+            turns to take a while &mdash; it is doing real inference, not
+            table lookups.
+          </p>
+          <div class="gd-note gd-note--ok">
+            <b class="tag">It refuses rather than pretends</b>
+            <p>
+              If credentials are missing, spawning the session fails with a
+              message telling you exactly what is absent. That is deliberate:
+              silently demoting an LLM seat to the heuristic makes a broken
+              config look like a broken agent.
+            </p>
+          </div>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Headless, for scoring changes</span>
+          </div>
+          <p>
+            Once you start editing the harness you need numbers, not vibes. This
+            runs full seasons with no browser:
+          </p>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="c"># V12 vs both heuristics, three seeds, three at a time</span>
+<span class="s">$</span> python scripts/run_matchup_v12.py --modes heur lite --seeds 69 2 56 --jobs 3</pre>
+          </div>
+          <p class="dim">
+            <code>heur</code> is V12 against <code>RED_HARVEST</code>,
+            <code>lite</code> against <code>RED_HARVEST_LITE</code>, and
+            <code>mirror</code> plays V12 against itself. Fix the seeds so a
+            change is measured against the same maps each time.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ 07 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="multiplayer">
+        <p class="gd-kicker">07 &middot; Multiplayer</p>
+        <h2>Play someone in the room</h2>
+        <p class="gd-lede">
+          Up to four seats, each in its own browser &mdash; laptops, phones,
+          across the table or across the internet.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Host a game</span>
+          </div>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="c"># recommended before you host — keeps one address all session</span>
+<span class="s">$</span> brew install cloudflared
+
+<span class="c"># then click MULTIPLAYER on the title screen</span>
+<span class="s">$</span> python run_web.py</pre>
+          </div>
+          <p>
+            <strong>MULTIPLAYER</strong> opens a public tunnel, moves your
+            browser onto it and spawns the session; you then hand out one QR
+            per seat and they work from anywhere. You can host with nothing
+            installed &mdash; the fallback provider is plain <code>ssh</code>
+            &mdash; but its free address changes after a few minutes, which
+            kills the links mid-game, so <code>cloudflared</code> is worth
+            the thirty seconds.
+          </p>
+          <div class="gd-note">
+            <b class="tag">Why there are two providers</b>
+            <p>
+              <code>cloudflare</code> goes first because its address lasts the
+              whole session. <code>localhost.run</code> sits behind it because
+              it needs no install at all, and because locked-down networks
+              filter outbound traffic unevenly &mdash; some drop the SSH the
+              fallback needs, others don't &mdash; so between the two almost
+              every network is covered. The server doesn't guess which:
+              it starts the first provider, waits for the address it printed
+              to become resolvable here, and falls through if it never does.
+              <code>/api/tunnel/status</code> says which one won.
+            </p>
+            <p>
+              <b class="tag">If the links stop working mid-game</b>
+              A tunnel can drop. The server notices and restarts it, but a
+              restart means a <em>new address</em>, so the QRs you already
+              handed out are dead. Look at the terminal running
+              <code>run_web.py</code>: it prints the new URL with
+              <code>NEW ADDRESS</code> beside it. That's the only place it
+              can tell you &mdash; everyone's browser, yours included, is
+              sitting on an address that no longer exists. Re-share and
+              carry on; the game itself is untouched, because it lives on
+              the server and not in the link.
+            </p>
+            <p class="dim">
+              That wait is deliberate, and it's the one thing to know if you
+              ever debug this: a tunnel hostname doesn't exist for a second or
+              two after the client prints it, and a DNS lookup in that gap gets
+              cached as "no such name" for <em>thirty minutes</em>. Checking
+              impatiently is how you break the link you're checking &mdash; so
+              if your own browser can't open the URL, get a fresh one rather
+              than poking at the old one.
+            </p>
+          </div>
+          <p class="dim">
+            The docs ride along: <code>&lt;url&gt;/guide/</code>,
+            <code>&lt;url&gt;/manual/</code> and
+            <code>&lt;url&gt;/manual/agent.html</code> all work from the
+            tunnel origin, so a first-timer you invite can read the rules
+            without cloning anything.
+          </p>
+          <div class="gd-note gd-note--warn">
+            <b class="tag">Two rules that keep sync intact</b>
+            <p>
+              <strong>No auto-reload during a party.</strong> The cross-player
+              submit lock is per-process, so a stray file save doesn't hiccup
+              &mdash; it resets everyone's season. Start with
+              <code>python run_web.py --no-reload</code> if you'll be editing
+              code while others are playing.
+            </p>
+            <p>
+              <strong>Pick your storage when you spawn.</strong> A
+              <code>MEMORY</code> game dies with the process; choose
+              <code>SNOWFLAKE</code> in the launcher's STORAGE row if the match
+              should survive a restart (see <a href="#snowflake">05</a>).
+              Anonymous tunnels also get a new random address every restart, so
+              re-share the links if you bounce the server.
+            </p>
+          </div>
+          <p class="dim">
+            Full detail, including the phone UI and firewall troubleshooting, is
+            in <code>docs/MULTIPLAYER.md</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ 08 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="build">
+        <p class="gd-kicker">08 &middot; Build</p>
+        <h2>Make V12 better</h2>
+        <p class="gd-lede">
+          Play a season against it first. You will spot the gaps yourself before
+          anyone points them out &mdash; that is the intended order.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">The two known gaps</span>
+          </div>
+          <ol>
+            <li>
+              <b>It buys weapons and never uses them.</b> V12 will happily spend
+              credits on EMPs and chaff in orbit, then plan a night as though
+              its own arsenal does not exist. Nothing in its reasoning path
+              turns a held weapon into an order.
+            </li>
+            <li>
+              <b>It under-values BLUE.</b> The value model treats blue as an
+              afterthought, so V12 tends to run its fuel economy close to the
+              edge and pass up good blue for mediocre red.
+            </li>
+          </ol>
+          <p class="dim">
+            Two natural pieces of work, and they compose: a purchasing heuristic
+            that buys the <em>right</em> weapon for the board, and an injection
+            point that lets the agent choose to fire it.
+          </p>
+        </div>
+
+        <div class="gd-note">
+          <b class="tag">Read this first</b>
+          <p>
+            The <a href="../manual/agent.html">agent &amp; harness guide</a>
+            takes one real V12 turn apart stage by stage &mdash; what the
+            agent is shown, how the prompt is assembled, what comes back,
+            and how it is sanitised into legal moves. An hour there will
+            save you a day of reading the harness cold.
+          </p>
+        </div>
+
+        <h3>Mint your own agent</h3>
+        <p>
+          One command. It copies V12 into a directory of your own and renames
+          its identity, so your turns are attributed to you rather than to
+          V12.
+        </p>
+
+        <div class="gd-term">
+          <div class="gd-term-head">
+            <span class="gd-term-dots"><i></i><i></i><i></i></span>
+            <span class="gd-term-title">mint your agent</span>
+            <button class="gd-copy" type="button">copy</button>
+          </div>
+<pre><code>python scripts/soc.py new --team redwatch --name reaper \
+    --participants "Ada Lovelace, Grace Hopper"</code></pre>
+        </div>
+
+        <p>
+          Restart the server and <code>REDWATCH_REAPER</code> is in the NEW
+          GAME dropdown, ready to play against V12. Name it
+          <code>&lt;team&gt;_&lt;agent&gt;</code> &mdash; the label ends up in
+          the audit trail and on the scoreboard, and a room full of agents
+          called <code>reaper</code> helps nobody. Everyone at the table goes
+          in <code>--participants</code>: the league is the day's public
+          record, and an entry that names nobody cannot be credited.
+        </p>
+
+        <div class="gd-note gd-note--info">
+          <b class="tag">There is no register to sign</b>
+          <p>
+            Minting writes an <code>agent.json</code> in your new directory
+            and that <em>is</em> the registration &mdash; the kit finds your
+            agent by scanning for those files at startup. You do not edit a
+            shared registry, which is exactly why a room of teams can all be
+            minting agents at once without treading on each other.
+          </p>
+        </div>
+
+        <div class="gd-note gd-note--warn">
+          <b class="tag">Don't edit V12 in place</b>
+          <p>
+            V12 is the control in your experiment. Change it directly and
+            you can no longer answer &ldquo;is my agent better?&rdquo;,
+            because there is nothing left to compare against &mdash; and
+            matches between teams stop being like-for-like. The fork costs
+            a second.
+          </p>
+        </div>
+
+        <div class="gd-note">
+          <b class="tag">Ask V12 mid&#8209;game</b>
+          <p>
+            On a Snowflake game, the night orders panel grows an
+            <b>&#9671; ask V12</b> button. It runs the shipped agent's full
+            think&#8209;and&#8209;plan pass over <em>your</em> board and hands
+            back what it would do &mdash; its reasoning on one tab, the
+            compiled orders on the other. Hover <b>show on map</b> to see the
+            orders on the board, numbered by the hour each would fire, and
+            <b>adopt plan</b> drops them into your queue so you can edit them
+            before you transmit. It never plays your turn.
+          </p>
+          <p>
+            Useful two ways: as a second opinion while you learn the game,
+            and as a way to watch your fork's reasoning change as you edit
+            it. One caveat &mdash; because V12 is not actually playing your
+            seat, it keeps no memory between asks. Each answer reasons from
+            the position in front of it, where the same agent playing an
+            opposing seat carries its journal from night to night.
+          </p>
+        </div>
+
+        <p>
+          Your fork ships with its own
+          <a href="../sea_of_colours/orchestrator_2/harnesses/tabula_v12/README.md">README</a>:
+          the turn pipeline, what the debug card shows, where plays come
+          from, and both gaps above with the exact files and constants.
+          Start there. The
+          <a href="../sea_of_colours/orchestrator_2/README.md">orchestrator
+          README</a> covers the harness contract if you would rather write
+          an agent from scratch than fork one.
+        </p>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Where to look</span>
+            <span class="gd-frame-sub">sea_of_colours/orchestrator_2/harnesses/tabula_v12/</span>
+          </div>
+          <table class="gd-tbl">
+            <tr>
+              <td style="width: 24ch"><code>harness.py</code></td>
+              <td>Turn entry point. Follow it once, top to bottom, before changing anything.</td>
+            </tr>
+            <tr>
+              <td><code>orbit.py</code></td>
+              <td>
+                Orbit phase. Currently delegates straight to the shared
+                heuristic &mdash; this is where a purchasing strategy goes.
+              </td>
+            </tr>
+            <tr>
+              <td><code>prompt.py</code></td>
+              <td>The prompt is built in Python each turn. Edit it and the next turn uses it; there is no redeploy.</td>
+            </tr>
+            <tr>
+              <td><code>value_pyramid.py</code><br /><code>doctrine.py</code></td>
+              <td>How tiles are scored and how priorities are stated. The blue problem lives here.</td>
+            </tr>
+            <tr>
+              <td><code>ENGINE_INTERFACE.md</code></td>
+              <td>The boundary the harness must obey. Read before you reach past it.</td>
+            </tr>
+          </table>
+          <p class="dim">
+            V12 is self-contained &mdash; it imports nothing from any other
+            harness, so you can read and change it without tracing into
+            neighbouring code.
+          </p>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">House rules for changes</span>
+          </div>
+          <ul>
+            <li>
+              <a href="../RULEBOOK.md">RULEBOOK.md</a> is canonical. If the code
+              and the rulebook disagree, the rulebook wins &mdash; or the
+              rulebook needs updating, and you should say so.
+            </li>
+            <li>
+              Score your change with
+              <code>run_matchup_v12.py</code> on fixed seeds. A harness change
+              that feels smarter and loses is common.
+            </li>
+            <li>
+              <code>pytest -q</code> before you call it done.
+            </li>
+          </ul>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Publishing it</span>
+          </div>
+          <p>
+            An agent that only exists on your laptop does not compete. Push it
+            to your fork, and push often &mdash; whatever is on your fork when
+            the organiser collects is what plays.
+          </p>
+          <div class="gd-term">
+            <button class="gd-copy" type="button">[ COPY ]</button>
+<pre><span class="s">$</span> python scripts/soc.py push</pre>
+          </div>
+          <p>
+            That commits your agent's directory and nothing else, then pushes
+            to <code>origin</code> &mdash; your fork. It refuses if you have
+            changed anything outside your own directory, because only your
+            directory travels to the league: a fix you made to the engine
+            would simply be missing there, and your agent would behave
+            differently than it does at your desk.
+          </p>
+          <p>
+            To hand work-in-progress to a teammate without publishing
+            anything, use <code>soc share</code> and they run
+            <code>soc grab</code> on the file. That is for the ten-minute
+            loop; <code>soc push</code> is for the record.
+          </p>
+          <div class="gd-note gd-note--info">
+            <b class="tag">Pushing is not entering</b>
+            <p>
+              Your fork is where your agent lives. The league is assembled at
+              the end of the day by an organiser running
+              <code>soc collect</code>, which lifts each agent out of each
+              fork into one staging area. Nothing you push lands in anyone
+              else's repo, and nobody else's push can break yours.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ 09 ═══════════════════════════════════════════════════ -->
+      <section class="gd-scene reveal" id="trouble">
+        <p class="gd-kicker">09 &middot; Trouble</p>
+        <h2>When it doesn't work</h2>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Symptom &rarr; cause</span>
+          </div>
+          <table class="gd-tbl">
+            <tr>
+              <th style="width: 34%">You see</th>
+              <th>What it means</th>
+            </tr>
+            <tr>
+              <td><code>ModuleNotFoundError: snowflake.snowpark</code></td>
+              <td>
+                You set <code>SOC_BACKEND=snowflake</code> without the
+                optional deps: <code>pip install -r
+                requirements-snowflake.txt</code>, or unset the variable and
+                let the server auto-detect.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>SOC_BACKEND=snowflake was requested but the store
+                could not be opened</code>
+              </td>
+              <td>
+                An explicit request is strict on purpose &mdash; better to
+                stop than to write your season somewhere you didn't mean.
+                The line under it names the fix.
+              </td>
+            </tr>
+            <tr>
+              <td>Game vanished after a restart</td>
+              <td>
+                You are on <code>memory</code>. Check the boot line or the
+                badge in the bottom-right; <a href="#snowflake">05</a> makes
+                seasons durable.
+              </td>
+            </tr>
+            <tr>
+              <td>Spawning a V12 game is refused</td>
+              <td>
+                The credential preflight found no PAT or no account. The message
+                names which. See <a href="#snowflake">05</a>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>ready: False</code> in the smoke test</td>
+              <td>
+                No PAT, or no <code>account</code> on the connection that got
+                resolved. Run <code>python scripts/soc.py doctor</code> &mdash;
+                it prints the exact file and section it read, which settles
+                &ldquo;no credentials&rdquo; versus &ldquo;the wrong one of
+                my five connections&rdquo;.
+              </td>
+            </tr>
+            <tr>
+              <td>V12 turns take forever</td>
+              <td>
+                Expected. It is running real inference over the network. Shorten
+                the season to 3 nights while iterating.
+              </td>
+            </tr>
+            <tr>
+              <td><code>Address already in use</code></td>
+              <td>
+                Something is already on port 8000 &mdash; usually your own
+                server from earlier. Add <code>--replace</code> to stop it and
+                take over, or <code>--port 8001</code> to run both. Nothing to
+                hunt for: <code>--replace</code> refuses unless the port
+                answers as Sea of Colours, so it cannot take out the unrelated
+                thing you had there.
+              </td>
+            </tr>
+            <tr>
+              <td>Edited a file, nothing changed</td>
+              <td>
+                Static assets are served no-cache from disk, so JS/CSS need only
+                a hard refresh (Cmd-Shift-R). Python changes need a server
+                restart &mdash; <code>run_web.py</code> auto-reloads for you
+                unless you started it with <code>--no-reload</code>, which is
+                what the Snowflake command above recommends. Re-run that same
+                command with <code>--replace</code> and it will stop the old
+                server for you.
+              </td>
+            </tr>
+            <tr>
+              <td><code>git clone</code> returns 404</td>
+              <td>
+                The repo is private. GitHub returns 404 rather than 403 for
+                repos you cannot see, so this usually means you are not signed
+                in, or have not been given read access yet. Ask the organiser.
+                Check the URL has <em>your</em> username in it &mdash; you
+                clone your fork, not the original.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>soc push</code> says <span class="dim">origin is not
+                yours</span>
+              </td>
+              <td>
+                You cloned the original repo instead of forking it first.
+                Nothing is lost and nothing needs re-doing: <code>soc
+                push</code> prints the two commands that point this clone at
+                your own fork, and your work comes with it.
+              </td>
+            </tr>
+            <tr>
+              <td>Pushing says <span class="dim">permission denied</span></td>
+              <td>
+                Same cause as above. You only ever have write access to your
+                own fork &mdash; nobody, including you, pushes to the repo the
+                event runs from.
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="gd-frame">
+          <div class="gd-frame-head">
+            <span class="gd-frame-title">Where else to read</span>
+          </div>
+          <div class="gd-grid">
+            <a class="gd-card" href="../manual/index.html">
+              <span class="t">The manual</span>
+              <span class="d">Every mechanic, animated and playable. The best way to learn the game.</span>
+            </a>
+            <a class="gd-card" href="../manual/agent.html">
+              <span class="t">Agent &amp; harness guide</span>
+              <span class="d">One real V12 turn taken apart, stage by stage. Read this before you change the agent.</span>
+            </a>
+            <a class="gd-card" href="../RULEBOOK.md">
+              <span class="t">RULEBOOK.md</span>
+              <span class="d">Canonical rules and changelog. The tie-breaker.</span>
+            </a>
+            <a class="gd-card" href="../README.md">
+              <span class="t">README.md</span>
+              <span class="d">CLI map generator, API surface, repo layout.</span>
+            </a>
+            <a class="gd-card" href="../docs/SNOWFLAKE_SETUP.md">
+              <span class="t">SNOWFLAKE_SETUP.md</span>
+              <span class="d">The long-form version of section 05.</span>
+            </a>
+            <a class="gd-card" href="../docs/MULTIPLAYER.md">
+              <span class="t">MULTIPLAYER.md</span>
+              <span class="d">Hosting, phones, tunnels, firewalls.</span>
+            </a>
+            <a class="gd-card" href="../docs/OUTSTANDING_ISSUES.md">
+              <span class="t">OUTSTANDING_ISSUES.md</span>
+              <span class="d">Known bugs and the triage log. Check before reporting.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="gd-foot">
+      <span class="prompt-sigil">$</span>
+      <span>sea_of_colours · install guide</span>
+      <span class="gd-spacer"></span>
+      <a href="../manual/index.html">[ MANUAL ]</a>
+      <a href="../RULEBOOK.md">[ RULEBOOK ]</a>
+      <a href="#overview">[ TOP ]</a>
+    </footer>
+
+    <script>
+      (function () {
+        "use strict";
+        const reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        /* ── scroll progress ─────────────────────────────────────── */
+        const bar = document.getElementById("gd-progress");
+        function onScroll() {
+          const h = document.documentElement;
+          const max = h.scrollHeight - h.clientHeight;
+          const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+          bar.style.width = pct + "%";
+        }
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+
+        /* ── nav scroll-spy ──────────────────────────────────────── */
+        const navLinks = Array.from(
+          document.querySelectorAll("#gd-nav a")
+        );
+        const sections = navLinks
+          .map((a) => document.querySelector(a.getAttribute("href")))
+          .filter(Boolean);
+        const spy = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              const id = e.target.id;
+              navLinks.forEach((a) =>
+                a.classList.toggle(
+                  "is-active",
+                  a.getAttribute("href") === "#" + id
+                )
+              );
+            });
+          },
+          // A band near the top of the viewport: the active chip should
+          // change when a heading reaches reading position, not when the
+          // section happens to be tallest on screen.
+          { rootMargin: "-25% 0px -65% 0px" }
+        );
+        sections.forEach((s) => spy.observe(s));
+
+        /* ── reveal on scroll ────────────────────────────────────── */
+        const revealer = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              e.target.classList.add("is-in");
+              obs.unobserve(e.target);
+            });
+          },
+          { rootMargin: "0px 0px -8% 0px" }
+        );
+        document
+          .querySelectorAll(".reveal")
+          .forEach((el) =>
+            reduced ? el.classList.add("is-in") : revealer.observe(el)
+          );
+
+        /* ── copy buttons ────────────────────────────────────────── */
+        document.querySelectorAll(".gd-copy").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const pre = btn.parentElement.querySelector("pre");
+            if (!pre) return;
+            // Strip the shell sigil and comment lines so the clipboard
+            // holds something runnable rather than a transcript.
+            const text = pre.innerText
+              .split("\n")
+              .filter((l) => !/^\s*(#|Target:|\[soc\]|INFO:)/.test(l))
+              .map((l) => l.replace(/^\$\s?/, ""))
+              .join("\n")
+              .trim();
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "[ COPIED ]";
+            } catch {
+              btn.textContent = "[ SELECT MANUALLY ]";
+            }
+            setTimeout(() => (btn.textContent = "[ COPY ]"), 1400);
+          });
+        });
+
+        /* ── hero: fog reveal over a generated surface ───────────── */
+        (function fog() {
+          const host = document.getElementById("gd-fog");
+          if (!host) return;
+          // Fill the frame exactly: measure one glyph rather than guess a
+          // column count, so the surface spans the width at any zoom.
+          const probe = document.createElement("i");
+          probe.textContent = "\u2588";
+          host.appendChild(probe);
+          const charW = probe.getBoundingClientRect().width || 6.6;
+          host.removeChild(probe);
+          const inner =
+            host.clientWidth -
+            parseFloat(getComputedStyle(host).paddingLeft) * 2;
+          const W = Math.max(40, Math.floor(inner / charW));
+          const H = 13;
+          const FOG = "rgb(19,18,27)"; // unrevealed, but not pure black
+          const BARE = "rgb(34,33,46)"; // revealed and empty
+          const PAINTS = [
+            "rgb(255,0,0)",
+            "rgb(59,143,224)",
+            "rgb(63,185,80)",
+          ];
+          // Overlapping blobs, nearest-centre wins, with a tier ramp so a
+          // deposit fades at its edge the way a real parcel does. Dense
+          // enough that the strip reads as a surface rather than a gap.
+          const blobs = [];
+          for (let i = 0; i < 34; i++) {
+            blobs.push({
+              x: Math.random() * W,
+              y: Math.random() * H,
+              r: 5 + Math.random() * 12,
+              c: PAINTS[(Math.random() * PAINTS.length) | 0],
+            });
+          }
+          const cells = [];
+          const frag = document.createDocumentFragment();
+          for (let y = 0; y < H; y++) {
+            for (let x = 0; x < W; x++) {
+              let paint = BARE;
+              let best = Infinity;
+              let strength = 0;
+              for (const b of blobs) {
+                const dx = x - b.x,
+                  dy = (y - b.y) * 1.7; // cells are ~2:1, keep blobs round
+                const d = Math.sqrt(dx * dx + dy * dy);
+                if (d < b.r && d < best) {
+                  best = d;
+                  paint = b.c;
+                  strength = 1 - d / b.r;
+                }
+              }
+              const el = document.createElement("i");
+              el.textContent = "\u2588";
+              el.style.color = FOG;
+              if (paint !== BARE) {
+                // Richer core, thin edge — the tier ramp, cheaply.
+                el.style.opacity = String(0.34 + strength * 0.66);
+              }
+              cells.push({ el, paint, x, y });
+              frag.appendChild(el);
+            }
+            frag.appendChild(document.createTextNode("\n"));
+          }
+          host.appendChild(frag);
+
+          if (reduced) {
+            cells.forEach((c) => (c.el.style.color = c.paint));
+            return;
+          }
+          // Diagonal wave out, hold, wave back — the gesture the manual
+          // uses to reveal a map. Driven off the clock, not the frame
+          // count: an uncapped rAF turned a slow sweep into a flicker.
+          const SPAN = W + H * 2;
+          const SWEEP_OUT = 2400,
+            HOLD_LIT = 4200,
+            SWEEP_BACK = 1600,
+            HOLD_FOG = 700;
+          const CYCLE = SWEEP_OUT + HOLD_LIT + SWEEP_BACK + HOLD_FOG;
+          const start = performance.now();
+          let lastFront = null;
+          function tick(now) {
+            const t = (now - start) % CYCLE;
+            let front;
+            if (t < SWEEP_OUT) front = (t / SWEEP_OUT) * SPAN;
+            else if (t < SWEEP_OUT + HOLD_LIT) front = SPAN;
+            else if (t < SWEEP_OUT + HOLD_LIT + SWEEP_BACK)
+              front =
+                SPAN *
+                (1 - (t - SWEEP_OUT - HOLD_LIT) / SWEEP_BACK);
+            else front = 0;
+            // Only repaint when the wavefront has actually moved a cell.
+            if (lastFront === null || Math.abs(front - lastFront) >= 1) {
+              lastFront = front;
+              for (const c of cells) {
+                c.el.style.color = c.x + c.y * 2 < front ? c.paint : FOG;
+              }
+            }
+            requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        })();
+
+        /* ── step player: one night, end to end ──────────────────── */
+        (function steps() {
+          const STEPS = [
+            {
+              label: "Look",
+              phase: "# planning",
+              cite: "§3.2 · §5 — vision",
+              manual: "vision",
+              body: `<p>The board opens fogged. You can see your own units and
+                     whatever your probes currently light up — nothing else.</p>
+                     <p>Grey cells are <b>echo</b>: what was there last time you
+                     looked. It is memory, not intelligence, and it goes stale
+                     while you plan.</p>`,
+              term: `phase   planning
+day     1 / 7
+vision  live · echo · fog
+credits 1000`,
+            },
+            {
+              label: "Probe",
+              phase: "# planning",
+              cite: "§3.9.7 — probes",
+              manual: "probes",
+              body: `<p>Probes are your only way to turn fog into something you
+                     can act on. Each lights a radius-4 disk — about 49 tiles —
+                     and expires after three nights.</p>
+                     <p>Drop one early. You cannot harvest what you cannot
+                     see.</p>`,
+              term: `queue
+  1  probe    at (18, 11)
+     └ lights ~49 tiles for 3 nights`,
+            },
+            {
+              label: "Route",
+              phase: "# planning",
+              cite: "§4 — orders",
+              manual: "orders",
+              body: `<p>Move a harvester with <code>step</code> orders, one cell
+                     at a time, and <code>drop</code> it onto a parcel worth
+                     taking.</p>
+                     <p>Orders execute in <b>slot order</b> across a 21-hour
+                     night, so the sequence matters as much as the
+                     destination.</p>`,
+              term: `queue
+  1  probe    at (18, 11)
+  2  step     hv-1 → (17, 12)
+  3  step     hv-1 → (18, 12)
+  4  drop     hv-1 at (18, 12)`,
+            },
+            {
+              label: "Transmit",
+              phase: "# planning → night",
+              cite: "§3.3 — resolution",
+              manual: "loop",
+              body: `<p>Nothing has happened yet. Transmitting locks your policy
+                     for the night; once every seat has locked, the night
+                     resolves.</p>
+                     <p>You do not get to react mid-night. This is the whole
+                     game: commit to a plan under fog, then watch it meet
+                     reality.</p>`,
+              term: `> transmit
+  policy locked · p1
+  waiting on p2 (RED_HARVEST_LITE)
+  ...
+  resolving night 1`,
+            },
+            {
+              label: "Watch",
+              phase: "# night",
+              cite: "§3.12 — trails",
+              manual: "loop",
+              body: `<p>The night plays back. You see your own orders land, and
+                     any trace the opponent left inside your vision — trails,
+                     spotted units, a parcel that is suddenly empty.</p>
+                     <p>Read this properly. It is most of what you will know
+                     about the other seat all season.</p>`,
+              term: `night 1 resolved
+  hv-1  harvested  RED ×3
+  probe  live      (18,11) r4
+  trail  spotted   (24,9) → (26,9)`,
+            },
+            {
+              label: "Orbit",
+              phase: "# orbit",
+              cite: "§4 — orbital station",
+              manual: "orbital",
+              body: `<p>Dawn. Now you spend: build harvesters, repair damage
+                     (never free) and buy weapons. There is no action limit
+                     &mdash; your wallet is the limit. Then the vault settles
+                     itself and everything you hoarded banks as points.</p>
+                     <p>Then night 2 begins, and you do it six more times.</p>`,
+              term: `orbit · day 1
+  credits    1000
+  hold       RED ×3
+  > ship RED ×3
+  > build probe
+  next: planning · day 2`,
+            },
+          ];
+
+          const chips = document.getElementById("gd-chips");
+          const elNum = document.getElementById("gd-step-num");
+          const elLabel = document.getElementById("gd-step-label");
+          const elText = document.getElementById("gd-step-text");
+          const elCite = document.getElementById("gd-step-cite");
+          const elTerm = document.getElementById("gd-step-term");
+          const elPhase = document.getElementById("gd-step-phase");
+          const elStatus = document.getElementById("gd-step-status");
+          const btnPrev = document.getElementById("gd-prev");
+          const btnNext = document.getElementById("gd-next");
+          const btnPlay = document.getElementById("gd-play");
+          if (!chips) return;
+
+          let idx = 0;
+          let timer = null;
+
+          STEPS.forEach((s, i) => {
+            const b = document.createElement("button");
+            b.className = "gd-chip";
+            b.innerHTML = `<span class="n">${i + 1}</span>${s.label}`;
+            b.addEventListener("click", () => {
+              stop();
+              go(i);
+            });
+            chips.appendChild(b);
+          });
+          const chipEls = Array.from(chips.children);
+
+          function go(i) {
+            idx = (i + STEPS.length) % STEPS.length;
+            const s = STEPS[idx];
+            chipEls.forEach((c, n) => c.classList.toggle("is-on", n === idx));
+            elNum.textContent = `Step ${idx + 1} / ${STEPS.length}`;
+            elLabel.textContent = s.label.toUpperCase();
+            elText.innerHTML = s.body;
+            elCite.innerHTML =
+              `${s.cite} · <a href="../manual/index.html#tab=${s.manual}">` +
+              `open in the manual &rarr;</a>`;
+            elTerm.textContent = s.term;
+            elPhase.textContent = s.phase;
+            elStatus.textContent = `# step ${idx + 1} · ${s.label.toLowerCase()}`;
+          }
+          function stop() {
+            if (timer) clearInterval(timer);
+            timer = null;
+            btnPlay.textContent = "[ PLAY ]";
+          }
+          function play() {
+            if (timer) return stop();
+            btnPlay.textContent = "[ PAUSE ]";
+            timer = setInterval(() => go(idx + 1), 5200);
+          }
+
+          btnPrev.addEventListener("click", () => {
+            stop();
+            go(idx - 1);
+          });
+          btnNext.addEventListener("click", () => {
+            stop();
+            go(idx + 1);
+          });
+          btnPlay.addEventListener("click", play);
+          go(0);
+        })();
+      })();
+    </script>
+  </body>
+</html>
